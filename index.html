@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#07111f" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="حياتي" />
+  <meta name="description" content="حياتي — تطبيق شخصي لإدارة جوانب الحياة اليومية." />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="icon" href="icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>حياتي</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar safe-top">
+      <div class="brand-wrap">
+        <div class="brand-mark" aria-hidden="true">ح</div>
+        <div>
+          <div class="brand-title">حياتي</div>
+          <div class="brand-subtitle">مركز حياتي الشخصي</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="installBtn" aria-label="تثبيت التطبيق" title="تثبيت التطبيق">＋</button>
+        <button class="icon-btn" id="themeBtn" aria-label="تبديل المظهر" title="تبديل المظهر">☾</button>
+      </div>
+    </header>
+
+    <main class="main-content" id="mainContent">
+      <section class="view active" data-view="today" id="view-today">
+        <div class="hero-card">
+          <div class="eyebrow" id="todayDate">اليوم</div>
+          <h1>أهلًا بك في حياتي</h1>
+          <p>الرئيسية تعرض المهم الآن، والقسم يعرض التفاصيل.</p>
+          <div class="demo-badge">نسخة V1 تجريبية • بيانات العرض غير محفوظة في Firebase بعد</div>
+        </div>
+
+        <section class="section-block">
+          <div class="section-heading">
+            <div>
+              <span class="section-kicker">يومي</span>
+              <h2>ما يحتاج انتباهك الآن</h2>
+            </div>
+            <button class="text-btn" data-nav="domains">كل الأقسام</button>
+          </div>
+
+          <div class="priority-list">
+            <article class="priority-card health" data-section="health" tabindex="0">
+              <div class="priority-icon">🍽️</div>
+              <div class="priority-body">
+                <span class="priority-label">صحتي</span>
+                <h3>مشروع إنزال الوزن</h3>
+                <p>ابدأ بتسجيل وجبتك أو وزنك اليوم.</p>
+              </div>
+              <button class="mini-action" data-action="meal">أضف وجبة</button>
+            </article>
+
+            <article class="priority-card knowledge" data-section="knowledge" tabindex="0">
+              <div class="priority-icon">📘</div>
+              <div class="priority-body">
+                <span class="priority-label">معرفتي</span>
+                <h3>مشروع الإنجليزية</h3>
+                <p>المهمة التعليمية اليومية ستظهر هنا.</p>
+              </div>
+              <button class="mini-action" data-action="learn">ابدأ</button>
+            </article>
+
+            <article class="priority-card religion" data-section="religion" tabindex="0">
+              <div class="priority-icon">📖</div>
+              <div class="priority-body">
+                <span class="priority-label">ديني</span>
+                <h3>ورد اليوم</h3>
+                <p>سيظهر هدف القرآن أو المشروع الديني النشط.</p>
+              </div>
+              <button class="mini-action" data-action="religion">فتح</button>
+            </article>
+          </div>
+        </section>
+
+        <section class="section-block quick-block">
+          <div class="section-heading compact">
+            <div>
+              <span class="section-kicker">إدخال سريع</span>
+              <h2>ماذا تريد أن تفعل الآن؟</h2>
+            </div>
+          </div>
+          <div class="quick-grid">
+            <button data-action="expense"><span>💳</span>مصروف</button>
+            <button data-action="meal"><span>🍲</span>وجبة</button>
+            <button data-action="weight"><span>⚖️</span>وزن</button>
+            <button data-action="contact"><span>☎️</span>تواصل</button>
+            <button data-action="reading"><span>📚</span>قراءة</button>
+            <button data-action="note"><span>✍️</span>ملاحظة</button>
+          </div>
+        </section>
+
+        <section class="section-block">
+          <div class="section-heading compact">
+            <div>
+              <span class="section-kicker">هذا الأسبوع</span>
+              <h2>القادم</h2>
+            </div>
+          </div>
+          <div class="timeline-preview">
+            <div class="timeline-item"><span class="dot blue"></span><div><b>اختبار الإنجليزية الأسبوعي</b><small>سيظهر الموعد بعد إعداد مشروع التعلم.</small></div></div>
+            <div class="timeline-item"><span class="dot teal"></span><div><b>مراجعة الوزن</b><small>حدد أيام القياس من قسم صحتي.</small></div></div>
+            <div class="timeline-item"><span class="dot gold"></span><div><b>التزاماتك القادمة</b><small>ستُجمع لاحقًا من جميع الأقسام.</small></div></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" data-view="domains" id="view-domains">
+        <div class="page-title">
+          <span class="section-kicker">الأقسام</span>
+          <h1>مجالات حياتي</h1>
+          <p>ستة أقسام مترابطة، ولكل قسم سجلاته وأهدافه وتذكيراته.</p>
+        </div>
+        <div class="domain-grid">
+          <article class="domain-card finance" data-section="finance"><div class="domain-top"><span class="domain-icon">💰</span><span class="status-pill">مالي</span></div><h2>مالي</h2><p>الدخل، المصروفات، الالتزامات، الادخار والأهداف المالية.</p><span class="domain-link">فتح القسم ←</span></article>
+          <article class="domain-card health" data-section="health"><div class="domain-top"><span class="domain-icon">🥗</span><span class="status-pill">صحتي</span></div><h2>صحتي</h2><p>مشروع إنزال الوزن، التغذية، الوجبات، الماء والوزن.</p><span class="domain-link">فتح القسم ←</span></article>
+          <article class="domain-card religion" data-section="religion"><div class="domain-top"><span class="domain-icon">🕌</span><span class="status-pill">ديني</span></div><h2>ديني</h2><p>المشاريع الدينية، القرآن، الأذكار، الصيام والتعلم.</p><span class="domain-link">فتح القسم ←</span></article>
+          <article class="domain-card relationships" data-section="relationships"><div class="domain-top"><span class="domain-icon">🤝</span><span class="status-pill">علاقاتي</span></div><h2>علاقاتي</h2><p>الأشخاص، التواصل، المناسبات، الوعود والذكريات.</p><span class="domain-link">فتح القسم ←</span></article>
+          <article class="domain-card family" data-section="family"><div class="domain-top"><span class="domain-icon">👨‍👩‍👧‍👦</span><span class="status-pill">عائلتي</span></div><h2>عائلتي</h2><p>شجرة العائلة والذكريات والألبومات العائلية.</p><span class="domain-link">فتح القسم ←</span></article>
+          <article class="domain-card knowledge" data-section="knowledge"><div class="domain-top"><span class="domain-icon">🧠</span><span class="status-pill">معرفتي</span></div><h2>معرفتي</h2><p>حديث اليوم، الإنجليزية، الكتب ومشاريع التعلم.</p><span class="domain-link">فتح القسم ←</span></article>
+        </div>
+      </section>
+
+      <section class="view" data-view="story" id="view-story">
+        <div class="page-title">
+          <span class="section-kicker">Timeline</span>
+          <h1>قصتي اليوم</h1>
+          <p>هنا ستتجمع أحداث يومك تلقائيًا من جميع الأقسام.</p>
+        </div>
+        <div class="empty-state">
+          <div class="empty-icon">🕰️</div>
+          <h2>لم تُسجّل أحداث بعد</h2>
+          <p>في النسخة القادمة، كل مصروف أو وجبة أو قراءة أو تواصل يمكن أن يظهر هنا تلقائيًا.</p>
+          <button class="primary-btn" data-nav="today">العودة إلى يومي</button>
+        </div>
+      </section>
+
+      <section class="view" data-view="settings" id="view-settings">
+        <div class="page-title">
+          <span class="section-kicker">الإعدادات</span>
+          <h1>إعدادات حياتي</h1>
+          <p>إعدادات النسخة الأولى من الهيكل الأساسي.</p>
+        </div>
+        <div class="settings-list">
+          <button class="setting-row" id="settingInstall"><span>📲</span><div><b>تثبيت التطبيق</b><small>إضافة حياتي إلى الشاشة الرئيسية.</small></div><em>←</em></button>
+          <button class="setting-row" id="settingTheme"><span>🌗</span><div><b>المظهر</b><small>التبديل بين الداكن والفاتح.</small></div><em>←</em></button>
+          <div class="setting-row static"><span>🔐</span><div><b>Firebase</b><small>سيُربط في المرحلة التالية بعد اعتماد الهيكل.</small></div><em>قريبًا</em></div>
+          <div class="setting-row static"><span>🤖</span><div><b>مساعد حياتي</b><small>سيُضاف تدريجيًا بعد استقرار البيانات والأقسام.</small></div><em>لاحقًا</em></div>
+        </div>
+      </section>
+
+      <section class="view" data-view="section" id="view-section">
+        <button class="back-btn" id="sectionBack">→ الرجوع للأقسام</button>
+        <div class="section-shell-card">
+          <div class="section-shell-icon" id="sectionIcon">💰</div>
+          <span class="section-kicker" id="sectionKicker">القسم</span>
+          <h1 id="sectionTitle">مالي</h1>
+          <p id="sectionDescription">سيتم بناء تفاصيل هذا القسم في المراحل القادمة.</p>
+          <div class="phase-note">
+            <b>هذه شاشة هيكلية مقصودة.</b>
+            <span>في V1 Skeleton نختبر الهوية والتنقل والـPWA أولًا، ثم نبني كل قسم على حدة دون استعجال.</span>
+          </div>
+          <button class="primary-btn" id="sectionAction">العودة إلى مركز حياتي</button>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav safe-bottom" aria-label="التنقل الرئيسي">
+      <button class="nav-item active" data-nav="today"><span>⌂</span><b>اليوم</b></button>
+      <button class="nav-item" data-nav="domains"><span>◫</span><b>الأقسام</b></button>
+      <button class="nav-item" data-nav="story"><span>◷</span><b>قصتي</b></button>
+      <button class="nav-item" data-nav="settings"><span>⚙</span><b>الإعدادات</b></button>
+    </nav>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="modal-close" id="modalClose" aria-label="إغلاق">×</button>
+      <div class="modal-icon" id="modalIcon">✓</div>
+      <h2 id="modalTitle">الميزة جاهزة للمرحلة التالية</h2>
+      <p id="modalText">هذا الزر موجود في الهيكل الآن، وسيُربط بقاعدة البيانات عند بناء القسم.</p>
+      <button class="primary-btn" id="modalOk">تمام</button>
+    </div>
+  </div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
