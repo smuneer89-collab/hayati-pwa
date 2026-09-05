@@ -253,16 +253,249 @@
         </section>
       </section>
 
+
+      <section class="view" data-view="health" id="view-health">
+        <button class="back-btn" data-nav="domains">→ الرجوع للأقسام</button>
+        <div class="domain-head health-head">
+          <div>
+            <span class="section-kicker">صحتي</span>
+            <h1>مشروع إنزال الوزن</h1>
+            <p>متابعة الوزن، السعرات، الوجبات، المشروبات والماء بصورة عملية وقابلة للتعديل.</p>
+          </div>
+          <span class="local-badge">محفوظ محليًا</span>
+        </div>
+
+        <div class="domain-stats health-stats">
+          <article><span>الوزن الحالي</span><b id="healthCurrentWeight">— كجم</b></article>
+          <article><span>الهدف</span><b id="healthTargetWeight">— كجم</b></article>
+          <article class="accent"><span>السعرات المتبقية اليوم</span><b id="healthCaloriesLeft">—</b></article>
+          <article><span>الماء اليوم</span><b id="healthWaterToday">٠ مل</b></article>
+        </div>
+
+        <section class="feature-card health-feature">
+          <div>
+            <span class="section-kicker">مشروعي</span>
+            <h2 id="healthProjectTitle">ابدأ مشروع إنزال الوزن</h2>
+            <p id="healthProjectSummary">أدخل بيانات البداية والهدف لتظهر لك لوحة متابعة يومية.</p>
+          </div>
+          <button class="secondary-btn" data-health-action="setup">إعداد المشروع</button>
+        </section>
+
+        <div class="domain-quick health-quick">
+          <button data-health-action="meal"><span>🍲</span><b>وجبة</b></button>
+          <button data-health-action="weight"><span>⚖️</span><b>وزن</b></button>
+          <button data-health-action="drink"><span>🥤</span><b>مشروب</b></button>
+          <button data-health-action="water"><span>💧</span><b>ماء</b></button>
+        </div>
+
+        <div class="domain-tabs" data-tab-group="health">
+          <button class="active" data-health-tab="today">اليوم</button>
+          <button data-health-tab="weight">الوزن</button>
+          <button data-health-tab="plan">الخطة</button>
+        </div>
+
+        <section class="domain-panel active" data-health-panel="today">
+          <div class="domain-card-wide">
+            <div class="card-row-head">
+              <div><span class="section-kicker">اليوم</span><h2>السعرات</h2></div>
+              <b class="big-value" id="healthCaloriesSummary">٠ / ٠</b>
+            </div>
+            <div class="money-progress health-progress"><span id="healthCaloriesBar"></span></div>
+            <div class="muted-row"><span>المستهلك من الميزانية اليومية</span><b id="healthCaloriesPct">٠٪</b></div>
+          </div>
+
+          <div class="domain-card-wide">
+            <div class="card-row-head"><div><span class="section-kicker">وجبات ومشروبات</span><h2>سجل اليوم</h2></div><button class="text-btn" data-health-action="meal">+ إضافة</button></div>
+            <div class="domain-list" id="healthTodayList"></div>
+          </div>
+
+          <div class="domain-card-wide">
+            <div class="card-row-head"><div><span class="section-kicker">الماء</span><h2>الهدف اليومي</h2></div><b id="healthWaterGoalText">٠ / ٠ مل</b></div>
+            <div class="money-progress water-progress"><span id="healthWaterBar"></span></div>
+            <div class="domain-inline-actions"><button class="chip-btn" data-health-water="250">+ ٢٥٠ مل</button><button class="chip-btn" data-health-water="500">+ ٥٠٠ مل</button></div>
+          </div>
+        </section>
+
+        <section class="domain-panel" data-health-panel="weight">
+          <div class="domain-card-wide">
+            <div class="card-row-head"><div><span class="section-kicker">الاتجاه</span><h2>الوزن ومتوسط ٧ أيام</h2></div><button class="text-btn" data-health-action="weight">+ تسجيل</button></div>
+            <div class="weight-overview"><div><span>آخر وزن</span><b id="healthLatestWeight">—</b></div><div><span>متوسط ٧ أيام</span><b id="healthAvg7">—</b></div><div><span>من البداية</span><b id="healthChange">—</b></div></div>
+            <div class="domain-list" id="healthWeightList"></div>
+          </div>
+        </section>
+
+        <section class="domain-panel" data-health-panel="plan">
+          <div class="domain-card-wide">
+            <div class="card-row-head"><div><span class="section-kicker">بيانات البداية</span><h2>ملخص المشروع</h2></div><button class="text-btn" data-health-action="setup">تعديل</button></div>
+            <div class="profile-grid" id="healthProfileGrid"></div>
+          </div>
+          <div class="phase-note">
+            <b>حدود النسخة الحالية</b>
+            <span>التسجيل والحسابات الأساسية تعمل محليًا. تحليل صورة الطعام وتحديد الكمية المناسبة بالذكاء الاصطناعي سيُضاف لاحقًا، وتبقى تقديرات السعرات قابلة للتعديل وليست تشخيصًا طبيًا.</span>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" data-view="religion" id="view-religion">
+        <button class="back-btn" data-nav="domains">→ الرجوع للأقسام</button>
+        <div class="domain-head religion-head">
+          <div>
+            <span class="section-kicker">ديني</span>
+            <h1>مشاريعي الدينية</h1>
+            <p>تنظيم هادئ للقرآن والأذكار والصيام والمشاريع، بدون تقييم لدرجة التدين.</p>
+          </div>
+          <span class="local-badge">محفوظ محليًا</span>
+        </div>
+
+        <div class="domain-stats religion-stats">
+          <article><span>المشاريع النشطة</span><b id="religionProjectsCount">٠</b></article>
+          <article><span>آخر موضع قرآن</span><b id="religionQuranPos">—</b></article>
+          <article class="accent"><span>أذكار مكتملة اليوم</span><b id="religionDhikrDone">٠</b></article>
+          <article><span>صيام هذا الشهر</span><b id="religionFastCount">٠ يوم</b></article>
+        </div>
+
+        <section class="feature-card religion-feature">
+          <div>
+            <span class="section-kicker">التركيز الحالي</span>
+            <h2 id="religionFocusTitle">اختر مشروعًا أو هدفًا دينيًا</h2>
+            <p id="religionFocusSummary">يمكن أن يكون ختمة، وردًا يوميًا، حفظًا، مراجعة أو مشروع تعلم ديني.</p>
+          </div>
+          <button class="secondary-btn" data-religion-action="project">+ مشروع</button>
+        </section>
+
+        <div class="domain-quick religion-quick">
+          <button data-religion-action="project"><span>🎯</span><b>مشروع</b></button>
+          <button data-religion-action="quran"><span>📖</span><b>قرآن</b></button>
+          <button data-religion-action="dhikr"><span>🤲</span><b>ذكر/دعاء</b></button>
+          <button data-religion-action="fast"><span>🌙</span><b>صيام</b></button>
+        </div>
+
+        <div class="domain-tabs" data-tab-group="religion">
+          <button class="active" data-religion-tab="overview">اليوم</button>
+          <button data-religion-tab="projects">المشاريع</button>
+          <button data-religion-tab="quran">القرآن</button>
+          <button data-religion-tab="adhkar">الأذكار</button>
+          <button data-religion-tab="fasting">الصيام</button>
+        </div>
+
+        <section class="domain-panel active" data-religion-panel="overview">
+          <div class="domain-card-wide">
+            <div class="card-row-head"><div><span class="section-kicker">اليوم</span><h2>أعمال قصيرة مقترحة من بياناتك</h2></div></div>
+            <div class="domain-list" id="religionTodayList"></div>
+          </div>
+        </section>
+
+        <section class="domain-panel" data-religion-panel="projects">
+          <div class="domain-card-wide">
+            <div class="card-row-head"><div><span class="section-kicker">أهدافي</span><h2>المشاريع الدينية</h2></div><button class="text-btn" data-religion-action="project">+ مشروع</button></div>
+            <div class="domain-list" id="religionProjectList"></div>
+          </div>
+        </section>
+
+        <section class="domain-panel" data-religion-panel="quran">
+          <div class="domain-card-wide">
+            <div class="card-row-head"><div><span class="section-kicker">القرآن</span><h2>القراءة والختمة والحفظ والمراجعة</h2></div><button class="text-btn" data-religion-action="quran">تحديث</button></div>
+            <div class="profile-grid" id="religionQuranGrid"></div>
+          </div>
+        </section>
+
+        <section class="domain-panel" data-religion-panel="adhkar">
+          <div class="domain-card-wide">
+            <div class="card-row-head"><div><span class="section-kicker">قوائمي</span><h2>الأذكار والأدعية</h2></div><button class="text-btn" data-religion-action="dhikr">+ إضافة</button></div>
+            <div class="domain-list" id="religionDhikrList"></div>
+          </div>
+        </section>
+
+        <section class="domain-panel" data-religion-panel="fasting">
+          <div class="domain-card-wide">
+            <div class="card-row-head"><div><span class="section-kicker">التقويم الشخصي</span><h2>أيام الصيام المسجلة</h2></div><button class="text-btn" data-religion-action="fast">+ يوم</button></div>
+            <div class="domain-list" id="religionFastList"></div>
+          </div>
+          <div class="phase-note"><b>تنظيم لا فتوى</b><span>هذا السجل يحفظ ما تدخله أنت فقط، ولا يستنتج أحكامًا شرعية أو عدد أيام واجبة تلقائيًا.</span></div>
+        </section>
+      </section>
+
+      <section class="view" data-view="knowledge" id="view-knowledge">
+        <button class="back-btn" data-nav="domains">→ الرجوع للأقسام</button>
+        <div class="domain-head knowledge-head">
+          <div>
+            <span class="section-kicker">معرفتي</span>
+            <h1>التعلم والثقافة</h1>
+            <p>حديث اليوم، مشروع الإنجليزية، الكتب ومشاريع التعلم المتتابعة.</p>
+          </div>
+          <span class="local-badge">محفوظ محليًا</span>
+        </div>
+
+        <div class="domain-stats knowledge-stats">
+          <article><span>الأحاديث</span><b id="knowledgeHadithCount">٠</b></article>
+          <article><span>مهام الإنجليزية اليوم</span><b id="knowledgeEnglishDone">٠ / ٠</b></article>
+          <article class="accent"><span>الاختبار الأسبوعي</span><b id="knowledgeNextExam">غير محدد</b></article>
+          <article><span>كتب أقرأها الآن</span><b id="knowledgeReadingBooks">٠</b></article>
+        </div>
+
+        <section class="hadith-feature" id="dailyHadithCard">
+          <div class="hadith-top"><span class="section-kicker">حديث اليوم</span><div class="hadith-actions"><button class="icon-chip" id="hadithFavoriteBtn" title="مفضلة">☆</button></div></div>
+          <blockquote id="dailyHadithText">أضف أحاديثك ليظهر هنا حديث اليوم.</blockquote>
+          <div class="hadith-source" id="dailyHadithSource">المصدر اختياري</div>
+          <div class="domain-inline-actions"><button class="chip-btn" id="hadithReadBtn">تمت القراءة</button><button class="chip-btn" data-knowledge-action="hadith">+ إضافة حديث</button></div>
+        </section>
+
+        <div class="domain-tabs" data-tab-group="knowledge">
+          <button class="active" data-knowledge-tab="hadith">الأحاديث</button>
+          <button data-knowledge-tab="english">الإنجليزية</button>
+          <button data-knowledge-tab="books">الكتب</button>
+          <button data-knowledge-tab="projects">مشاريع التعلم</button>
+        </div>
+
+        <section class="domain-panel active" data-knowledge-panel="hadith">
+          <div class="domain-card-wide">
+            <div class="card-row-head"><div><span class="section-kicker">قاعدتي</span><h2>الأحاديث</h2></div><button class="text-btn" data-knowledge-action="hadith">+ حديث</button></div>
+            <div class="domain-list" id="knowledgeHadithList"></div>
+          </div>
+          <div class="phase-note"><b>المصدر اختياري</b><span>نص الحديث هو الحقل الأساسي. إذا لم تضف مصدرًا، لا يقوم التطبيق باختراع مصدر أو حكم على صحة الحديث.</span></div>
+        </section>
+
+        <section class="domain-panel" data-knowledge-panel="english">
+          <section class="feature-card knowledge-feature">
+            <div><span class="section-kicker">المشروع النشط</span><h2>تطوير اللغة الإنجليزية</h2><p id="englishSummary">حدد المستوى والهدف وموعد الاختبار الأسبوعي.</p></div>
+            <button class="secondary-btn" data-knowledge-action="englishSetup">إعداد</button>
+          </section>
+          <div class="domain-card-wide">
+            <div class="card-row-head"><div><span class="section-kicker">اليوم</span><h2>مهام الإنجليزية</h2></div><button class="text-btn" data-knowledge-action="englishTask">+ مهمة</button></div>
+            <div class="domain-list" id="englishTaskList"></div>
+          </div>
+          <div class="domain-card-wide">
+            <div class="card-row-head"><div><span class="section-kicker">اختبار أسبوعي</span><h2>سجل النتائج</h2></div><button class="text-btn" data-knowledge-action="englishTest">+ نتيجة</button></div>
+            <div class="domain-list" id="englishTestList"></div>
+          </div>
+        </section>
+
+        <section class="domain-panel" data-knowledge-panel="books">
+          <div class="domain-card-wide">
+            <div class="card-row-head"><div><span class="section-kicker">مكتبتي</span><h2>الكتب</h2></div><button class="text-btn" data-knowledge-action="book">+ كتاب</button></div>
+            <div class="domain-list" id="knowledgeBookList"></div>
+          </div>
+        </section>
+
+        <section class="domain-panel" data-knowledge-panel="projects">
+          <div class="domain-card-wide">
+            <div class="card-row-head"><div><span class="section-kicker">الجامعة الشخصية</span><h2>مشاريع التعلم المتتابعة</h2></div><button class="text-btn" data-knowledge-action="project">+ مشروع</button></div>
+            <div class="domain-list" id="knowledgeProjectList"></div>
+          </div>
+          <div class="phase-note"><b>الدورة المعرفية</b><span>أقرأ → أفهم → ألخص → أناقش → أُختبر → أراجع → أطبق.</span></div>
+        </section>
+      </section>
+
       <section class="view" data-view="section" id="view-section">
         <button class="back-btn" id="sectionBack">→ الرجوع للأقسام</button>
         <div class="section-shell-card">
-          <div class="section-shell-icon" id="sectionIcon">🥗</div>
+          <div class="section-shell-icon" id="sectionIcon">🤝</div>
           <span class="section-kicker" id="sectionKicker">القسم</span>
-          <h1 id="sectionTitle">صحتي</h1>
+          <h1 id="sectionTitle">علاقاتي</h1>
           <p id="sectionDescription">سيتم بناء تفاصيل هذا القسم في المرحلة التالية.</p>
           <div class="phase-note">
-            <b>نبني قسمًا واحدًا في كل مرة.</b>
-            <span>حاليًا تم تفعيل «مالي». بقية الأقسام ستبنى تباعًا بعد مراجعة كل قسم واعتماده.</span>
+            <b>المتبقي حاليًا</b>
+            <span>تم تفعيل «مالي»، «صحتي»، «ديني» و«معرفتي». بقي «علاقاتي» و«عائلتي» للبناء في الخطوة القادمة.</span>
           </div>
           <button class="primary-btn" id="sectionAction">العودة إلى مركز حياتي</button>
         </div>
@@ -288,6 +521,20 @@
       </div>
       <div class="form-grid" id="financeFormFields"></div>
       <button class="primary-btn full" type="submit" id="financeFormSubmit">حفظ</button>
+    </form>
+  </div>
+
+
+  <div class="sheet-backdrop" id="domainSheet" hidden>
+    <form class="bottom-sheet" id="domainForm">
+      <div class="sheet-handle"></div>
+      <button class="modal-close" type="button" id="domainSheetClose" aria-label="إغلاق">×</button>
+      <div class="sheet-title">
+        <span class="section-kicker" id="domainFormKicker">حياتي</span>
+        <h2 id="domainFormTitle">إضافة</h2>
+      </div>
+      <div class="form-grid" id="domainFormFields"></div>
+      <button class="primary-btn full" type="submit" id="domainFormSubmit">حفظ</button>
     </form>
   </div>
 

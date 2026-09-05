@@ -1,20 +1,12 @@
-# hayati-pwa
+# حياتي — V1 Core Sections
 
-Personal life management PWA — Arabic RTL.
+نسخة تجريبية محلية من تطبيق «حياتي» بصيغة PWA.
 
-## Current build
-- PWA shell
-- Main dashboard
-- Six life domains
-- **Finance section V1 implemented** with local device storage
-- Timeline receives finance events
-- No Firebase yet by design
+المفعّل حاليًا بدون Firebase:
+- مالي
+- صحتي — مشروع إنزال الوزن
+- ديني — المشاريع الدينية والقرآن والأذكار والصيام
+- معرفتي — حديث اليوم والإنجليزية والكتب ومشاريع التعلم
+- قصتي اليوم / Timeline
 
-## Finance V1
-- Monthly income
-- Fixed expenses
-- Base monthly surplus
-- Expense/income transactions
-- Obligations
-- Financial goals and monthly required amount
-- LocalStorage persistence until Firebase is connected later
+البيانات تُحفظ مؤقتًا في Local Storage على الجهاز إلى أن يتم ربط Firebase في مرحلة لاحقة.

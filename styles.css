@@ -271,3 +271,66 @@ html[data-theme="light"] .nav-item.active { color: #0369a1; }
 .form-field input:focus,.form-field select:focus { border-color:rgba(56,189,248,.45); }
 .primary-btn.full { width:100%; margin-top:14px; min-height:44px; }
 @media (max-width:380px){ .finance-quick{grid-template-columns:repeat(5,70px);} }
+
+/* Core sections V1: Health, Religion, Knowledge */
+.domain-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:16px; }
+.domain-head h1 { margin:4px 0 4px; font-size:28px; }
+.domain-head p { margin:0; color:var(--muted); font-size:11px; line-height:1.7; }
+.domain-stats { display:grid; grid-template-columns:repeat(2,1fr); gap:9px; }
+.domain-stats article { padding:14px; min-height:82px; border-radius:18px; background:var(--surface); border:1px solid var(--line); display:flex; flex-direction:column; justify-content:space-between; }
+.domain-stats article.accent { background:linear-gradient(145deg,rgba(37,99,235,.22),rgba(14,165,233,.07)); border-color:rgba(56,189,248,.20); }
+.domain-stats span { color:var(--muted); font-size:9px; }
+.domain-stats b { font-size:15px; }
+.feature-card { margin-top:12px; padding:16px; border-radius:20px; border:1px solid rgba(125,211,252,.16); display:flex; align-items:center; justify-content:space-between; gap:12px; background:linear-gradient(135deg,#17396a,#10253f); }
+.feature-card h2 { margin:3px 0 3px; font-size:14px; color:white; }
+.feature-card p { margin:0; color:#cbd5e1; font-size:9px; line-height:1.6; }
+.health-feature { background:linear-gradient(135deg,#0f4462,#11324c); }
+.religion-feature { background:linear-gradient(135deg,#302b63,#182442); }
+.knowledge-feature { background:linear-gradient(135deg,#0f4c4c,#123148); }
+.domain-quick { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:12px 0 16px; }
+.domain-quick button { min-height:68px; border:1px solid var(--line); border-radius:16px; background:var(--surface); color:var(--text); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; }
+.domain-quick button span { font-size:20px; }
+.domain-quick button b { font-size:9px; }
+.domain-tabs { display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin-bottom:8px; }
+.domain-tabs button { flex:1; min-width:74px; border:1px solid var(--line); border-radius:999px; padding:8px 10px; color:var(--muted); background:var(--surface); font-size:9px; font-weight:800; white-space:nowrap; }
+.domain-tabs button.active { color:white; border-color:rgba(56,189,248,.25); background:linear-gradient(135deg,#2563eb,#0ea5e9); }
+.domain-panel { display:none; }
+.domain-panel.active { display:block; animation:fade .15s ease-out; }
+.domain-card-wide { margin-top:10px; padding:16px; border-radius:20px; background:var(--surface); border:1px solid var(--line); box-shadow:0 10px 30px rgba(0,0,0,.08); }
+.domain-card-wide h2 { margin:3px 0 0; font-size:14px; }
+.big-value { color:#7dd3fc; font-size:17px; }
+.health-progress span { background:linear-gradient(90deg,#38bdf8,#2dd4bf); }
+.water-progress span { background:linear-gradient(90deg,#0ea5e9,#67e8f9); }
+.domain-inline-actions { display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
+.chip-btn,.icon-chip { border:1px solid var(--line); color:var(--text); background:var(--surface-2); border-radius:999px; padding:7px 10px; font-size:9px; font-weight:800; }
+.icon-chip { min-width:34px; padding:7px; }
+.domain-list { display:grid; gap:8px; margin-top:12px; }
+.domain-row { padding:11px; border-radius:15px; background:var(--surface-2); border:1px solid var(--line); display:flex; align-items:center; gap:8px; }
+.domain-row > div:first-child { min-width:0; flex:1; }
+.domain-row b { display:block; font-size:11px; line-height:1.6; overflow-wrap:anywhere; }
+.domain-row small { display:block; margin-top:3px; color:var(--muted); font-size:8px; line-height:1.65; }
+.domain-row strong { color:#7dd3fc; font-size:10px; white-space:nowrap; }
+.row-delete,.row-toggle { border:0; border-radius:9px; padding:6px 8px; font-size:8px; color:var(--muted); background:rgba(255,255,255,.04); }
+.row-toggle { color:#86efac; background:rgba(34,197,94,.08); }
+.done-row { opacity:.72; }
+.done-row b { text-decoration:line-through; }
+.weight-overview { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
+.weight-overview div,.profile-grid div { padding:11px; border-radius:14px; background:var(--surface-2); border:1px solid var(--line); }
+.weight-overview span,.profile-grid span { display:block; color:var(--muted); font-size:8px; }
+.weight-overview b,.profile-grid b { display:block; margin-top:4px; font-size:11px; }
+.profile-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:12px; }
+.hadith-feature { margin-top:12px; padding:20px 16px; border-radius:22px; background:linear-gradient(145deg,rgba(13,148,136,.18),rgba(37,99,235,.12)); border:1px solid rgba(45,212,191,.18); }
+.hadith-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.hadith-actions { display:flex; gap:6px; }
+.hadith-feature blockquote { margin:16px 0 10px; padding:0; font-size:16px; font-weight:700; line-height:2; }
+.hadith-source { color:var(--muted); font-size:9px; }
+.hadith-row b { font-weight:700; line-height:1.8; }
+.book-row { align-items:flex-start; }
+.mini-progress { height:5px; background:var(--surface); border-radius:999px; overflow:hidden; margin-top:7px; }
+.mini-progress span { display:block; height:100%; background:linear-gradient(90deg,#2dd4bf,#38bdf8); }
+.form-field textarea { width:100%; min-height:90px; padding:10px 12px; border:1px solid var(--line); border-radius:13px; background:var(--surface-2); color:var(--text); font-family:inherit; font-size:12px; outline:none; resize:vertical; }
+.form-field textarea:focus { border-color:rgba(56,189,248,.45); }
+.check-field { display:flex; gap:8px; align-items:center; color:var(--text); font-size:10px; }
+.check-field input { width:18px; height:18px; }
+.row-delete:disabled { opacity:.25; cursor:not-allowed; }
+@media (max-width:380px){ .domain-quick{grid-template-columns:repeat(4,72px);overflow-x:auto}.weight-overview{grid-template-columns:1fr}.profile-grid{grid-template-columns:1fr 1fr}.domain-row{flex-wrap:wrap} }
