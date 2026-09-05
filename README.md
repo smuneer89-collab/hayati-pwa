@@ -1,25 +1,20 @@
-# حياتي — Hayati PWA
+# hayati-pwa
 
-**V1 Skeleton** لمشروع «حياتي» — تطبيق شخصي عربي لإدارة الحياة.
+Personal life management PWA — Arabic RTL.
 
-## ما الموجود في هذه النسخة؟
-- واجهة عربية RTL وMobile-first.
-- الصفحة الرئيسية «مركز حياتي / يومي».
-- الأقسام الستة المعتمدة: مالي، صحتي، ديني، علاقاتي، عائلتي، معرفتي.
-- صفحة «قصتي اليوم» كهيكل للـTimeline.
-- إعدادات أولية + الوضع الداكن/الفاتح.
-- PWA Manifest + Service Worker + أيقونات.
-- يعمل كتطبيق ثابت بدون Firebase في هذه المرحلة.
+## Current build
+- PWA shell
+- Main dashboard
+- Six life domains
+- **Finance section V1 implemented** with local device storage
+- Timeline receives finance events
+- No Firebase yet by design
 
-## ما غير الموجود عمدًا؟
-- Firebase Auth / Firestore / Storage.
-- الذكاء الاصطناعي وتحليل صور الطعام.
-- التفاصيل الداخلية الكاملة للأقسام.
-
-هذه الميزات تُضاف تدريجيًا بعد اعتماد الهيكل الأساسي.
-
-## التشغيل
-يجب تشغيل الملفات عبر HTTPS أو خادم محلي حتى يعمل Service Worker. فتح `index.html` مباشرة كملف لن يفعّل كل مزايا PWA.
-
-## الأمان
-لا تضع مفاتيح API أو Service Account أو كلمات مرور داخل هذا المستودع.
+## Finance V1
+- Monthly income
+- Fixed expenses
+- Base monthly surplus
+- Expense/income transactions
+- Obligations
+- Financial goals and monthly required amount
+- LocalStorage persistence until Firebase is connected later

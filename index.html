@@ -158,16 +158,111 @@
         </div>
       </section>
 
+      <section class="view" data-view="finance" id="view-finance">
+        <button class="back-btn" data-nav="domains">→ الرجوع للأقسام</button>
+        <div class="finance-head">
+          <div>
+            <span class="section-kicker">مالي</span>
+            <h1>إدارة مالي</h1>
+            <p>الدخل، المصروفات، الالتزامات، الادخار والأهداف المالية في مكان واحد.</p>
+          </div>
+          <span class="local-badge">محفوظ محليًا</span>
+        </div>
+
+        <div class="finance-stats">
+          <article><span>الدخل الشهري</span><b id="finIncome">٠.٠٠٠ د.ب</b></article>
+          <article><span>المصاريف الثابتة</span><b id="finFixed">٠.٠٠٠ د.ب</b></article>
+          <article class="accent"><span>الفائض الأساسي</span><b id="finSurplus">٠.٠٠٠ د.ب</b></article>
+          <article><span>مصروف هذا الشهر</span><b id="finSpent">٠.٠٠٠ د.ب</b></article>
+        </div>
+
+        <section class="finance-setup-card">
+          <div>
+            <span class="section-kicker">الخطة الشهرية</span>
+            <h2>الدخل والفائض الحقيقي</h2>
+            <p>الفائض الأساسي = الدخل الشهري − المصاريف الثابتة.</p>
+          </div>
+          <button class="secondary-btn" data-fin-action="income">تحديث الدخل</button>
+        </section>
+
+        <div class="finance-quick">
+          <button data-fin-action="expense"><span>💳</span><b>مصروف</b></button>
+          <button data-fin-action="extraIncome"><span>💵</span><b>دخل إضافي</b></button>
+          <button data-fin-action="fixed"><span>📌</span><b>مصروف ثابت</b></button>
+          <button data-fin-action="obligation"><span>🗓️</span><b>التزام</b></button>
+          <button data-fin-action="goal"><span>🎯</span><b>هدف مالي</b></button>
+        </div>
+
+        <div class="finance-tabs" role="tablist">
+          <button class="active" data-fin-tab="overview">نظرة عامة</button>
+          <button data-fin-tab="transactions">العمليات</button>
+          <button data-fin-tab="obligations">الالتزامات</button>
+          <button data-fin-tab="goals">الأهداف</button>
+        </div>
+
+        <section class="fin-panel active" data-fin-panel="overview">
+          <div class="finance-card">
+            <div class="card-row-head">
+              <div><span class="section-kicker">هذا الشهر</span><h2>المتاح بعد المصروفات المسجلة</h2></div>
+              <b class="big-money" id="finAvailable">٠.٠٠٠ د.ب</b>
+            </div>
+            <div class="money-progress"><span id="finSpendBar"></span></div>
+            <div class="muted-row"><span>المصروف المتغير من الفائض</span><b id="finSpendPct">٠٪</b></div>
+          </div>
+
+          <div class="finance-card">
+            <div class="card-row-head">
+              <div><span class="section-kicker">ثابت شهريًا</span><h2>المصاريف الثابتة</h2></div>
+              <button class="text-btn" data-fin-action="fixed">+ إضافة</button>
+            </div>
+            <div class="finance-list" id="fixedList"></div>
+          </div>
+
+          <div class="finance-card">
+            <div class="card-row-head">
+              <div><span class="section-kicker">الخطة الذكية</span><h2>احتياج الأهداف هذا الشهر</h2></div>
+              <b id="finGoalNeed">٠.٠٠٠ د.ب</b>
+            </div>
+            <p class="finance-note" id="finGoalStatus">أضف أهدافك المالية حتى تظهر الخطة الشهرية.</p>
+          </div>
+        </section>
+
+        <section class="fin-panel" data-fin-panel="transactions">
+          <div class="finance-card">
+            <div class="card-row-head"><div><span class="section-kicker">السجل</span><h2>العمليات المالية</h2></div><button class="text-btn" data-fin-action="expense">+ مصروف</button></div>
+            <div class="finance-list" id="transactionList"></div>
+          </div>
+        </section>
+
+        <section class="fin-panel" data-fin-panel="obligations">
+          <div class="finance-card">
+            <div class="card-row-head"><div><span class="section-kicker">القادم</span><h2>الالتزامات</h2></div><button class="text-btn" data-fin-action="obligation">+ إضافة</button></div>
+            <div class="finance-list" id="obligationList"></div>
+          </div>
+        </section>
+
+        <section class="fin-panel" data-fin-panel="goals">
+          <div class="finance-card">
+            <div class="card-row-head"><div><span class="section-kicker">أهدافي</span><h2>الأهداف المالية</h2></div><button class="text-btn" data-fin-action="goal">+ هدف</button></div>
+            <div class="finance-list goals" id="goalList"></div>
+          </div>
+          <div class="phase-note">
+            <b>قاعدة الأهداف المعتمدة</b>
+            <span>يحسب «حياتي» المبلغ الشهري اللازم لكل هدف. إذا كان الفائض غير كافٍ، يبقى المبدأ أن يتقدم جميع الأهداف النشطة بدل تجميد بعضها. طريقة توزيع النقص الدقيقة لن نعتمدها من عندنا قبل مراجعتك.</span>
+          </div>
+        </section>
+      </section>
+
       <section class="view" data-view="section" id="view-section">
         <button class="back-btn" id="sectionBack">→ الرجوع للأقسام</button>
         <div class="section-shell-card">
-          <div class="section-shell-icon" id="sectionIcon">💰</div>
+          <div class="section-shell-icon" id="sectionIcon">🥗</div>
           <span class="section-kicker" id="sectionKicker">القسم</span>
-          <h1 id="sectionTitle">مالي</h1>
-          <p id="sectionDescription">سيتم بناء تفاصيل هذا القسم في المراحل القادمة.</p>
+          <h1 id="sectionTitle">صحتي</h1>
+          <p id="sectionDescription">سيتم بناء تفاصيل هذا القسم في المرحلة التالية.</p>
           <div class="phase-note">
-            <b>هذه شاشة هيكلية مقصودة.</b>
-            <span>في V1 Skeleton نختبر الهوية والتنقل والـPWA أولًا، ثم نبني كل قسم على حدة دون استعجال.</span>
+            <b>نبني قسمًا واحدًا في كل مرة.</b>
+            <span>حاليًا تم تفعيل «مالي». بقية الأقسام ستبنى تباعًا بعد مراجعة كل قسم واعتماده.</span>
           </div>
           <button class="primary-btn" id="sectionAction">العودة إلى مركز حياتي</button>
         </div>
@@ -180,6 +275,20 @@
       <button class="nav-item" data-nav="story"><span>◷</span><b>قصتي</b></button>
       <button class="nav-item" data-nav="settings"><span>⚙</span><b>الإعدادات</b></button>
     </nav>
+  </div>
+
+
+  <div class="sheet-backdrop" id="financeSheet" hidden>
+    <form class="bottom-sheet" id="financeForm">
+      <div class="sheet-handle"></div>
+      <button class="modal-close" type="button" id="financeSheetClose" aria-label="إغلاق">×</button>
+      <div class="sheet-title">
+        <span class="section-kicker" id="financeFormKicker">مالي</span>
+        <h2 id="financeFormTitle">إضافة</h2>
+      </div>
+      <div class="form-grid" id="financeFormFields"></div>
+      <button class="primary-btn full" type="submit" id="financeFormSubmit">حفظ</button>
+    </form>
   </div>
 
   <div class="modal-backdrop" id="modalBackdrop" hidden>
