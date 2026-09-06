@@ -14,6 +14,7 @@
   <link rel="icon" href="icon-192.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://static-cdn.tarteel.ai" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <title>حياتي</title>
@@ -548,8 +549,8 @@
             <div class="quran-entry-copy">
               <span class="section-kicker">القرآن الكريم</span>
               <h2>مصحفي داخل حياتي</h2>
-              <p>قراءة مباشرة بالنص العثماني، حفظ آخر موضع، علامات مرجعية وبحث داخل القرآن.</p>
-              <div class="quran-entry-meta" id="religionQuranReaderMeta">١١٤ سورة • ٦٢٣٦ آية</div>
+              <p>مصحف رقمي بصفحات المدينة: شاشة كاملة، سطور ثابتة، نص عثماني قابل للنسخ وحفظ موضعك بالسطر.</p>
+              <div class="quran-entry-meta" id="religionQuranReaderMeta">١١٤ سورة • ٦٠٤ صفحة</div>
             </div>
             <div class="quran-entry-actions">
               <button class="primary-btn" type="button" data-quran-open>فتح المصحف</button>
@@ -584,7 +585,7 @@
           <div class="quran-app-title">
             <span class="section-kicker">ديني</span>
             <h1>القرآن الكريم</h1>
-            <p>النص العثماني من Tanzil Project — دون تعديل على نص الآيات.</p>
+            <p>مصحف رقمي صفحة بصفحة • النص العثماني قابل للتحديد والنسخ.</p>
           </div>
           <button class="quran-theme-toggle" type="button" id="quranThemeToggle" aria-label="تبديل مظهر القراءة">☾</button>
         </div>
@@ -605,11 +606,10 @@
               <input id="quranSearchInput" type="search" inputmode="search" placeholder="ابحث عن سورة أو كلمة في القرآن…" autocomplete="off" />
               <button type="button" id="quranSearchClear" aria-label="مسح البحث">×</button>
             </label>
-            <div class="quran-font-tools" aria-label="حجم خط القرآن">
-              <span>حجم القراءة</span>
-              <button type="button" id="quranFontDown">−</button>
-              <b id="quranFontLabel">متوسط</b>
-              <button type="button" id="quranFontUp">＋</button>
+            <div class="mushaf-page-jump">
+              <span>انتقل إلى صفحة</span>
+              <input id="mushafPageJumpInput" type="number" inputmode="numeric" min="1" max="604" placeholder="1–604" />
+              <button type="button" id="mushafPageJumpBtn">فتح</button>
             </div>
           </div>
 
@@ -628,35 +628,35 @@
 
           <div class="quran-source-note">
             <b>مصدر النص القرآني</b>
-            <span>Tanzil Project — Uthmani Text 1.1. تم تضمين النص كما هو دون تغيير.</span>
+            <span>النص القابل للنسخ والبحث: Tanzil Uthmani 1.1. توزيع الصفحات: مصحف المدينة الرقمي 604 صفحة. خط القراءة: Uthmanic Hafs عبر QUL/Tarteel عند توفر الشبكة.</span>
             <a href="https://tanzil.net" target="_blank" rel="noopener">tanzil.net ↗</a>
           </div>
         </section>
 
-        <section id="quranReadingPane" class="quran-reading-pane" hidden>
-          <div class="quran-reader-sticky">
-            <button type="button" class="quran-reader-back" id="quranReaderBack">→ السور</button>
-            <div>
-              <span id="quranReaderKicker">سورة</span>
-              <h2 id="quranReaderTitle">الفاتحة</h2>
-            </div>
-            <button type="button" class="quran-reader-more" id="quranReaderTopBookmark" title="حفظ آخر موضع">🔖</button>
-          </div>
-          <div class="quran-surah-banner">
-            <span class="quran-ornament">۞</span>
-            <div>
-              <h1 id="quranSurahBannerTitle">سُورَةُ ٱلْفَاتِحَةِ</h1>
-              <p id="quranSurahBannerMeta">٧ آيات</p>
-            </div>
-            <span class="quran-ornament">۞</span>
-          </div>
-          <article class="quran-text-sheet" id="quranTextSheet"></article>
-          <div class="quran-reader-footer">
-            <button type="button" id="quranPrevSurah">السورة السابقة</button>
-            <button type="button" id="quranBackToIndex">فهرس السور</button>
-            <button type="button" id="quranNextSurah">السورة التالية</button>
-          </div>
-        </section>
+        <section id="quranReadingPane" class="quran-reading-pane mushaf-reader" data-mushaf-theme="paper" hidden>
+  <div class="mushaf-stage" id="mushafStage">
+    <div class="mushaf-top-controls">
+      <button type="button" id="mushafExitBtn" class="mushaf-round-btn" aria-label="العودة إلى الفهرس">→</button>
+      <div class="mushaf-top-meta"><b id="mushafSurahName">سورة الفاتحة</b><span id="mushafPageTop">صفحة ١ من ٦٠٤</span></div>
+      <button type="button" id="mushafThemeBtn" class="mushaf-round-btn" aria-label="تبديل مظهر المصحف">☾</button>
+    </div>
+    <button type="button" id="mushafPrevPage" class="mushaf-edge-nav prev" aria-label="الصفحة السابقة">›</button>
+    <button type="button" id="mushafNextPage" class="mushaf-edge-nav next" aria-label="الصفحة التالية">‹</button>
+    <article class="mushaf-paper" id="mushafPaper" aria-label="صفحة المصحف">
+      <div class="mushaf-frame-corner c1"></div><div class="mushaf-frame-corner c2"></div><div class="mushaf-frame-corner c3"></div><div class="mushaf-frame-corner c4"></div>
+      <div class="mushaf-lines" id="mushafLines"></div>
+      <div class="mushaf-page-number" id="mushafPageNumber">١</div>
+    </article>
+    <div class="mushaf-bottom-controls">
+      <div class="mushaf-selection" id="mushafSelectionText">اضغط على السطر الذي انتهيت عنده</div>
+      <div class="mushaf-actions">
+        <button type="button" id="mushafCopyBtn">نسخ السطر</button>
+        <button type="button" id="mushafSaveBtn" class="primary">🔖 انتهيت هنا</button>
+      </div>
+    </div>
+  </div>
+</section>
+
       </section>
 
       <section class="view" data-view="knowledge" id="view-knowledge">
