@@ -12,6 +12,9 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="icon" href="icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <title>حياتي</title>
 </head>
@@ -513,7 +516,7 @@
 
         <div class="domain-quick religion-quick">
           <button data-religion-action="project"><span>🎯</span><b>مشروع</b></button>
-          <button data-religion-action="quran"><span>📖</span><b>قرآن</b></button>
+          <button data-quran-open><span>📖</span><b>المصحف</b></button>
           <button data-religion-action="dhikr"><span>🤲</span><b>ذكر/دعاء</b></button>
           <button data-religion-action="fast"><span>🌙</span><b>صيام</b></button>
         </div>
@@ -541,8 +544,20 @@
         </section>
 
         <section class="domain-panel" data-religion-panel="quran">
+          <section class="quran-entry-card">
+            <div class="quran-entry-copy">
+              <span class="section-kicker">القرآن الكريم</span>
+              <h2>مصحفي داخل حياتي</h2>
+              <p>قراءة مباشرة بالنص العثماني، حفظ آخر موضع، علامات مرجعية وبحث داخل القرآن.</p>
+              <div class="quran-entry-meta" id="religionQuranReaderMeta">١١٤ سورة • ٦٢٣٦ آية</div>
+            </div>
+            <div class="quran-entry-actions">
+              <button class="primary-btn" type="button" data-quran-open>فتح المصحف</button>
+              <button class="secondary-btn" type="button" data-quran-continue>متابعة القراءة</button>
+            </div>
+          </section>
           <div class="domain-card-wide">
-            <div class="card-row-head"><div><span class="section-kicker">القرآن</span><h2>القراءة والختمة والحفظ والمراجعة</h2></div><button class="text-btn" data-religion-action="quran">تحديث</button></div>
+            <div class="card-row-head"><div><span class="section-kicker">الخطة</span><h2>القراءة والختمة والحفظ والمراجعة</h2></div><button class="text-btn" data-religion-action="quran">تحديث الخطة</button></div>
             <div class="profile-grid" id="religionQuranGrid"></div>
           </div>
         </section>
@@ -560,6 +575,87 @@
             <div class="domain-list" id="religionFastList"></div>
           </div>
           <div class="phase-note"><b>تنظيم لا فتوى</b><span>هذا السجل يحفظ ما تدخله أنت فقط، ولا يستنتج أحكامًا شرعية أو عدد أيام واجبة تلقائيًا.</span></div>
+        </section>
+      </section>
+
+      <section class="view quran-view" data-view="quran-reader" id="view-quran-reader">
+        <div class="quran-app-head">
+          <button class="back-btn quran-back" type="button" data-nav="religion">→ ديني</button>
+          <div class="quran-app-title">
+            <span class="section-kicker">ديني</span>
+            <h1>القرآن الكريم</h1>
+            <p>النص العثماني من Tanzil Project — دون تعديل على نص الآيات.</p>
+          </div>
+          <button class="quran-theme-toggle" type="button" id="quranThemeToggle" aria-label="تبديل مظهر القراءة">☾</button>
+        </div>
+
+        <section id="quranLibraryPane" class="quran-library-pane">
+          <section class="quran-continue-card" id="quranContinueCard">
+            <div>
+              <span class="section-kicker">آخر قراءة</span>
+              <h2 id="quranContinueTitle">ابدأ من سورة الفاتحة</h2>
+              <p id="quranContinueMeta">سيحفظ حياتي آخر موضع تقرأه على هذا الجهاز.</p>
+            </div>
+            <button class="primary-btn" type="button" id="quranContinueBtn">ابدأ القراءة</button>
+          </section>
+
+          <div class="quran-tools-card">
+            <label class="quran-search-wrap">
+              <span>⌕</span>
+              <input id="quranSearchInput" type="search" inputmode="search" placeholder="ابحث عن سورة أو كلمة في القرآن…" autocomplete="off" />
+              <button type="button" id="quranSearchClear" aria-label="مسح البحث">×</button>
+            </label>
+            <div class="quran-font-tools" aria-label="حجم خط القرآن">
+              <span>حجم القراءة</span>
+              <button type="button" id="quranFontDown">−</button>
+              <b id="quranFontLabel">متوسط</b>
+              <button type="button" id="quranFontUp">＋</button>
+            </div>
+          </div>
+
+          <section class="quran-search-results" id="quranSearchResults" hidden>
+            <div class="card-row-head"><div><span class="section-kicker">نتائج البحث</span><h2 id="quranSearchHeading">النتائج</h2></div></div>
+            <div class="quran-result-list" id="quranSearchResultList"></div>
+          </section>
+
+          <section class="quran-surah-section" id="quranSurahSection">
+            <div class="card-row-head">
+              <div><span class="section-kicker">الفهرس</span><h2>السور</h2></div>
+              <span class="quran-count-pill" id="quranLoadedCount">جارٍ التحميل…</span>
+            </div>
+            <div class="quran-surah-list" id="quranSurahList"></div>
+          </section>
+
+          <div class="quran-source-note">
+            <b>مصدر النص القرآني</b>
+            <span>Tanzil Project — Uthmani Text 1.1. تم تضمين النص كما هو دون تغيير.</span>
+            <a href="https://tanzil.net" target="_blank" rel="noopener">tanzil.net ↗</a>
+          </div>
+        </section>
+
+        <section id="quranReadingPane" class="quran-reading-pane" hidden>
+          <div class="quran-reader-sticky">
+            <button type="button" class="quran-reader-back" id="quranReaderBack">→ السور</button>
+            <div>
+              <span id="quranReaderKicker">سورة</span>
+              <h2 id="quranReaderTitle">الفاتحة</h2>
+            </div>
+            <button type="button" class="quran-reader-more" id="quranReaderTopBookmark" title="حفظ آخر موضع">🔖</button>
+          </div>
+          <div class="quran-surah-banner">
+            <span class="quran-ornament">۞</span>
+            <div>
+              <h1 id="quranSurahBannerTitle">سُورَةُ ٱلْفَاتِحَةِ</h1>
+              <p id="quranSurahBannerMeta">٧ آيات</p>
+            </div>
+            <span class="quran-ornament">۞</span>
+          </div>
+          <article class="quran-text-sheet" id="quranTextSheet"></article>
+          <div class="quran-reader-footer">
+            <button type="button" id="quranPrevSurah">السورة السابقة</button>
+            <button type="button" id="quranBackToIndex">فهرس السور</button>
+            <button type="button" id="quranNextSurah">السورة التالية</button>
+          </div>
         </section>
       </section>
 

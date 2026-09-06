@@ -1,4 +1,4 @@
-const CACHE = 'hayati-v1-day-sleep-hadith-1';
+const CACHE = 'hayati-v7-quran-reader-1';
 const ASSETS = [
   './',
   './index.html',
@@ -7,7 +7,8 @@ const ASSETS = [
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
-  './apple-touch-icon.png'
+  './apple-touch-icon.png',
+  './data/quran-uthmani.txt'
 ];
 
 self.addEventListener('install', event => {

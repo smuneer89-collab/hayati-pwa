@@ -55,7 +55,7 @@ const emptyHealth = () => ({
 });
 const emptyReligion = () => ({
   projects: [],
-  quran: { mode: 'قراءة', lastPosition: '', dailyTarget: '', note: '' },
+  quran: { mode: 'قراءة', lastPosition: '', dailyTarget: '', note: '', reader: { lastSurah: 1, lastAyah: 1, lastAt: '', fontStep: 2, theme: 'night', bookmarks: [] } },
   adhkar: [],
   fasting: []
 });
@@ -72,6 +72,7 @@ const emptyDayRhythm = () => ({ currentStart: '', currentEnd: '', lastEnd: '', l
 let finance = normalizeFinanceData(loadJSON(FINANCE_KEY, emptyFinance()));
 let health = loadJSON(HEALTH_KEY, emptyHealth());
 let religion = loadJSON(RELIGION_KEY, emptyReligion());
+religion.quran = { ...emptyReligion().quran, ...(religion.quran||{}), reader: { ...emptyReligion().quran.reader, ...(religion.quran?.reader||{}), bookmarks: Array.isArray(religion.quran?.reader?.bookmarks) ? religion.quran.reader.bookmarks : [] } };
 let knowledge = loadJSON(KNOWLEDGE_KEY, emptyKnowledge());
 let relationships = loadJSON(RELATIONSHIPS_KEY, emptyRelationships());
 let family = loadJSON(FAMILY_KEY, emptyFamily());
@@ -133,6 +134,7 @@ function showView(name) {
   if (name === 'family') renderFamily();
   if (name === 'settings') { renderBackupSettings(); renderHadithManagerStats(); }
   if (name === 'hadith-manager') renderHadithManager();
+  if (name === 'quran-reader') initQuranReader();
   if (name === 'story') renderStory();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -418,6 +420,7 @@ function renderReligion(){
   renderList('religionTodayList',suggestions,x=>`<div class="domain-row"><div><b>${x.icon} ${escapeHTML(x.title)}</b><small>${escapeHTML(x.meta)}</small></div></div>`,'لا توجد أعمال محددة من بياناتك اليوم. أضف مشروعًا أو وردًا أو ذكرًا.');
   renderList('religionProjectList',religion.projects,x=>`<div class="domain-row"><div><b>🎯 ${escapeHTML(x.title)}</b><small>${escapeHTML(x.type||'مشروع ديني')} • ${escapeHTML(x.status||'نشط')}${x.deadline?` • ${arabicDate(x.deadline)}`:''}</small></div><button class="row-delete" data-religion-toggle-project="${x.id}">${x.status==='مكتمل'?'إعادة فتح':'تم'}</button><button class="row-delete" data-religion-delete="project" data-id="${x.id}">حذف</button></div>`,'لم تضف مشروعًا دينيًا بعد.');
   const qg=document.getElementById('religionQuranGrid'); if(qg){ const q=religion.quran; qg.innerHTML=[['المسار',q.mode||'—'],['آخر موضع',q.lastPosition||'—'],['الهدف اليومي',q.dailyTarget||'—'],['ملاحظة',q.note||'—']].map(([a,b])=>`<div><span>${a}</span><b>${escapeHTML(b)}</b></div>`).join(''); }
+  const qrm=document.getElementById('religionQuranReaderMeta'); if(qrm){ const r=ensureQuranReaderState(); qrm.textContent=r.lastAt?`آخر قراءة: ${quranSurahNames[r.lastSurah-1]||'القرآن'} • آية ${toArabicDigits(r.lastAyah)}`:'١١٤ سورة • ٦٢٣٦ آية • جاهز للقراءة'; }
   renderList('religionDhikrList',religion.adhkar,x=>{ const isDone=(x.doneDates||[]).includes(t); return `<div class="domain-row ${isDone?'done-row':''}"><div><b>🤲 ${escapeHTML(x.title)}</b><small>${x.target?`الهدف ${escapeHTML(x.target)}`:'قائمة شخصية'}${isDone?' • اكتمل اليوم':''}</small></div><button class="row-toggle" data-religion-toggle-dhikr="${x.id}">${isDone?'↺':'✓'}</button><button class="row-delete" data-religion-delete="dhikr" data-id="${x.id}">حذف</button></div>`;},'لم تضف أذكارًا أو أدعية بعد.');
   const fast=[...religion.fasting].sort((a,b)=>(b.date||'').localeCompare(a.date||'')); renderList('religionFastList',fast,x=>`<div class="domain-row"><div><b>🌙 ${arabicDate(x.date)}</b><small>${escapeHTML(x.note||'يوم صيام مسجل')}</small></div><button class="row-delete" data-religion-delete="fast" data-id="${x.id}">حذف</button></div>`,'لم تسجل أيام صيام بعد.');
 }
@@ -671,6 +674,101 @@ async function deleteFamily(kind,id){
 function toggleFamilyTask(id){const x=family.tasks.find(x=>x.id===id);if(!x)return;x.done=!x.done;if(x.done)addTimeline(`أنجزت مسؤولية عائلية: ${x.title}`,'عائلتي','✅');saveFamily();}
 async function handleFamilyFiles(files,albumId){ const album=family.albums.find(a=>a.id===albumId); if(!album)return; let added=0; for(const file of [...files]){if(!file.type.startsWith('image/'))continue;const id=makeId();const meta={id,albumId,name:file.name||`photo-${id}`,type:file.type||'image/jpeg',createdAt:new Date().toISOString()};await putPhotoRecord({...meta,blob:file});family.photos.push(meta);if(!album.coverPhotoId)album.coverPhotoId=id;added++;} if(added){addTimeline(`أضفت ${added.toLocaleString('ar-BH')} صورة إلى ألبوم ${album.title}`,'عائلتي','📷');saveFamily();} }
 
+
+
+// ---------------- Quran Reader: Tanzil Uthmani text ----------------
+const quranSurahNames = ['الفاتحة','البقرة','آل عمران','النساء','المائدة','الأنعام','الأعراف','الأنفال','التوبة','يونس','هود','يوسف','الرعد','إبراهيم','الحجر','النحل','الإسراء','الكهف','مريم','طه','الأنبياء','الحج','المؤمنون','النور','الفرقان','الشعراء','النمل','القصص','العنكبوت','الروم','لقمان','السجدة','الأحزاب','سبأ','فاطر','يس','الصافات','ص','الزمر','غافر','فصلت','الشورى','الزخرف','الدخان','الجاثية','الأحقاف','محمد','الفتح','الحجرات','ق','الذاريات','الطور','النجم','القمر','الرحمن','الواقعة','الحديد','المجادلة','الحشر','الممتحنة','الصف','الجمعة','المنافقون','التغابن','الطلاق','التحريم','الملك','القلم','الحاقة','المعارج','نوح','الجن','المزمل','المدثر','القيامة','الإنسان','المرسلات','النبأ','النازعات','عبس','التكوير','الانفطار','المطففين','الانشقاق','البروج','الطارق','الأعلى','الغاشية','الفجر','البلد','الشمس','الليل','الضحى','الشرح','التين','العلق','القدر','البينة','الزلزلة','العاديات','القارعة','التكاثر','العصر','الهمزة','الفيل','قريش','الماعون','الكوثر','الكافرون','النصر','المسد','الإخلاص','الفلق','الناس'];
+let quranVerses=[];
+let quranBySurah=new Map();
+let quranLoadPromise=null;
+let quranCurrentSurah=1;
+let quranSelectedAyah=null;
+const quranFontSizes=[22,25,28,31,34,38];
+const quranFontLabels=['صغير جدًا','صغير','متوسط','كبير','كبير جدًا','ضخم'];
+function ensureQuranReaderState(){
+  religion.quran=religion.quran||{};
+  religion.quran.reader={...emptyReligion().quran.reader,...(religion.quran.reader||{})};
+  if(!Array.isArray(religion.quran.reader.bookmarks))religion.quran.reader.bookmarks=[];
+  return religion.quran.reader;
+}
+function toArabicDigits(value){return String(value??'').replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[Number(d)]);}
+function normalizeArabicSearch(s=''){return s.normalize('NFD').replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g,'').replace(/[ٱأإآ]/g,'ا').replace(/ى/g,'ي').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/ـ/g,'').toLowerCase();}
+async function loadQuranData(){
+  if(quranVerses.length)return quranVerses;
+  if(quranLoadPromise)return quranLoadPromise;
+  quranLoadPromise=fetch('./data/quran-uthmani.txt').then(r=>{if(!r.ok)throw new Error('تعذر تحميل نص القرآن');return r.text();}).then(text=>{
+    const verses=[]; const by=new Map();
+    for(const line of text.split(/\r?\n/)){
+      const m=line.match(/^(\d+)\|(\d+)\|(.*)$/); if(!m)continue;
+      const v={surah:Number(m[1]),ayah:Number(m[2]),text:m[3]}; verses.push(v); if(!by.has(v.surah))by.set(v.surah,[]); by.get(v.surah).push(v);
+    }
+    quranVerses=verses; quranBySurah=by;
+    if(verses.length!==6236||by.size!==114)console.warn('Quran validation:',verses.length,by.size);
+    return verses;
+  }).catch(err=>{quranLoadPromise=null;throw err;});
+  return quranLoadPromise;
+}
+function updateQuranFont(){
+  const r=ensureQuranReaderState(); r.fontStep=Math.min(quranFontSizes.length-1,Math.max(0,Number(r.fontStep??2)));
+  const view=document.getElementById('view-quran-reader'); if(view)view.style.setProperty('--quran-font-size',`${quranFontSizes[r.fontStep]}px`);
+  const label=document.getElementById('quranFontLabel'); if(label)label.textContent=quranFontLabels[r.fontStep];
+}
+function updateQuranTheme(){
+  const r=ensureQuranReaderState(); const view=document.getElementById('view-quran-reader'); if(view)view.dataset.quranTheme=r.theme==='paper'?'paper':'night';
+  const btn=document.getElementById('quranThemeToggle'); if(btn)btn.textContent=r.theme==='paper'?'☾':'☀';
+}
+function quranVerseCount(surah){return quranBySurah.get(Number(surah))?.length||0;}
+function renderQuranIndex(){
+  const r=ensureQuranReaderState(); const list=document.getElementById('quranSurahList'); if(!list)return;
+  list.innerHTML=quranSurahNames.map((name,i)=>{const n=i+1,c=quranVerseCount(n);return `<button class="quran-surah-row" type="button" data-quran-surah="${n}"><span class="quran-surah-number">${toArabicDigits(n)}</span><span class="quran-surah-name"><b>سورة ${escapeHTML(name)}</b><small>${toArabicDigits(c)} آية</small></span><span class="quran-surah-arrow">‹</span></button>`;}).join('');
+  const loaded=document.getElementById('quranLoadedCount'); if(loaded)loaded.textContent=`${toArabicDigits(quranBySurah.size)} سورة`;
+  const title=document.getElementById('quranContinueTitle'),meta=document.getElementById('quranContinueMeta'),btn=document.getElementById('quranContinueBtn');
+  const s=Math.min(114,Math.max(1,Number(r.lastSurah||1))),a=Math.max(1,Number(r.lastAyah||1));
+  if(title)title.textContent=r.lastAt?`سورة ${quranSurahNames[s-1]} — الآية ${toArabicDigits(a)}`:'ابدأ من سورة الفاتحة';
+  if(meta)meta.textContent=r.lastAt?`آخر قراءة ${new Intl.DateTimeFormat('ar-BH',{dateStyle:'medium',timeStyle:'short'}).format(new Date(r.lastAt))}`:'سيحفظ حياتي آخر موضع تقرأه على هذا الجهاز.';
+  if(btn)btn.textContent=r.lastAt?'متابعة':'ابدأ القراءة';
+}
+async function initQuranReader(){
+  updateQuranFont(); updateQuranTheme();
+  try{await loadQuranData();renderQuranIndex();}
+  catch(e){openModal('تعذر فتح القرآن',e?.message||'تأكد من وجود ملف القرآن داخل مجلد data.','⚠️');}
+}
+function openQuranLibrary(){
+  const view=document.getElementById('view-quran-reader'); if(view)view.classList.remove('is-reading');
+  const lib=document.getElementById('quranLibraryPane'),read=document.getElementById('quranReadingPane'); if(lib)lib.hidden=false;if(read)read.hidden=true; quranSelectedAyah=null; window.scrollTo({top:0,behavior:'smooth'});
+}
+async function openQuranReader(surah,ayah=1,scroll=true){
+  await loadQuranData(); surah=Math.min(114,Math.max(1,Number(surah||1))); ayah=Math.max(1,Number(ayah||1)); quranCurrentSurah=surah; quranSelectedAyah=null;
+  const verses=quranBySurah.get(surah)||[]; const view=document.getElementById('view-quran-reader'); if(view)view.classList.add('is-reading'); const lib=document.getElementById('quranLibraryPane'),read=document.getElementById('quranReadingPane'); if(lib)lib.hidden=true;if(read)read.hidden=false;
+  const name=quranSurahNames[surah-1]||`سورة ${surah}`; setText('quranReaderKicker',`السورة ${toArabicDigits(surah)} من ١١٤`);setText('quranReaderTitle',name);setText('quranSurahBannerTitle',`سُورَةُ ${name}`);setText('quranSurahBannerMeta',`${toArabicDigits(verses.length)} آية`);
+  const sheet=document.getElementById('quranTextSheet'); if(sheet)sheet.innerHTML=verses.map(v=>`<span class="quran-ayah" id="quran-ayah-${v.ayah}" data-quran-ayah="${v.ayah}">${escapeHTML(v.text)} <span class="quran-ayah-number">${toArabicDigits(v.ayah)}</span></span> `).join('');
+  const r=ensureQuranReaderState();r.lastSurah=surah;r.lastAyah=Math.min(ayah,verses.length||1);r.lastAt=new Date().toISOString();religion.quran.lastPosition=`سورة ${name} • آية ${toArabicDigits(r.lastAyah)}`;saveReligion();
+  const prev=document.getElementById('quranPrevSurah'),next=document.getElementById('quranNextSurah');if(prev)prev.disabled=surah===1;if(next)next.disabled=surah===114;
+  if(scroll){requestAnimationFrame(()=>setTimeout(()=>{const el=document.getElementById(`quran-ayah-${Math.min(ayah,verses.length||1)}`);if(el)el.scrollIntoView({block:'center',behavior:'smooth'});},80));}
+}
+function saveQuranPosition(ayah=quranSelectedAyah||1,notify=true){
+  const r=ensureQuranReaderState(); const name=quranSurahNames[quranCurrentSurah-1]; r.lastSurah=quranCurrentSurah;r.lastAyah=Number(ayah||1);r.lastAt=new Date().toISOString(); religion.quran.lastPosition=`سورة ${name} • آية ${toArabicDigits(r.lastAyah)}`; saveReligion(); if(notify)openModal('تم حفظ موضعك',`${religion.quran.lastPosition}.`,'🔖');
+}
+function toggleQuranBookmark(ayah){
+  const r=ensureQuranReaderState(); const key=`${quranCurrentSurah}:${ayah}`; const i=r.bookmarks.findIndex(x=>x.key===key); if(i>=0)r.bookmarks.splice(i,1); else r.bookmarks.unshift({key,surah:quranCurrentSurah,ayah:Number(ayah),at:new Date().toISOString()}); saveReligion(); renderSelectedAyahActions(Number(ayah));
+}
+function renderSelectedAyahActions(ayah){
+  document.querySelectorAll('.quran-ayah-actions').forEach(x=>x.remove()); document.querySelectorAll('.quran-ayah').forEach(x=>x.dataset.selected='0');
+  const el=document.getElementById(`quran-ayah-${ayah}`); if(!el)return; el.dataset.selected='1'; const r=ensureQuranReaderState(),bookmarked=r.bookmarks.some(x=>x.surah===quranCurrentSurah&&x.ayah===ayah); const div=document.createElement('div'); div.className='quran-ayah-actions'; div.innerHTML=`<button type="button" data-quran-save-ayah="${ayah}">🔖 حفظ الموضع</button><button type="button" data-quran-bookmark="${ayah}">${bookmarked?'★ إزالة العلامة':'☆ علامة'}</button><button type="button" data-quran-copy="${ayah}">نسخ الآية</button>`; el.insertAdjacentElement('afterend',div); quranSelectedAyah=ayah;
+}
+async function copyQuranAyah(ayah){
+  const verse=quranBySurah.get(quranCurrentSurah)?.find(v=>v.ayah===Number(ayah));if(!verse)return;const text=`${verse.text} — سورة ${quranSurahNames[quranCurrentSurah-1]}، الآية ${toArabicDigits(verse.ayah)}`;try{await navigator.clipboard.writeText(text);openModal('تم النسخ','تم نسخ الآية مع اسم السورة ورقمها.','✓');}catch{openModal('تعذر النسخ','يمكنك تحديد النص ونسخه يدويًا.','⚠️');}
+}
+function quranSearch(query){
+  const results=document.getElementById('quranSearchResults'),section=document.getElementById('quranSurahSection'),list=document.getElementById('quranSearchResultList'),heading=document.getElementById('quranSearchHeading'); if(!results||!list)return;
+  query=(query||'').trim(); if(!query){results.hidden=true;if(section)section.hidden=false;return;}
+  const nq=normalizeArabicSearch(query); const matches=[];
+  quranSurahNames.forEach((name,i)=>{if(normalizeArabicSearch(name).includes(nq))matches.push({kind:'surah',surah:i+1,name});});
+  if(nq.length>=2){for(const v of quranVerses){if(normalizeArabicSearch(v.text).includes(nq)){matches.push({kind:'ayah',...v});if(matches.length>=80)break;}}}
+  if(section)section.hidden=true;results.hidden=false;if(heading)heading.textContent=`${toArabicDigits(matches.length)} نتيجة${matches.length>=80?' (أول ٨٠)':''}`;
+  list.innerHTML=matches.length?matches.map(m=>m.kind==='surah'?`<button class="quran-result" type="button" data-quran-surah="${m.surah}"><b>سورة ${escapeHTML(m.name)}</b><small>${toArabicDigits(quranVerseCount(m.surah))} آية</small></button>`:`<button class="quran-result" type="button" data-quran-jump="${m.surah}:${m.ayah}"><b>سورة ${escapeHTML(quranSurahNames[m.surah-1])} • الآية ${toArabicDigits(m.ayah)}</b><p>${escapeHTML(m.text)}</p></button>`).join(''):'<div class="empty-state">لا توجد نتائج مطابقة.</div>';
+}
+
 // ---------------- Backup: structured snapshots + full ZIP ----------------
 let snapshotTimer=null;
 function structuredState(){ return { app:'hayati', schemaVersion:BACKUP_SCHEMA_VERSION, createdAt:new Date().toISOString(), data:{finance,health,religion,knowledge,relationships,family,dayRhythm,timeline:loadJSON(TIMELINE_KEY,[])}, settings:{theme:localStorage.getItem('hayati-theme')||'dark'} }; }
@@ -726,6 +824,15 @@ document.addEventListener('click', (event) => {
   const healthWater=event.target.closest('[data-health-water]'); if(healthWater){ const ml=Number(healthWater.dataset.healthWater); health.water.push({id:makeId(),ml,date:todayKey()}); addTimeline(`شربت ${ml} مل ماء`,'صحتي','💧'); saveHealth(); return; }
   const healthDel=event.target.closest('[data-health-delete]'); if(healthDel){ if(confirm('حذف هذا العنصر؟')) deleteHealth(healthDel.dataset.healthDelete,healthDel.dataset.id); return; }
 
+  const qOpen=event.target.closest('[data-quran-open]'); if(qOpen){showView('quran-reader');navItems.forEach(i=>i.classList.remove('active'));openQuranLibrary();return;}
+  const qContinue=event.target.closest('[data-quran-continue]'); if(qContinue){const r=ensureQuranReaderState();showView('quran-reader');navItems.forEach(i=>i.classList.remove('active'));openQuranReader(r.lastSurah||1,r.lastAyah||1);return;}
+  const qSurah=event.target.closest('[data-quran-surah]'); if(qSurah){openQuranReader(Number(qSurah.dataset.quranSurah),1);return;}
+  const qJump=event.target.closest('[data-quran-jump]'); if(qJump){const [s,a]=qJump.dataset.quranJump.split(':').map(Number);openQuranReader(s,a);return;}
+  const qAyah=event.target.closest('[data-quran-ayah]'); if(qAyah){renderSelectedAyahActions(Number(qAyah.dataset.quranAyah));return;}
+  const qSaveAyah=event.target.closest('[data-quran-save-ayah]'); if(qSaveAyah){saveQuranPosition(Number(qSaveAyah.dataset.quranSaveAyah));return;}
+  const qBookmark=event.target.closest('[data-quran-bookmark]'); if(qBookmark){toggleQuranBookmark(Number(qBookmark.dataset.quranBookmark));return;}
+  const qCopy=event.target.closest('[data-quran-copy]'); if(qCopy){copyQuranAyah(Number(qCopy.dataset.quranCopy));return;}
+
   const religionAction=event.target.closest('[data-religion-action]'); if(religionAction){ openReligionForm(religionAction.dataset.religionAction); return; }
   const religionTab=event.target.closest('[data-religion-tab]'); if(religionTab){ document.querySelectorAll('[data-religion-tab]').forEach(x=>x.classList.toggle('active',x===religionTab)); document.querySelectorAll('[data-religion-panel]').forEach(x=>x.classList.toggle('active',x.dataset.religionPanel===religionTab.dataset.religionTab)); return; }
   const rd=event.target.closest('[data-religion-delete]'); if(rd){ if(confirm('حذف هذا العنصر؟'))deleteReligion(rd.dataset.religionDelete,rd.dataset.id); return; }
@@ -773,6 +880,17 @@ document.getElementById('hadithAnalyzeBtn')?.addEventListener('click',()=>render
 document.getElementById('hadithBatchForm')?.addEventListener('submit',addHadithBatch);
 const hadithReadBtn=document.getElementById('hadithReadBtn'); if(hadithReadBtn)hadithReadBtn.addEventListener('click',markDailyHadithRead);
 const hadithFavoriteBtn=document.getElementById('hadithFavoriteBtn'); if(hadithFavoriteBtn)hadithFavoriteBtn.addEventListener('click',toggleDailyHadithFavorite);
+document.getElementById('quranContinueBtn')?.addEventListener('click',()=>{const r=ensureQuranReaderState();openQuranReader(r.lastSurah||1,r.lastAyah||1);});
+document.getElementById('quranReaderBack')?.addEventListener('click',openQuranLibrary);
+document.getElementById('quranBackToIndex')?.addEventListener('click',openQuranLibrary);
+document.getElementById('quranReaderTopBookmark')?.addEventListener('click',()=>saveQuranPosition(quranSelectedAyah||ensureQuranReaderState().lastAyah||1));
+document.getElementById('quranPrevSurah')?.addEventListener('click',()=>{if(quranCurrentSurah>1)openQuranReader(quranCurrentSurah-1,1,false);});
+document.getElementById('quranNextSurah')?.addEventListener('click',()=>{if(quranCurrentSurah<114)openQuranReader(quranCurrentSurah+1,1,false);});
+document.getElementById('quranFontDown')?.addEventListener('click',()=>{const r=ensureQuranReaderState();r.fontStep=Math.max(0,Number(r.fontStep||0)-1);saveReligion();updateQuranFont();});
+document.getElementById('quranFontUp')?.addEventListener('click',()=>{const r=ensureQuranReaderState();r.fontStep=Math.min(quranFontSizes.length-1,Number(r.fontStep||0)+1);saveReligion();updateQuranFont();});
+document.getElementById('quranThemeToggle')?.addEventListener('click',()=>{const r=ensureQuranReaderState();r.theme=r.theme==='paper'?'night':'paper';saveReligion();updateQuranTheme();});
+let quranSearchTimer=null;document.getElementById('quranSearchInput')?.addEventListener('input',e=>{clearTimeout(quranSearchTimer);quranSearchTimer=setTimeout(()=>quranSearch(e.target.value),180);});
+document.getElementById('quranSearchClear')?.addEventListener('click',()=>{const i=document.getElementById('quranSearchInput');if(i){i.value='';quranSearch('');i.focus();}});
 document.getElementById('sectionBack').addEventListener('click', () => showView('domains'));
 document.getElementById('sectionAction').addEventListener('click', () => showView('today'));
 modalClose.addEventListener('click', closeModal); modalOk.addEventListener('click', closeModal); modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) closeModal(); });
