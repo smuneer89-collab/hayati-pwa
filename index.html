@@ -40,6 +40,46 @@
           <div class="demo-badge">نسخة V1 تجريبية • بيانات العرض غير محفوظة في Firebase بعد</div>
         </div>
 
+        <section class="home-hadith-card" id="homeDailyHadithCard">
+          <div class="home-hadith-head">
+            <div>
+              <span class="section-kicker">حديث اليوم</span>
+              <h2>قبس اليوم</h2>
+            </div>
+            <button class="text-btn" type="button" data-section="knowledge">فتح معرفتي</button>
+          </div>
+          <blockquote id="homeDailyHadithText">أضف أحاديثك من الإعدادات ليظهر هنا حديث اليوم.</blockquote>
+          <div class="home-hadith-meta" id="homeDailyHadithMeta">قاعدة الأحاديث فارغة حاليًا.</div>
+        </section>
+
+        <section class="day-cycle-card" id="dayCycleCard">
+          <div class="day-cycle-head">
+            <div>
+              <span class="section-kicker">دورتي اليومية</span>
+              <h2>بداية اليوم ونهايته</h2>
+            </div>
+            <span class="day-status-pill" id="dayCycleStatus">جاهز</span>
+          </div>
+          <div class="day-cycle-actions">
+            <button class="day-cycle-btn start" type="button" id="startDayBtn">
+              <span class="day-cycle-icon">☀️</span>
+              <span><b>بداية اليوم</b><small id="startDayTime">لم تُسجل بعد</small></span>
+            </button>
+            <button class="day-cycle-btn end" type="button" id="endDayBtn">
+              <span class="day-cycle-icon">🌙</span>
+              <span><b>نهاية اليوم</b><small id="endDayTime">لم تُسجل بعد</small></span>
+            </button>
+          </div>
+          <div class="sleep-summary">
+            <div class="sleep-summary-icon">😴</div>
+            <div>
+              <span>آخر مدة نوم محسوبة</span>
+              <b id="sleepSummaryText">لا توجد مدة نوم محسوبة بعد</b>
+              <small id="sleepSummaryRange">يُحسب النوم من «نهاية اليوم» إلى «بداية اليوم» التالية.</small>
+            </div>
+          </div>
+        </section>
+
         <section class="section-block">
           <div class="section-heading">
             <div>

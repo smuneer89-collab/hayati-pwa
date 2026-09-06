@@ -107,6 +107,44 @@ button { cursor: pointer; }
   color: #dbeafe; font-size: 10px;
 }
 
+.home-hadith-card {
+  position: relative; overflow: hidden; margin-top: 14px; padding: 20px; border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, #163852 0%, #102a3e 52%, #0b2033 100%);
+  border: 1px solid rgba(45,212,191,.20); box-shadow: var(--shadow);
+}
+.home-hadith-card::before {
+  content: ""; position: absolute; width: 150px; height: 150px; border-radius: 50%;
+  background: rgba(45,212,191,.10); filter: blur(34px); bottom: -78px; left: -30px; pointer-events: none;
+}
+.home-hadith-head { position: relative; display: flex; align-items: start; justify-content: space-between; gap: 12px; }
+.home-hadith-head h2 { margin: 4px 0 0; font-size: 17px; }
+.home-hadith-card blockquote { position: relative; margin: 16px 0 10px; padding: 0; font-size: 16px; font-weight: 750; line-height: 2.05; color: var(--text); }
+.home-hadith-meta { position: relative; color: var(--muted); font-size: 10px; line-height: 1.7; }
+
+.day-cycle-card {
+  margin-top: 14px; padding: 16px; border-radius: var(--radius-xl); background: var(--surface);
+  border: 1px solid var(--line); box-shadow: 0 10px 30px rgba(0,0,0,.12);
+}
+.day-cycle-head { display: flex; align-items: start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.day-cycle-head h2 { margin: 4px 0 0; font-size: 17px; }
+.day-status-pill { padding: 6px 9px; border-radius: 999px; background: rgba(56,189,248,.10); border: 1px solid rgba(56,189,248,.18); color: #7dd3fc; font-size: 9px; font-weight: 800; white-space: nowrap; }
+.day-cycle-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.day-cycle-btn {
+  min-height: 76px; display: flex; align-items: center; gap: 10px; text-align: right; padding: 12px; border-radius: 17px;
+  color: var(--text); background: var(--surface-2); border: 1px solid var(--line);
+}
+.day-cycle-btn.start { background: linear-gradient(145deg, rgba(245,158,11,.12), var(--surface-2)); border-color: rgba(245,158,11,.18); }
+.day-cycle-btn.end { background: linear-gradient(145deg, rgba(99,102,241,.14), var(--surface-2)); border-color: rgba(129,140,248,.18); }
+.day-cycle-btn:active { transform: scale(.985); }
+.day-cycle-btn.is-recorded { box-shadow: inset 0 0 0 1px rgba(45,212,191,.22); }
+.day-cycle-icon { font-size: 24px; }
+.day-cycle-btn b { display: block; font-size: 12px; }
+.day-cycle-btn small { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; line-height: 1.5; }
+.sleep-summary { display: grid; grid-template-columns: 38px 1fr; gap: 10px; align-items: center; margin-top: 10px; padding: 11px; border-radius: 15px; background: color-mix(in srgb, var(--surface-2) 90%, transparent); border: 1px solid var(--line); }
+.sleep-summary-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 13px; background: rgba(99,102,241,.12); font-size: 20px; }
+.sleep-summary span, .sleep-summary small { display: block; color: var(--muted); font-size: 9px; }
+.sleep-summary b { display: block; margin: 3px 0; font-size: 12px; }
+
 .section-block { margin-top: 24px; }
 .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .section-heading.compact { align-items: center; }
@@ -410,3 +448,5 @@ html[data-theme="light"] .nav-item.active { color: #0369a1; }
 .hadith-preview-more{text-align:center;color:var(--muted);font-size:9px;padding:7px}
 #hadithBatchText{min-height:260px;line-height:1.9}
 @media(max-width:390px){.hadith-import-actions{grid-template-columns:1fr}.hadith-manager-summary{gap:6px}.hadith-manager-summary>div{padding-inline:6px}}
+
+@media (max-width:380px){ .day-cycle-actions{grid-template-columns:1fr}.home-hadith-card blockquote{font-size:15px} }

@@ -1,4 +1,4 @@
-const CACHE = 'hayati-v1-hadith-manager-1';
+const CACHE = 'hayati-v1-day-sleep-hadith-1';
 const ASSETS = [
   './',
   './index.html',

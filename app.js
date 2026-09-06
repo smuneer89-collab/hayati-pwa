@@ -45,7 +45,8 @@ const TIMELINE_KEY = 'hayati-timeline-v1';
 const SNAPSHOT_KEY = 'hayati-backup-snapshots-v1';
 const BACKUP_META_KEY = 'hayati-backup-meta-v1';
 const DAILY_HADITH_STATE_KEY = 'hayati-daily-hadith-v1';
-const BACKUP_SCHEMA_VERSION = 2;
+const DAY_RHYTHM_KEY = 'hayati-day-rhythm-v1';
+const BACKUP_SCHEMA_VERSION = 3;
 
 const emptyFinance = () => ({ currentBalance: 0, monthlyIncome: 0, salaries: { mid: 0, end: 0 }, fixedExpenses: [], transactions: [], obligations: [], goals: [] });
 const emptyHealth = () => ({
@@ -66,6 +67,7 @@ const emptyKnowledge = () => ({
 });
 const emptyRelationships = () => ({ people: [], interactions: [], events: [], promises: [], gifts: [] });
 const emptyFamily = () => ({ members: [], albums: [], tasks: [], photos: [] });
+const emptyDayRhythm = () => ({ currentStart: '', currentEnd: '', lastEnd: '', lastSleepMinutes: null, lastSleepStart: '', lastSleepEnd: '', sleepHistory: [] });
 
 let finance = normalizeFinanceData(loadJSON(FINANCE_KEY, emptyFinance()));
 let health = loadJSON(HEALTH_KEY, emptyHealth());
@@ -73,6 +75,8 @@ let religion = loadJSON(RELIGION_KEY, emptyReligion());
 let knowledge = loadJSON(KNOWLEDGE_KEY, emptyKnowledge());
 let relationships = loadJSON(RELATIONSHIPS_KEY, emptyRelationships());
 let family = loadJSON(FAMILY_KEY, emptyFamily());
+let dayRhythm = loadJSON(DAY_RHYTHM_KEY, emptyDayRhythm());
+dayRhythm = { ...emptyDayRhythm(), ...(dayRhythm && typeof dayRhythm === 'object' ? dayRhythm : {}), sleepHistory: Array.isArray(dayRhythm?.sleepHistory) ? dayRhythm.sleepHistory : [] };
 
 function loadJSON(key, fallback) {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
@@ -109,6 +113,7 @@ function saveReligion() { localStorage.setItem(RELIGION_KEY, JSON.stringify(reli
 function saveKnowledge() { localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(knowledge)); scheduleSnapshot(); renderKnowledge(); renderDashboard(); }
 function saveRelationships() { localStorage.setItem(RELATIONSHIPS_KEY, JSON.stringify(relationships)); scheduleSnapshot(); renderRelationships(); renderDashboard(); }
 function saveFamily() { localStorage.setItem(FAMILY_KEY, JSON.stringify(family)); scheduleSnapshot(); renderFamily(); renderDashboard(); }
+function saveDayRhythm() { localStorage.setItem(DAY_RHYTHM_KEY, JSON.stringify(dayRhythm)); scheduleSnapshot(); renderDayRhythm(); }
 function saveTimeline(items) { localStorage.setItem(TIMELINE_KEY, JSON.stringify(items.slice(0, 300))); scheduleSnapshot(); }
 function addTimeline(title, meta='حياتي', icon='✓') {
   const items = loadJSON(TIMELINE_KEY, []);
@@ -166,6 +171,57 @@ async function installApp() {
 function setTheme(theme) { document.documentElement.dataset.theme = theme; localStorage.setItem('hayati-theme', theme); themeBtn.textContent = theme === 'light' ? '☀' : '☾'; }
 function toggleTheme() { setTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light'); }
 function formatArabicDate() { try { return new Intl.DateTimeFormat('ar-BH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date()); } catch { return 'اليوم'; } }
+function formatClock(iso) {
+  if (!iso) return '';
+  try { return new Intl.DateTimeFormat('ar-BH', { hour: 'numeric', minute: '2-digit' }).format(new Date(iso)); } catch { return ''; }
+}
+function formatSleepDuration(minutes) {
+  const total=Math.max(0,Math.round(Number(minutes||0))); const h=Math.floor(total/60), m=total%60;
+  if(h && m) return `${h.toLocaleString('ar-BH')} ساعة و${m.toLocaleString('ar-BH')} دقيقة`;
+  if(h) return `${h.toLocaleString('ar-BH')} ساعة`;
+  return `${m.toLocaleString('ar-BH')} دقيقة`;
+}
+function renderDayRhythm(){
+  const start=document.getElementById('startDayTime'), end=document.getElementById('endDayTime'), status=document.getElementById('dayCycleStatus');
+  const startBtn=document.getElementById('startDayBtn'), endBtn=document.getElementById('endDayBtn');
+  const active=!!dayRhythm.currentStart && !dayRhythm.currentEnd;
+  if(start) start.textContent=dayRhythm.currentStart?`آخر بداية: ${formatClock(dayRhythm.currentStart)}`:'لم تُسجل بعد';
+  if(end) end.textContent=dayRhythm.lastEnd?`آخر نهاية: ${formatClock(dayRhythm.lastEnd)}`:'لم تُسجل بعد';
+  if(status) status.textContent=active?'اليوم بدأ':(dayRhythm.currentEnd?'انتهى اليوم':'جاهز');
+  startBtn?.classList.toggle('is-recorded',active); endBtn?.classList.toggle('is-recorded',!!dayRhythm.currentEnd);
+  const sleepText=document.getElementById('sleepSummaryText'), sleepRange=document.getElementById('sleepSummaryRange');
+  if(dayRhythm.lastSleepMinutes!=null){
+    if(sleepText) sleepText.textContent=formatSleepDuration(dayRhythm.lastSleepMinutes);
+    if(sleepRange) sleepRange.textContent=`من ${formatClock(dayRhythm.lastSleepStart)} إلى ${formatClock(dayRhythm.lastSleepEnd)}`;
+  } else {
+    if(sleepText) sleepText.textContent='لا توجد مدة نوم محسوبة بعد';
+    if(sleepRange) sleepRange.textContent='يُحسب النوم من «نهاية اليوم» إلى «بداية اليوم» التالية.';
+  }
+}
+function startDay(){
+  if(dayRhythm.currentStart && !dayRhythm.currentEnd) return openModal('اليوم بدأ بالفعل',`سجلت بداية اليوم عند ${formatClock(dayRhythm.currentStart)}.`,'☀️');
+  const now=new Date(); const nowIso=now.toISOString();
+  if(dayRhythm.lastEnd){
+    const end=new Date(dayRhythm.lastEnd); const mins=Math.max(0,Math.round((now-end)/60000));
+    dayRhythm.lastSleepMinutes=mins; dayRhythm.lastSleepStart=dayRhythm.lastEnd; dayRhythm.lastSleepEnd=nowIso;
+    dayRhythm.sleepHistory=[{id:makeId(),endAt:dayRhythm.lastEnd,startAt:nowIso,minutes:mins},...(dayRhythm.sleepHistory||[])].slice(0,90);
+  }
+  dayRhythm.currentStart=nowIso; dayRhythm.currentEnd=''; saveDayRhythm();
+  addTimeline(dayRhythm.lastSleepMinutes!=null?`بدأت يومي • النوم ${formatSleepDuration(dayRhythm.lastSleepMinutes)}`:'بدأت يومي','يومي','☀️');
+}
+function endDay(){
+  if(dayRhythm.currentEnd) return openModal('نهاية اليوم مسجلة',`سجلت نهاية اليوم عند ${formatClock(dayRhythm.currentEnd)}. ستُحسب مدة النوم عند تسجيل بداية اليوم التالية.`,'🌙');
+  const nowIso=new Date().toISOString(); dayRhythm.currentEnd=nowIso; dayRhythm.lastEnd=nowIso; saveDayRhythm();
+  addTimeline('أنهيت يومي','يومي','🌙');
+}
+function renderHomeHadith(){
+  const had=dailyHadith(); const text=document.getElementById('homeDailyHadithText'), meta=document.getElementById('homeDailyHadithMeta');
+  if(!text||!meta)return;
+  if(!had){ text.textContent='أضف أحاديثك من الإعدادات ليظهر هنا حديث اليوم.'; meta.textContent='قاعدة الأحاديث فارغة حاليًا.'; return; }
+  text.textContent=had.text;
+  const topic=had.topic||had.category||''; const source=had.source||'';
+  meta.textContent=[topic?`الموضوع: ${topic}`:'',source?`المصدر: ${source}`:''].filter(Boolean).join(' • ') || 'حديث من قاعدتك الشخصية';
+}
 function money(n) { return `${Number(n || 0).toLocaleString('ar-BH', {minimumFractionDigits:3, maximumFractionDigits:3})} د.ب`; }
 function arabicDate(v) { if (!v) return 'بدون تاريخ'; try { return new Intl.DateTimeFormat('ar-BH',{day:'numeric',month:'short',year:'numeric'}).format(new Date(v+'T12:00:00')); } catch { return v; } }
 function todayKey() { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
@@ -617,15 +673,15 @@ async function handleFamilyFiles(files,albumId){ const album=family.albums.find(
 
 // ---------------- Backup: structured snapshots + full ZIP ----------------
 let snapshotTimer=null;
-function structuredState(){ return { app:'hayati', schemaVersion:BACKUP_SCHEMA_VERSION, createdAt:new Date().toISOString(), data:{finance,health,religion,knowledge,relationships,family,timeline:loadJSON(TIMELINE_KEY,[])}, settings:{theme:localStorage.getItem('hayati-theme')||'dark'} }; }
+function structuredState(){ return { app:'hayati', schemaVersion:BACKUP_SCHEMA_VERSION, createdAt:new Date().toISOString(), data:{finance,health,religion,knowledge,relationships,family,dayRhythm,timeline:loadJSON(TIMELINE_KEY,[])}, settings:{theme:localStorage.getItem('hayati-theme')||'dark'} }; }
 function scheduleSnapshot(){ clearTimeout(snapshotTimer); snapshotTimer=setTimeout(()=>createSnapshotNow('تلقائية'),900); }
 function quickHash(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0).toString(16);}
 function createSnapshotNow(label='يدوية'){ try{const state=structuredState();const snaps=loadJSON(SNAPSHOT_KEY,[]);const hash=quickHash(JSON.stringify(state.data));if(snaps[0]?.hash===hash)return;snaps.unshift({id:makeId(),createdAt:state.createdAt,label,hash,state});localStorage.setItem(SNAPSHOT_KEY,JSON.stringify(snaps.slice(0,5)));renderBackupSettings();}catch{} }
 function applyStructuredState(state){
   if(!state?.data)throw new Error('نسخة غير صالحة');
-  finance=normalizeFinanceData(state.data.finance||emptyFinance());health=state.data.health||emptyHealth();religion=state.data.religion||emptyReligion();knowledge=state.data.knowledge||emptyKnowledge();relationships=state.data.relationships||emptyRelationships();family=state.data.family||emptyFamily();
-  localStorage.setItem(FINANCE_KEY,JSON.stringify(finance));localStorage.setItem(HEALTH_KEY,JSON.stringify(health));localStorage.setItem(RELIGION_KEY,JSON.stringify(religion));localStorage.setItem(KNOWLEDGE_KEY,JSON.stringify(knowledge));localStorage.setItem(RELATIONSHIPS_KEY,JSON.stringify(relationships));localStorage.setItem(FAMILY_KEY,JSON.stringify(family));localStorage.setItem(TIMELINE_KEY,JSON.stringify(state.data.timeline||[])); if(state.settings?.theme)setTheme(state.settings.theme);
-  renderFinance();renderHealth();renderReligion();renderKnowledge();renderRelationships();renderFamily();renderStory();renderDashboard();renderBackupSettings();
+  finance=normalizeFinanceData(state.data.finance||emptyFinance());health=state.data.health||emptyHealth();religion=state.data.religion||emptyReligion();knowledge=state.data.knowledge||emptyKnowledge();relationships=state.data.relationships||emptyRelationships();family=state.data.family||emptyFamily();dayRhythm={...emptyDayRhythm(),...(state.data.dayRhythm||{})};dayRhythm.sleepHistory=Array.isArray(dayRhythm.sleepHistory)?dayRhythm.sleepHistory:[];
+  localStorage.setItem(FINANCE_KEY,JSON.stringify(finance));localStorage.setItem(HEALTH_KEY,JSON.stringify(health));localStorage.setItem(RELIGION_KEY,JSON.stringify(religion));localStorage.setItem(KNOWLEDGE_KEY,JSON.stringify(knowledge));localStorage.setItem(RELATIONSHIPS_KEY,JSON.stringify(relationships));localStorage.setItem(FAMILY_KEY,JSON.stringify(family));localStorage.setItem(DAY_RHYTHM_KEY,JSON.stringify(dayRhythm));localStorage.setItem(TIMELINE_KEY,JSON.stringify(state.data.timeline||[])); if(state.settings?.theme)setTheme(state.settings.theme);
+  renderFinance();renderHealth();renderReligion();renderKnowledge();renderRelationships();renderFamily();renderStory();renderDashboard();renderDayRhythm();renderBackupSettings();
 }
 function backupReminderEnabled(){const v=localStorage.getItem('hayati-backup-weekly-reminder');return v===null?true:v==='1';}
 function toggleBackupReminder(){localStorage.setItem('hayati-backup-weekly-reminder',backupReminderEnabled()?'0':'1');renderBackupSettings();}
@@ -646,6 +702,7 @@ function renderDashboard(){
   const healthCard=document.querySelector('.priority-card.health .priority-body'); if(healthCard){ const calGoal=Number(health.profile.dailyCalories||0), consumed=healthTodayCalories(), current=latestWeightRecord()?.weight||health.profile.startWeight; healthCard.querySelector('h3').textContent=health.profile.startWeight?'مشروع إنزال الوزن':'مشروع إنزال الوزن'; healthCard.querySelector('p').textContent=calGoal?`متبقي ${Math.max(0,calGoal-consumed).toLocaleString('ar-BH')} سعرة اليوم${current?` • الوزن ${current} كجم`:''}`:'ابدأ بإعداد مشروعك أو سجّل وجبتك ووزنك.'; }
   const religionCard=document.querySelector('.priority-card.religion .priority-body'); if(religionCard){ const focus=religion.projects.find(x=>x.status!=='مكتمل'); religionCard.querySelector('h3').textContent=focus?focus.title:'ورد اليوم'; religionCard.querySelector('p').textContent=religion.quran.dailyTarget?`هدف القرآن: ${religion.quran.dailyTarget}`:(focus?'تابع مشروعك الديني النشط.':'أضف مشروعًا أو هدف قرآن أو ذكرًا.'); }
   const knowledgeCard=document.querySelector('.priority-card.knowledge .priority-body'); if(knowledgeCard){ const had=dailyHadith(); const todayTasks=knowledge.english.tasks.filter(x=>x.date===todayKey()); knowledgeCard.querySelector('h3').textContent=had?'حديث اليوم':'مشروع الإنجليزية'; knowledgeCard.querySelector('p').textContent=had?`${had.text.slice(0,68)}${had.text.length>68?'…':''}`:(todayTasks.length?`${todayTasks.filter(x=>!x.done).length} مهمة إنجليزية متبقية اليوم`:'أضف أحاديثك أو مهام الإنجليزية.'); }
+  renderHomeHadith(); renderDayRhythm();
 }
 function renderStory(){
   const view=document.getElementById('view-story'); const items=loadJSON(TIMELINE_KEY,[]); const old=view.querySelector('.story-live'); if(old) old.remove(); const empty=view.querySelector('.empty-state'); if(!items.length){ if(empty) empty.style.display=''; return; } if(empty) empty.style.display='none'; const wrap=document.createElement('div'); wrap.className='timeline-preview story-live';
@@ -709,6 +766,8 @@ document.addEventListener('click', (event) => {
   }
 });
 
+document.getElementById('startDayBtn')?.addEventListener('click',startDay);
+document.getElementById('endDayBtn')?.addEventListener('click',endDay);
 document.getElementById('hadithManagerOpenBtn')?.addEventListener('click',()=>showView('hadith-manager'));
 document.getElementById('hadithAnalyzeBtn')?.addEventListener('click',()=>renderHadithBatchPreview());
 document.getElementById('hadithBatchForm')?.addEventListener('submit',addHadithBatch);
