@@ -334,3 +334,22 @@ html[data-theme="light"] .nav-item.active { color: #0369a1; }
 .check-field input { width:18px; height:18px; }
 .row-delete:disabled { opacity:.25; cursor:not-allowed; }
 @media (max-width:380px){ .domain-quick{grid-template-columns:repeat(4,72px);overflow-x:auto}.weight-overview{grid-template-columns:1fr}.profile-grid{grid-template-columns:1fr 1fr}.domain-row{flex-wrap:wrap} }
+
+/* Relationships + Family + Backup */
+.relationships-head h1{color:var(--gold)}
+.family-head h1{color:var(--rose)}
+.relationships-feature{background:linear-gradient(145deg,rgba(245,158,11,.16),rgba(255,255,255,.02));border-color:rgba(245,158,11,.18)}
+.family-feature{background:linear-gradient(145deg,rgba(244,63,94,.14),rgba(255,255,255,.02));border-color:rgba(244,63,94,.18)}
+.family-tree{display:grid;gap:9px;margin-top:10px}
+.tree-person{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;padding:11px;border:1px solid var(--line);background:var(--surface-2);border-radius:15px}
+.tree-avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,rgba(244,63,94,.28),rgba(37,99,235,.18));font-weight:900;font-size:16px;border:1px solid var(--line)}
+.tree-person b{display:block;font-size:11px}.tree-person small{display:block;color:var(--muted);font-size:8px;margin-top:3px;line-height:1.6}
+.album-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+.album-card{overflow:hidden;border-radius:17px;border:1px solid var(--line);background:var(--surface-2)}
+.album-cover{aspect-ratio:4/3;display:grid;place-items:center;background:linear-gradient(145deg,rgba(244,63,94,.16),rgba(14,165,233,.10));font-size:28px;overflow:hidden}
+.album-cover img{width:100%;height:100%;object-fit:cover;display:block}
+.album-body{padding:10px}.album-body b{font-size:11px;display:block}.album-body small{display:block;color:var(--muted);font-size:8px;margin-top:3px}.album-body p{font-size:9px;color:var(--muted);line-height:1.6;margin:7px 0 0}
+.album-actions{display:flex;gap:6px;margin-top:9px}.album-actions button{flex:1;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:10px;padding:7px;font-size:8px;font-weight:800}
+.backup-snapshots-row{align-items:flex-start}
+.snapshot-list{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.snapshot-list button{border:1px solid var(--line);background:var(--surface-2);color:var(--text);border-radius:999px;padding:5px 8px;font-size:8px}.snapshot-list span{font-size:8px;color:var(--muted)}
+@media(max-width:390px){.album-grid{grid-template-columns:1fr}.tree-person{grid-template-columns:38px 1fr auto}.tree-avatar{width:38px;height:38px}}

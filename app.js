@@ -39,7 +39,12 @@ const FINANCE_KEY = 'hayati-finance-v1';
 const HEALTH_KEY = 'hayati-health-v1';
 const RELIGION_KEY = 'hayati-religion-v1';
 const KNOWLEDGE_KEY = 'hayati-knowledge-v1';
+const RELATIONSHIPS_KEY = 'hayati-relationships-v1';
+const FAMILY_KEY = 'hayati-family-v1';
 const TIMELINE_KEY = 'hayati-timeline-v1';
+const SNAPSHOT_KEY = 'hayati-backup-snapshots-v1';
+const BACKUP_META_KEY = 'hayati-backup-meta-v1';
+const BACKUP_SCHEMA_VERSION = 1;
 
 const emptyFinance = () => ({ monthlyIncome: 0, fixedExpenses: [], transactions: [], obligations: [], goals: [] });
 const emptyHealth = () => ({
@@ -58,20 +63,26 @@ const emptyKnowledge = () => ({
   books: [],
   projects: [{ id: 'english-project', title: 'تطوير اللغة الإنجليزية', status: 'أتعلمه الآن', note: 'المشروع التعليمي النشط حاليًا.' }]
 });
+const emptyRelationships = () => ({ people: [], interactions: [], events: [], promises: [], gifts: [] });
+const emptyFamily = () => ({ members: [], albums: [], tasks: [], photos: [] });
 
 let finance = loadJSON(FINANCE_KEY, emptyFinance());
 let health = loadJSON(HEALTH_KEY, emptyHealth());
 let religion = loadJSON(RELIGION_KEY, emptyReligion());
 let knowledge = loadJSON(KNOWLEDGE_KEY, emptyKnowledge());
+let relationships = loadJSON(RELATIONSHIPS_KEY, emptyRelationships());
+let family = loadJSON(FAMILY_KEY, emptyFamily());
 
 function loadJSON(key, fallback) {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
 }
-function saveFinance() { localStorage.setItem(FINANCE_KEY, JSON.stringify(finance)); renderFinance(); renderDashboard(); }
-function saveHealth() { localStorage.setItem(HEALTH_KEY, JSON.stringify(health)); renderHealth(); renderDashboard(); }
-function saveReligion() { localStorage.setItem(RELIGION_KEY, JSON.stringify(religion)); renderReligion(); renderDashboard(); }
-function saveKnowledge() { localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(knowledge)); renderKnowledge(); renderDashboard(); }
-function saveTimeline(items) { localStorage.setItem(TIMELINE_KEY, JSON.stringify(items.slice(0, 300))); }
+function saveFinance() { localStorage.setItem(FINANCE_KEY, JSON.stringify(finance)); scheduleSnapshot(); renderFinance(); renderDashboard(); }
+function saveHealth() { localStorage.setItem(HEALTH_KEY, JSON.stringify(health)); scheduleSnapshot(); renderHealth(); renderDashboard(); }
+function saveReligion() { localStorage.setItem(RELIGION_KEY, JSON.stringify(religion)); scheduleSnapshot(); renderReligion(); renderDashboard(); }
+function saveKnowledge() { localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(knowledge)); scheduleSnapshot(); renderKnowledge(); renderDashboard(); }
+function saveRelationships() { localStorage.setItem(RELATIONSHIPS_KEY, JSON.stringify(relationships)); scheduleSnapshot(); renderRelationships(); renderDashboard(); }
+function saveFamily() { localStorage.setItem(FAMILY_KEY, JSON.stringify(family)); scheduleSnapshot(); renderFamily(); renderDashboard(); }
+function saveTimeline(items) { localStorage.setItem(TIMELINE_KEY, JSON.stringify(items.slice(0, 300))); scheduleSnapshot(); }
 function addTimeline(title, meta='حياتي', icon='✓') {
   const items = loadJSON(TIMELINE_KEY, []);
   items.unshift({ id: makeId(), title, meta, icon, at: new Date().toISOString() });
@@ -86,12 +97,15 @@ function showView(name) {
   if (name === 'health') renderHealth();
   if (name === 'religion') renderReligion();
   if (name === 'knowledge') renderKnowledge();
+  if (name === 'relationships') renderRelationships();
+  if (name === 'family') renderFamily();
+  if (name === 'settings') renderBackupSettings();
   if (name === 'story') renderStory();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function openSection(key) {
-  if (['finance','health','religion','knowledge'].includes(key)) {
+  if (['finance','health','religion','knowledge','relationships','family'].includes(key)) {
     showView(key);
     navItems.forEach(i => i.classList.remove('active'));
     return;
@@ -313,8 +327,119 @@ domainForm.addEventListener('submit',e=>{
   if(action==='knowledge:englishTest'){ knowledge.english.tests.push({id:makeId(),score:Number(fd.score),outOf:Number(fd.outOf),date:fd.date,note:fd.note}); addTimeline(`سجلت نتيجة اختبار الإنجليزية: ${fd.score}/${fd.outOf}`,'معرفتي','📝'); saveKnowledge(); }
   if(action==='knowledge:book'){ knowledge.books.push({id:makeId(),title:fd.title,author:fd.author,status:fd.status,currentPage:Number(fd.currentPage||0),totalPages:Number(fd.totalPages||0),notes:fd.notes}); addTimeline(`أضفت كتابًا: ${fd.title}`,'معرفتي','📚'); saveKnowledge(); }
   if(action==='knowledge:project'){ knowledge.projects.push({id:makeId(),title:fd.title,status:fd.status,note:fd.note}); addTimeline(`أضفت مشروع تعلم: ${fd.title}`,'معرفتي','🎓'); saveKnowledge(); }
+
+  if(action==='rel:person'){ relationships.people.push({id:makeId(),name:fd.name,circle:fd.circle,cadenceDays:Number(fd.cadenceDays||0),lastContact:fd.lastContact,lastMeeting:fd.lastMeeting,birthday:fd.birthday,howMet:fd.howMet,notes:fd.notes}); addTimeline(`أضفت شخصًا إلى علاقاتي: ${fd.name}`,'علاقاتي','👤'); saveRelationships(); }
+  if(action==='rel:contact' || action.startsWith('rel:contact:')){ const personId=action.startsWith('rel:contact:')?action.split(':')[2]:fd.personId; relationships.interactions.push({id:makeId(),personId,type:fd.type,date:fd.date,note:fd.note}); const person=relationships.people.find(p=>p.id===personId); if(person){person.lastContact=fd.date;if(fd.type==='لقاء'||fd.type==='زيارة')person.lastMeeting=fd.date;} addTimeline(`سجلت ${fd.type} مع ${personName(personId)}`,'علاقاتي','☎️'); saveRelationships(); }
+  if(action==='rel:event'){ relationships.events.push({id:makeId(),title:fd.title,date:fd.date,personId:fd.personId,place:fd.place,status:fd.status,notes:fd.notes}); addTimeline(`أضفت مناسبة: ${fd.title}`,'علاقاتي','🎉'); saveRelationships(); }
+  if(action==='rel:promise'){ relationships.promises.push({id:makeId(),title:fd.title,personId:fd.personId,dueDate:fd.dueDate,status:'مفتوح',notes:fd.notes}); addTimeline(`أضفت وعدًا: ${fd.title}`,'علاقاتي','🤝'); saveRelationships(); }
+  if(action==='rel:gift'){ relationships.gifts.push({id:makeId(),idea:fd.idea,personId:fd.personId,budget:Number(fd.budget||0),status:fd.status}); addTimeline(`أضفت فكرة هدية: ${fd.idea}`,'علاقاتي','🎁'); saveRelationships(); }
+
+  if(action==='family:member'){ family.members.push({id:makeId(),name:fd.name,relationship:fd.relationship,birthDate:fd.birthDate,parent1Id:fd.parent1Id,parent2Id:fd.parent2Id,notes:fd.notes}); addTimeline(`أضفت فردًا للعائلة: ${fd.name}`,'عائلتي','👨‍👩‍👧'); saveFamily(); }
+  if(action==='family:album'){ family.albums.push({id:makeId(),title:fd.title,date:fd.date,description:fd.description,coverPhotoId:''}); addTimeline(`أنشأت ألبومًا عائليًا: ${fd.title}`,'عائلتي','🖼️'); saveFamily(); }
+  if(action==='family:task'){ family.tasks.push({id:makeId(),title:fd.title,assignee:fd.assignee,dueDate:fd.dueDate,note:fd.note,done:false}); addTimeline(`أضفت مسؤولية عائلية: ${fd.title}`,'عائلتي','✅'); saveFamily(); }
+  if(action==='family:photo'){ pendingFamilyAlbumId=fd.albumId; closeDomainForm(); document.getElementById('familyPhotoInput')?.click(); return; }
   closeDomainForm();
 });
+
+
+// ---------------- Relationships ----------------
+function personName(id){ return relationships.people.find(p=>p.id===id)?.name || 'بدون شخص محدد'; }
+function daysSince(dateStr){ if(!dateStr)return Infinity; const a=new Date(dateStr+'T12:00:00'), b=new Date(); return Math.floor((b-a)/86400000); }
+function daysUntil(dateStr){ if(!dateStr)return Infinity; const a=new Date(dateStr+'T12:00:00'), b=new Date(); b.setHours(12,0,0,0); return Math.ceil((a-b)/86400000); }
+function entitySelectField(label,name,items,placeholder='اختر',required=true){
+  return `<div class="form-field"><label for="ff-${name}">${label}</label><select id="ff-${name}" name="${name}" ${required?'required':''}><option value="">${escapeHTML(placeholder)}</option>${items.map(x=>`<option value="${escapeHTML(x.id)}">${escapeHTML(x.name||x.title)}</option>`).join('')}</select></div>`;
+}
+function relationshipDuePeople(){
+  return relationships.people.filter(p=>Number(p.cadenceDays||0)>0 && (!p.lastContact || daysSince(p.lastContact)>=Number(p.cadenceDays))).sort((a,b)=>(daysSince(b.lastContact)-Number(b.cadenceDays||0))-(daysSince(a.lastContact)-Number(a.cadenceDays||0)));
+}
+function renderRelationships(){
+  const due=relationshipDuePeople(); const upcoming=relationships.events.filter(e=>{const d=daysUntil(e.date);return d>=0&&d<=30;}); const open=relationships.promises.filter(p=>p.status!=='مكتمل');
+  setText('relPeopleCount',relationships.people.length.toLocaleString('ar-BH')); setText('relDueCount',due.length.toLocaleString('ar-BH')); setText('relUpcomingCount',upcoming.length.toLocaleString('ar-BH')); setText('relOpenPromises',open.length.toLocaleString('ar-BH'));
+  setText('relFollowupSummary', due.length?`${due.length.toLocaleString('ar-BH')} شخصًا وصل أو تجاوز موعد التواصل الذي حددته.`:'لا يوجد شخص متأخر حسب وتيرة التواصل المسجلة.');
+  renderList('relDueList',due,p=>`<div class="domain-row"><div><b>👤 ${escapeHTML(p.name)}</b><small>${escapeHTML(p.circle||'بدون دائرة')} • ${p.lastContact?`آخر تواصل منذ ${daysSince(p.lastContact).toLocaleString('ar-BH')} يوم`:'لم يُسجل تواصل بعد'} • الوتيرة ${Number(p.cadenceDays).toLocaleString('ar-BH')} يوم</small></div><button class="row-toggle" data-rel-quick-contact="${p.id}">☎️</button></div>`,'لا يوجد أحد يحتاج متابعة الآن.');
+  const interactions=[...relationships.interactions].sort((a,b)=>(b.date||'').localeCompare(a.date||'')); renderList('relInteractionList',interactions.slice(0,12),x=>`<div class="domain-row"><div><b>${x.type==='لقاء'?'🤝':'☎️'} ${escapeHTML(personName(x.personId))}</b><small>${escapeHTML(x.type)} • ${arabicDate(x.date)}${x.note?` • ${escapeHTML(x.note)}`:''}</small></div><button class="row-delete" data-rel-delete="interaction" data-id="${x.id}">حذف</button></div>`,'لا يوجد تواصل مسجل بعد.');
+  renderList('relPeopleList',relationships.people,p=>`<div class="domain-row"><div><b>👤 ${escapeHTML(p.name)}</b><small>${escapeHTML(p.circle||'بدون دائرة')}${p.lastContact?` • آخر تواصل ${arabicDate(p.lastContact)}`:''}${p.birthday?` • مناسبة ${arabicDate(p.birthday)}`:''}</small>${p.notes?`<small>${escapeHTML(p.notes)}</small>`:''}</div><button class="row-toggle" data-rel-quick-contact="${p.id}">☎️</button><button class="row-delete" data-rel-delete="person" data-id="${p.id}">حذف</button></div>`,'لم تضف أشخاصًا بعد.');
+  const events=[...relationships.events].sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999')); renderList('relEventList',events,e=>`<div class="domain-row"><div><b>🎉 ${escapeHTML(e.title)}</b><small>${arabicDate(e.date)}${e.personId?` • ${escapeHTML(personName(e.personId))}`:''}${e.place?` • ${escapeHTML(e.place)}`:''} • ${escapeHTML(e.status||'قادم')}</small></div><button class="row-delete" data-rel-delete="event" data-id="${e.id}">حذف</button></div>`,'لا توجد مناسبات بعد.');
+  const promises=[...relationships.promises].sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999')); renderList('relPromiseList',promises,p=>`<div class="domain-row ${p.status==='مكتمل'?'done-row':''}"><div><b>🤝 ${escapeHTML(p.title)}</b><small>${p.personId?`${escapeHTML(personName(p.personId))} • `:''}${p.dueDate?arabicDate(p.dueDate):'بدون موعد'}${p.notes?` • ${escapeHTML(p.notes)}`:''}</small></div><button class="row-toggle" data-rel-toggle-promise="${p.id}">${p.status==='مكتمل'?'↺':'✓'}</button><button class="row-delete" data-rel-delete="promise" data-id="${p.id}">حذف</button></div>`,'لا توجد وعود مسجلة.');
+  renderList('relGiftList',relationships.gifts,g=>`<div class="domain-row ${g.status==='تمت'?'done-row':''}"><div><b>🎁 ${escapeHTML(g.idea)}</b><small>${g.personId?`${escapeHTML(personName(g.personId))} • `:''}${g.budget?`الميزانية ${money(g.budget)} • `:''}${escapeHTML(g.status||'فكرة')}</small></div><button class="row-toggle" data-rel-toggle-gift="${g.id}">${g.status==='تمت'?'↺':'✓'}</button><button class="row-delete" data-rel-delete="gift" data-id="${g.id}">حذف</button></div>`,'لا توجد أفكار هدايا بعد.');
+}
+function openRelationshipForm(action, preselected=''){
+  const people=relationships.people;
+  if(action==='person') return openDomainForm('علاقاتي','إضافة شخص',field('الاسم','name','text','placeholder="الاسم"')+selectField('الدائرة','circle',['مقربون','أصدقاء','زملاء العمل','معارف','أخرى'])+optionalField('كل كم يوم تريد التواصل؟','cadenceDays','number','min="0" step="1" placeholder="مثال: 30"')+optionalField('آخر تواصل','lastContact','date')+optionalField('آخر لقاء','lastMeeting','date')+optionalField('مناسبة مهمة / ميلاد','birthday','date')+optionalField('كيف تعرفتما؟','howMet','text','placeholder="اختياري"')+textareaField('ملاحظات','notes','placeholder="أشياء تريد تذكرها في المرة القادمة"'),'rel:person');
+  if(action==='contact') { if(!people.length)return openModal('أضف شخصًا أولًا','حتى نسجل التواصل نحتاج شخصًا واحدًا على الأقل في «علاقاتي».','👤'); return openDomainForm('علاقاتي','تسجيل تواصل',entitySelectField('الشخص','personId',people,'اختر الشخص')+selectField('النوع','type',['اتصال','رسالة','لقاء','زيارة','أخرى'])+field('التاريخ','date','date',`value="${todayKey()}"`)+textareaField('آخر حديث بيننا / ملاحظة','note','placeholder="مثال: كان يبحث عن وظيفة؛ اسأله ماذا حدث"'),'rel:contact'); }
+  if(action==='event') return openDomainForm('علاقاتي','إضافة مناسبة أو دعوة',field('العنوان','title','text','placeholder="مثال: زواج، عشاء، زيارة"')+field('التاريخ','date','date')+entitySelectField('مرتبط بشخص','personId',people,'اختياري',false)+optionalField('المكان','place','text','placeholder="اختياري"')+selectField('الحالة','status',['قادم','سأحضر','اعتذار','تم'])+textareaField('ملاحظات','notes','placeholder="هدية، مهمة، تفاصيل..."'),'rel:event');
+  if(action==='promise') return openDomainForm('علاقاتي','إضافة وعد أو التزام',field('الوعد / المهمة','title','text','placeholder="مثال: أرسل الملف يوم الخميس"')+entitySelectField('لمن؟','personId',people,'اختياري',false)+optionalField('موعد التنفيذ','dueDate','date')+textareaField('ملاحظات','notes'),'rel:promise');
+  if(action==='gift') return openDomainForm('علاقاتي','فكرة هدية',field('فكرة الهدية','idea','text','placeholder="مثال: كتاب أو ساعة"')+entitySelectField('لمن؟','personId',people,'اختياري',false)+optionalField('ميزانية تقريبية بالدينار','budget','number','step="0.001" min="0"')+selectField('الحالة','status',['فكرة','سأشتريها','تمت']),'rel:gift');
+  if(action==='contact-preselected' && preselected) { if(!people.length)return; openDomainForm('علاقاتي','تسجيل تواصل',entitySelectField('الشخص','personId',people,'اختر الشخص')+selectField('النوع','type',['اتصال','رسالة','لقاء','زيارة','أخرى'])+field('التاريخ','date','date',`value="${todayKey()}"`)+textareaField('آخر حديث بيننا / ملاحظة','note'),`rel:contact:${preselected}`); const sel=document.getElementById('ff-personId'); if(sel)sel.value=preselected; return; }
+}
+function deleteRelationship(kind,id){
+  const map={person:'people',interaction:'interactions',event:'events',promise:'promises',gift:'gifts'}; const key=map[kind]; if(!key)return;
+  if(kind==='person'){ relationships.interactions=relationships.interactions.filter(x=>x.personId!==id); relationships.events.forEach(x=>{if(x.personId===id)x.personId=''}); relationships.promises.forEach(x=>{if(x.personId===id)x.personId=''}); relationships.gifts.forEach(x=>{if(x.personId===id)x.personId=''}); }
+  relationships[key]=relationships[key].filter(x=>x.id!==id); saveRelationships();
+}
+function togglePromise(id){ const x=relationships.promises.find(x=>x.id===id); if(!x)return; x.status=x.status==='مكتمل'?'مفتوح':'مكتمل'; if(x.status==='مكتمل')addTimeline(`أنجزت وعدًا: ${x.title}`,'علاقاتي','🤝'); saveRelationships(); }
+function toggleGift(id){ const x=relationships.gifts.find(x=>x.id===id); if(!x)return; x.status=x.status==='تمت'?'فكرة':'تمت'; if(x.status==='تمت')addTimeline(`أكملت هدية: ${x.idea}`,'علاقاتي','🎁'); saveRelationships(); }
+
+// ---------------- Family + IndexedDB media ----------------
+const FAMILY_DB='hayati-family-media-v1', FAMILY_STORE='photos'; let pendingFamilyAlbumId='';
+function familyMemberName(id){ return family.members.find(m=>m.id===id)?.name || ''; }
+function openFamilyDB(){ return new Promise((resolve,reject)=>{ const req=indexedDB.open(FAMILY_DB,1); req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(FAMILY_STORE))db.createObjectStore(FAMILY_STORE,{keyPath:'id'});}; req.onsuccess=()=>resolve(req.result); req.onerror=()=>reject(req.error); }); }
+async function putPhotoRecord(rec){ const db=await openFamilyDB(); return new Promise((resolve,reject)=>{const tx=db.transaction(FAMILY_STORE,'readwrite');tx.objectStore(FAMILY_STORE).put(rec);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);}); }
+async function getPhotoRecord(id){ const db=await openFamilyDB(); return new Promise((resolve,reject)=>{const req=db.transaction(FAMILY_STORE).objectStore(FAMILY_STORE).get(id);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);}); }
+async function getAllPhotoRecords(){ const db=await openFamilyDB(); return new Promise((resolve,reject)=>{const req=db.transaction(FAMILY_STORE).objectStore(FAMILY_STORE).getAll();req.onsuccess=()=>resolve(req.result||[]);req.onerror=()=>reject(req.error);}); }
+async function deletePhotoRecord(id){ const db=await openFamilyDB(); return new Promise((resolve,reject)=>{const tx=db.transaction(FAMILY_STORE,'readwrite');tx.objectStore(FAMILY_STORE).delete(id);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);}); }
+async function clearPhotoStore(){ const db=await openFamilyDB(); return new Promise((resolve,reject)=>{const tx=db.transaction(FAMILY_STORE,'readwrite');tx.objectStore(FAMILY_STORE).clear();tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);}); }
+function nextBirthdayDays(dateStr){ if(!dateStr)return Infinity; const src=new Date(dateStr+'T12:00:00'), now=new Date(); let d=new Date(now.getFullYear(),src.getMonth(),src.getDate(),12); if(d<now)d.setFullYear(d.getFullYear()+1); return Math.ceil((d-now)/86400000); }
+async function renderFamily(){
+  const upcoming=family.members.filter(m=>nextBirthdayDays(m.birthDate)<=30);
+  setText('familyMembersCount',family.members.length.toLocaleString('ar-BH')); setText('familyUpcomingCount',upcoming.length.toLocaleString('ar-BH')); setText('familyAlbumsCount',family.albums.length.toLocaleString('ar-BH')); setText('familyPhotosCount',family.photos.length.toLocaleString('ar-BH'));
+  setText('familyMemorySummary',family.albums.length?`${family.albums.length.toLocaleString('ar-BH')} ألبوم و${family.photos.length.toLocaleString('ar-BH')} صورة محفوظة على هذا الجهاز.`:'أنشئ أول ألبوم عائلي وارفع الصور من الآيفون.');
+  const tree=document.getElementById('familyTree'); if(tree){tree.innerHTML=''; if(!family.members.length)tree.innerHTML=emptyRow('أضف أفراد العائلة حتى تتكون الشجرة تدريجيًا.'); else family.members.forEach(m=>{const parents=[familyMemberName(m.parent1Id),familyMemberName(m.parent2Id)].filter(Boolean); tree.insertAdjacentHTML('beforeend',`<div class="tree-person"><div class="tree-avatar">${escapeHTML((m.name||'؟').trim().charAt(0)||'؟')}</div><div><b>${escapeHTML(m.name)}</b><small>${escapeHTML(m.relationship||'فرد من العائلة')}${parents.length?` • الوالدان: ${escapeHTML(parents.join(' و '))}`:''}${m.birthDate?` • ${arabicDate(m.birthDate)}`:''}</small></div><button class="row-delete" data-family-delete="member" data-id="${m.id}">حذف</button></div>`);});}
+  renderList('familyTaskList',family.tasks,t=>`<div class="domain-row ${t.done?'done-row':''}"><div><b>✅ ${escapeHTML(t.title)}</b><small>${t.dueDate?arabicDate(t.dueDate):'بدون موعد'}${t.assignee?` • ${escapeHTML(t.assignee)}`:''}${t.note?` • ${escapeHTML(t.note)}`:''}</small></div><button class="row-toggle" data-family-toggle-task="${t.id}">${t.done?'↺':'✓'}</button><button class="row-delete" data-family-delete="task" data-id="${t.id}">حذف</button></div>`,'لا توجد مسؤوليات عائلية مسجلة.');
+  await renderFamilyAlbums();
+}
+async function renderFamilyAlbums(){ const wrap=document.getElementById('familyAlbumList'); if(!wrap)return; wrap.innerHTML=''; if(!family.albums.length){wrap.innerHTML=emptyRow('لم تنشئ ألبومات بعد.');return;} for(const a of [...family.albums].sort((x,y)=>(y.date||'').localeCompare(x.date||''))){const photos=family.photos.filter(p=>p.albumId===a.id); const coverId=a.coverPhotoId||photos[0]?.id; const card=document.createElement('article'); card.className='album-card'; card.innerHTML=`<div class="album-cover" data-cover-for="${a.id}"><span>🖼️</span></div><div class="album-body"><b>${escapeHTML(a.title)}</b><small>${a.date?arabicDate(a.date):'بدون تاريخ'} • ${photos.length.toLocaleString('ar-BH')} صورة</small>${a.description?`<p>${escapeHTML(a.description)}</p>`:''}<div class="album-actions"><button data-family-add-photo="${a.id}">+ صور</button><button data-family-delete="album" data-id="${a.id}">حذف</button></div></div>`; wrap.appendChild(card); if(coverId){try{const rec=await getPhotoRecord(coverId); if(rec?.blob){const url=URL.createObjectURL(rec.blob); const el=card.querySelector('.album-cover'); el.innerHTML=`<img alt="غلاف ${escapeHTML(a.title)}" src="${url}">`;}}catch{}} } }
+function openFamilyForm(action){
+  if(action==='member'){const members=family.members; return openDomainForm('عائلتي','إضافة فرد',field('الاسم','name','text','placeholder="الاسم"')+optionalField('صلة القرابة','relationship','text','placeholder="مثال: أب، أم، أخ، ابنة..."')+optionalField('تاريخ الميلاد / المناسبة','birthDate','date')+entitySelectField('الأب / الوالد 1','parent1Id',members,'اختياري',false)+entitySelectField('الأم / الوالد 2','parent2Id',members,'اختياري',false)+textareaField('ملاحظات','notes'),'family:member');}
+  if(action==='album') return openDomainForm('عائلتي','إنشاء ألبوم عائلي',field('اسم الألبوم','title','text','placeholder="مثال: رحلة عمان 2026"')+optionalField('التاريخ','date','date')+textareaField('الوصف','description','placeholder="اختياري"'),'family:album');
+  if(action==='task') return openDomainForm('عائلتي','مسؤولية عائلية',field('المهمة','title','text','placeholder="مثال: شراء احتياجات المنزل"')+optionalField('المسؤول','assignee','text','placeholder="اختياري"')+optionalField('موعدها','dueDate','date')+textareaField('ملاحظة','note'),'family:task');
+  if(action==='photo'){ if(!family.albums.length)return openModal('أنشئ ألبومًا أولًا','الصور تُضاف داخل ألبوم عائلي حتى تبقى مرتبة.','🖼️'); return openDomainForm('عائلتي','إضافة صور',entitySelectField('الألبوم','albumId',family.albums,'اختر الألبوم'),'family:photo'); }
+}
+async function deleteFamily(kind,id){
+  if(kind==='member')family.members=family.members.filter(x=>x.id!==id);
+  if(kind==='task')family.tasks=family.tasks.filter(x=>x.id!==id);
+  if(kind==='photo'){family.photos=family.photos.filter(x=>x.id!==id);await deletePhotoRecord(id);}
+  if(kind==='album'){const ids=family.photos.filter(x=>x.albumId===id).map(x=>x.id);for(const pid of ids)await deletePhotoRecord(pid); family.photos=family.photos.filter(x=>x.albumId!==id);family.albums=family.albums.filter(x=>x.id!==id);}
+  saveFamily();
+}
+function toggleFamilyTask(id){const x=family.tasks.find(x=>x.id===id);if(!x)return;x.done=!x.done;if(x.done)addTimeline(`أنجزت مسؤولية عائلية: ${x.title}`,'عائلتي','✅');saveFamily();}
+async function handleFamilyFiles(files,albumId){ const album=family.albums.find(a=>a.id===albumId); if(!album)return; let added=0; for(const file of [...files]){if(!file.type.startsWith('image/'))continue;const id=makeId();const meta={id,albumId,name:file.name||`photo-${id}`,type:file.type||'image/jpeg',createdAt:new Date().toISOString()};await putPhotoRecord({...meta,blob:file});family.photos.push(meta);if(!album.coverPhotoId)album.coverPhotoId=id;added++;} if(added){addTimeline(`أضفت ${added.toLocaleString('ar-BH')} صورة إلى ألبوم ${album.title}`,'عائلتي','📷');saveFamily();} }
+
+// ---------------- Backup: structured snapshots + full ZIP ----------------
+let snapshotTimer=null;
+function structuredState(){ return { app:'hayati', schemaVersion:BACKUP_SCHEMA_VERSION, createdAt:new Date().toISOString(), data:{finance,health,religion,knowledge,relationships,family,timeline:loadJSON(TIMELINE_KEY,[])}, settings:{theme:localStorage.getItem('hayati-theme')||'dark'} }; }
+function scheduleSnapshot(){ clearTimeout(snapshotTimer); snapshotTimer=setTimeout(()=>createSnapshotNow('تلقائية'),900); }
+function quickHash(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0).toString(16);}
+function createSnapshotNow(label='يدوية'){ try{const state=structuredState();const snaps=loadJSON(SNAPSHOT_KEY,[]);const hash=quickHash(JSON.stringify(state.data));if(snaps[0]?.hash===hash)return;snaps.unshift({id:makeId(),createdAt:state.createdAt,label,hash,state});localStorage.setItem(SNAPSHOT_KEY,JSON.stringify(snaps.slice(0,5)));renderBackupSettings();}catch{} }
+function applyStructuredState(state){
+  if(!state?.data)throw new Error('نسخة غير صالحة');
+  finance=state.data.finance||emptyFinance();health=state.data.health||emptyHealth();religion=state.data.religion||emptyReligion();knowledge=state.data.knowledge||emptyKnowledge();relationships=state.data.relationships||emptyRelationships();family=state.data.family||emptyFamily();
+  localStorage.setItem(FINANCE_KEY,JSON.stringify(finance));localStorage.setItem(HEALTH_KEY,JSON.stringify(health));localStorage.setItem(RELIGION_KEY,JSON.stringify(religion));localStorage.setItem(KNOWLEDGE_KEY,JSON.stringify(knowledge));localStorage.setItem(RELATIONSHIPS_KEY,JSON.stringify(relationships));localStorage.setItem(FAMILY_KEY,JSON.stringify(family));localStorage.setItem(TIMELINE_KEY,JSON.stringify(state.data.timeline||[])); if(state.settings?.theme)setTheme(state.settings.theme);
+  renderFinance();renderHealth();renderReligion();renderKnowledge();renderRelationships();renderFamily();renderStory();renderDashboard();renderBackupSettings();
+}
+function backupReminderEnabled(){const v=localStorage.getItem('hayati-backup-weekly-reminder');return v===null?true:v==='1';}
+function toggleBackupReminder(){localStorage.setItem('hayati-backup-weekly-reminder',backupReminderEnabled()?'0':'1');renderBackupSettings();}
+function maybeShowBackupReminder(){if(!backupReminderEnabled())return;const meta=loadJSON(BACKUP_META_KEY,{});let base=meta.lastFullAt||localStorage.getItem('hayati-first-seen');if(!base){base=new Date().toISOString();localStorage.setItem('hayati-first-seen',base);return;}if(Date.now()-new Date(base).getTime()>=7*86400000){setTimeout(()=>openModal('تذكير بالنسخة الاحتياطية','مر أسبوع أو أكثر منذ آخر نسخة كاملة. من الإعدادات يمكنك إنشاء ملف ZIP وحفظه في Files أو iCloud Drive.','💾'),500);}}
+function renderBackupSettings(){ const meta=loadJSON(BACKUP_META_KEY,{});const last=document.getElementById('backupLastFull');if(last)last.textContent=meta.lastFullAt?`آخر نسخة: ${new Intl.DateTimeFormat('ar-BH',{dateStyle:'medium',timeStyle:'short'}).format(new Date(meta.lastFullAt))}`:'لم تُنشأ نسخة كاملة بعد.';const rs=document.getElementById('backupReminderState');if(rs)rs.textContent=backupReminderEnabled()?'مفعل':'متوقف';const list=document.getElementById('backupSnapshotList');if(!list)return;const snaps=loadJSON(SNAPSHOT_KEY,[]);list.innerHTML=snaps.length?snaps.map(s=>`<button type="button" data-restore-snapshot="${s.id}">${new Intl.DateTimeFormat('ar-BH',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(new Date(s.createdAt))} • ${escapeHTML(s.label)}</button>`).join(''):'<span>لا توجد لقطات بعد.</span>'; }
+function restoreSnapshot(id){const snaps=loadJSON(SNAPSHOT_KEY,[]);const s=snaps.find(x=>x.id===id);if(!s)return;if(!confirm('استعادة هذه اللقطة المحلية؟ ستُحفظ لقطة للحالة الحالية أولًا.'))return;createSnapshotNow('قبل الاستعادة');applyStructuredState(s.state);openModal('تمت الاستعادة','تمت استعادة البيانات النصية من اللقطة المحلية. صور الألبومات لم تُحذف من الجهاز.','♻️');}
+function u16(n){return [n&255,(n>>>8)&255]} function u32(n){return [n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]}
+let crcTable=null;function crc32(bytes){if(!crcTable){crcTable=Array.from({length:256},(_,n)=>{let c=n;for(let k=0;k<8;k++)c=(c&1)?0xedb88320^(c>>>1):c>>>1;return c>>>0;});}let c=0xffffffff;for(const b of bytes)c=crcTable[(c^b)&255]^(c>>>8);return (c^0xffffffff)>>>0;}
+function concatBytes(parts){const len=parts.reduce((s,p)=>s+p.length,0),out=new Uint8Array(len);let o=0;for(const p of parts){out.set(p,o);o+=p.length;}return out;}
+function makeStoreZip(files){const enc=new TextEncoder(),localParts=[],centralParts=[];let offset=0;for(const f of files){const name=enc.encode(f.name),data=f.bytes instanceof Uint8Array?f.bytes:new Uint8Array(f.bytes),crc=crc32(data);const local=new Uint8Array([0x50,0x4b,0x03,0x04,...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0),...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0),...name]);localParts.push(local,data);const central=new Uint8Array([0x50,0x4b,0x01,0x02,...u16(20),...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0),...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(offset),...name]);centralParts.push(central);offset+=local.length+data.length;}const central=concatBytes(centralParts),locals=concatBytes(localParts);const end=new Uint8Array([0x50,0x4b,0x05,0x06,...u16(0),...u16(0),...u16(files.length),...u16(files.length),...u32(central.length),...u32(locals.length),...u16(0)]);return concatBytes([locals,central,end]);}
+function parseStoreZip(buffer){const bytes=new Uint8Array(buffer),view=new DataView(buffer),dec=new TextDecoder(),files={};let o=0;while(o+4<=bytes.length){const sig=view.getUint32(o,true);if(sig!==0x04034b50)break;const method=view.getUint16(o+8,true),size=view.getUint32(o+18,true),nameLen=view.getUint16(o+26,true),extraLen=view.getUint16(o+28,true);if(method!==0)throw new Error('تنسيق ZIP غير مدعوم');const name=dec.decode(bytes.slice(o+30,o+30+nameLen));const start=o+30+nameLen+extraLen;files[name]=bytes.slice(start,start+size);o=start+size;}return files;}
+async function exportFullBackup(){try{openModal('جارٍ تجهيز النسخة','يتم جمع البيانات وصور الألبومات. قد يستغرق ذلك قليلًا إذا كانت الصور كثيرة.','💾');const state=structuredState(),photos=await getAllPhotoRecords();state.photoFiles=photos.map(p=>({id:p.id,name:p.name,type:p.type,path:`photos/${p.id}`}));const files=[{name:'data.json',bytes:new TextEncoder().encode(JSON.stringify(state,null,2))}];for(const p of photos){files.push({name:`photos/${p.id}`,bytes:new Uint8Array(await p.blob.arrayBuffer())});}const zip=makeStoreZip(files),blob=new Blob([zip],{type:'application/zip'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`hayati-backup-${todayKey()}.zip`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);localStorage.setItem(BACKUP_META_KEY,JSON.stringify({lastFullAt:new Date().toISOString(),photoCount:photos.length}));renderBackupSettings();closeModal();openModal('النسخة جاهزة','تم إنشاء ملف ZIP. احفظه في Files أو iCloud Drive في مكان تعرفه.','✅');}catch(e){closeModal();openModal('تعذر إنشاء النسخة',e?.message||'حدث خطأ أثناء إنشاء النسخة.','⚠️');}}
+async function importFullBackup(file){try{const files=parseStoreZip(await file.arrayBuffer());if(!files['data.json'])throw new Error('ملف data.json غير موجود داخل النسخة');const state=JSON.parse(new TextDecoder().decode(files['data.json']));if(state.app!=='hayati'||!state.data)throw new Error('هذه ليست نسخة حياتي صالحة');const counts=`مالي: ${(state.data.finance?.transactions||[]).length} عملية، صحتي: ${(state.data.health?.weights||[]).length} وزن، علاقاتي: ${(state.data.relationships?.people||[]).length} شخص، عائلتي: ${(state.data.family?.albums||[]).length} ألبوم، الصور: ${(state.photoFiles||[]).length}.`;if(!confirm(`تم فحص النسخة. ${counts}\n\nهل تريد استعادتها؟ سيتم حفظ لقطة محلية من بياناتك الحالية أولًا.`))return;createSnapshotNow('قبل الاستعادة الكاملة');await clearPhotoStore();for(const m of state.photoFiles||[]){const b=files[m.path];if(!b)continue;await putPhotoRecord({id:m.id,albumId:(state.data.family?.photos||[]).find(x=>x.id===m.id)?.albumId||'',name:m.name,type:m.type,createdAt:(state.data.family?.photos||[]).find(x=>x.id===m.id)?.createdAt||state.createdAt,blob:new Blob([b],{type:m.type||'application/octet-stream'})});}applyStructuredState(state);openModal('تمت الاستعادة','تمت استعادة بيانات حياتي وصور الألبومات الموجودة في النسخة.','✅');}catch(e){openModal('تعذر استعادة النسخة',e?.message||'الملف غير صالح أو تالف.','⚠️');}}
+
 
 // ---------------- Dashboard + Story ----------------
 function renderDashboard(){
@@ -353,6 +478,20 @@ document.addEventListener('click', (event) => {
   const kf=event.target.closest('[data-knowledge-favorite]'); if(kf){toggleHadithFavorite(kf.dataset.knowledgeFavorite);return;}
   const et=event.target.closest('[data-english-toggle]'); if(et){toggleEnglishTask(et.dataset.englishToggle);return;}
 
+  const relAction=event.target.closest('[data-rel-action]'); if(relAction){openRelationshipForm(relAction.dataset.relAction);return;}
+  const relTab=event.target.closest('[data-rel-tab]'); if(relTab){document.querySelectorAll('[data-rel-tab]').forEach(x=>x.classList.toggle('active',x===relTab));document.querySelectorAll('[data-rel-panel]').forEach(x=>x.classList.toggle('active',x.dataset.relPanel===relTab.dataset.relTab));return;}
+  const relQuick=event.target.closest('[data-rel-quick-contact]'); if(relQuick){openRelationshipForm('contact-preselected',relQuick.dataset.relQuickContact);return;}
+  const relDel=event.target.closest('[data-rel-delete]'); if(relDel){if(confirm('حذف هذا العنصر؟'))deleteRelationship(relDel.dataset.relDelete,relDel.dataset.id);return;}
+  const relPromise=event.target.closest('[data-rel-toggle-promise]'); if(relPromise){togglePromise(relPromise.dataset.relTogglePromise);return;}
+  const relGift=event.target.closest('[data-rel-toggle-gift]'); if(relGift){toggleGift(relGift.dataset.relToggleGift);return;}
+
+  const familyAction=event.target.closest('[data-family-action]'); if(familyAction){openFamilyForm(familyAction.dataset.familyAction);return;}
+  const familyTab=event.target.closest('[data-family-tab]'); if(familyTab){document.querySelectorAll('[data-family-tab]').forEach(x=>x.classList.toggle('active',x===familyTab));document.querySelectorAll('[data-family-panel]').forEach(x=>x.classList.toggle('active',x.dataset.familyPanel===familyTab.dataset.familyTab));return;}
+  const familyPhoto=event.target.closest('[data-family-add-photo]'); if(familyPhoto){pendingFamilyAlbumId=familyPhoto.dataset.familyAddPhoto;document.getElementById('familyPhotoInput')?.click();return;}
+  const familyDel=event.target.closest('[data-family-delete]'); if(familyDel){if(confirm('حذف هذا العنصر؟'))deleteFamily(familyDel.dataset.familyDelete,familyDel.dataset.id);return;}
+  const familyTask=event.target.closest('[data-family-toggle-task]'); if(familyTask){toggleFamilyTask(familyTask.dataset.familyToggleTask);return;}
+  const snap=event.target.closest('[data-restore-snapshot]'); if(snap){restoreSnapshot(snap.dataset.restoreSnapshot);return;}
+
   const action = event.target.closest('[data-action]');
   if (action) {
     if(action.dataset.action==='expense'){ showView('finance'); navItems.forEach(i=>i.classList.remove('active')); openFinanceForm('expense'); return; }
@@ -361,7 +500,8 @@ document.addEventListener('click', (event) => {
     if(action.dataset.action==='reading'){ showView('knowledge'); navItems.forEach(i=>i.classList.remove('active')); openKnowledgeForm('book'); return; }
     if(action.dataset.action==='learn'){ showView('knowledge'); navItems.forEach(i=>i.classList.remove('active')); return; }
     if(action.dataset.action==='religion'){ showView('religion'); navItems.forEach(i=>i.classList.remove('active')); return; }
-    const labels = { contact:['تسجيل تواصل','سيُبنى هذا الإجراء داخل قسم «علاقاتي» في الخطوة القادمة.','☎️'], note:['إضافة ملاحظة','إضافة الملاحظات العامة ستُربط بالـTimeline في مرحلة لاحقة.','✍️'] };
+    if(action.dataset.action==='contact'){ showView('relationships'); navItems.forEach(i=>i.classList.remove('active')); openRelationshipForm('contact'); return; }
+    const labels = { note:['إضافة ملاحظة','إضافة الملاحظات العامة ستُربط بالـTimeline في مرحلة لاحقة.','✍️'] };
     const [title,text,icon]=labels[action.dataset.action]||['قريبًا','سيتم بناء هذه الميزة في قسمها.','✓']; openModal(title,text,icon);
   }
 });
@@ -372,7 +512,12 @@ document.getElementById('sectionBack').addEventListener('click', () => showView(
 document.getElementById('sectionAction').addEventListener('click', () => showView('today'));
 modalClose.addEventListener('click', closeModal); modalOk.addEventListener('click', closeModal); modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) closeModal(); });
 installBtn.addEventListener('click', installApp); document.getElementById('settingInstall').addEventListener('click', installApp); themeBtn.addEventListener('click', toggleTheme); document.getElementById('settingTheme').addEventListener('click', toggleTheme);
+document.getElementById('backupExportBtn')?.addEventListener('click',exportFullBackup);
+document.getElementById('backupImportBtn')?.addEventListener('click',()=>document.getElementById('backupImportInput')?.click());
+document.getElementById('backupReminderBtn')?.addEventListener('click',toggleBackupReminder);
+document.getElementById('backupImportInput')?.addEventListener('change',async e=>{const file=e.target.files?.[0];if(file)await importFullBackup(file);e.target.value='';});
+document.getElementById('familyPhotoInput')?.addEventListener('change',async e=>{const files=e.target.files;if(files?.length&&pendingFamilyAlbumId)await handleFamilyFiles(files,pendingFamilyAlbumId);pendingFamilyAlbumId='';e.target.value='';});
 window.addEventListener('beforeinstallprompt', (event) => { event.preventDefault(); deferredPrompt = event; });
 
-const savedTheme = localStorage.getItem('hayati-theme'); setTheme(savedTheme || 'dark'); document.getElementById('todayDate').textContent = formatArabicDate(); renderFinance(); renderHealth(); renderReligion(); renderKnowledge(); renderStory(); renderDashboard();
+const savedTheme = localStorage.getItem('hayati-theme'); setTheme(savedTheme || 'dark'); document.getElementById('todayDate').textContent = formatArabicDate(); renderFinance(); renderHealth(); renderReligion(); renderKnowledge(); renderRelationships(); renderFamily(); renderStory(); renderDashboard(); renderBackupSettings(); maybeShowBackupReminder();
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));

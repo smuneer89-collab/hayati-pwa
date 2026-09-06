@@ -153,9 +153,15 @@
         <div class="settings-list">
           <button class="setting-row" id="settingInstall"><span>📲</span><div><b>تثبيت التطبيق</b><small>إضافة حياتي إلى الشاشة الرئيسية.</small></div><em>←</em></button>
           <button class="setting-row" id="settingTheme"><span>🌗</span><div><b>المظهر</b><small>التبديل بين الداكن والفاتح.</small></div><em>←</em></button>
-          <div class="setting-row static"><span>🔐</span><div><b>Firebase</b><small>سيُربط في المرحلة التالية بعد اعتماد الهيكل.</small></div><em>قريبًا</em></div>
+          <button class="setting-row" id="backupExportBtn"><span>💾</span><div><b>إنشاء نسخة احتياطية كاملة</b><small>ملف ZIP يشمل البيانات وصور الألبومات العائلية.</small></div><em>تنزيل</em></button>
+          <button class="setting-row" id="backupImportBtn"><span>♻️</span><div><b>استعادة نسخة احتياطية</b><small>يفحص النسخة أولًا ويأخذ نسخة أمان من الحالة الحالية قبل الاستعادة.</small></div><em>استعادة</em></button>
+          <div class="setting-row static"><span>🕘</span><div><b>آخر نسخة كاملة</b><small id="backupLastFull">لم تُنشأ نسخة كاملة بعد.</small></div><em>ZIP</em></div>
+          <button class="setting-row" id="backupReminderBtn"><span>🔔</span><div><b>تذكير أسبوعي بالنسخة</b><small>تذكير داخل التطبيق إذا مر أسبوع دون نسخة كاملة.</small></div><em id="backupReminderState">مفعل</em></button>
+          <div class="setting-row static backup-snapshots-row"><span>🧩</span><div><b>النسخ المحلية الأخيرة</b><small>آخر 5 لقطات من البيانات النصية داخل هذا الجهاز.</small><div id="backupSnapshotList" class="snapshot-list"></div></div><em>محلي</em></div>
+          <div class="setting-row static"><span>🔐</span><div><b>Firebase</b><small>لن نربطه الآن؛ نبني الأقسام أولًا كما اتفقنا.</small></div><em>لاحقًا</em></div>
           <div class="setting-row static"><span>🤖</span><div><b>مساعد حياتي</b><small>سيُضاف تدريجيًا بعد استقرار البيانات والأقسام.</small></div><em>لاحقًا</em></div>
         </div>
+        <input type="file" id="backupImportInput" accept=".zip,application/zip" hidden />
       </section>
 
       <section class="view" data-view="finance" id="view-finance">
@@ -486,6 +492,94 @@
         </section>
       </section>
 
+      <section class="view" data-view="relationships" id="view-relationships">
+        <button class="back-btn" data-nav="domains">→ الرجوع للأقسام</button>
+        <div class="domain-head relationships-head">
+          <div><span class="section-kicker">علاقاتي</span><h1>العلاقات الحقيقية</h1><p>إدارة الأشخاص، التواصل، المناسبات، الوعود والهدايا دون تقييم الناس أو إعطائهم درجات.</p></div>
+          <span class="local-badge">محفوظ محليًا</span>
+        </div>
+        <div class="domain-stats relationships-stats">
+          <article><span>الأشخاص</span><b id="relPeopleCount">٠</b></article>
+          <article><span>يحتاجون تواصلًا</span><b id="relDueCount">٠</b></article>
+          <article class="accent"><span>مناسبات قادمة</span><b id="relUpcomingCount">٠</b></article>
+          <article><span>وعود مفتوحة</span><b id="relOpenPromises">٠</b></article>
+        </div>
+        <section class="feature-card relationships-feature">
+          <div><span class="section-kicker">متابعة ذكية بسيطة</span><h2>من يحتاج تواصلي؟</h2><p id="relFollowupSummary">أضف الأشخاص وحدد وتيرة التواصل التي تناسبك.</p></div>
+          <button class="secondary-btn" data-rel-action="contact">تسجيل تواصل</button>
+        </section>
+        <div class="domain-quick relationships-quick">
+          <button data-rel-action="person"><span>👤</span><b>شخص</b></button>
+          <button data-rel-action="contact"><span>☎️</span><b>تواصل</b></button>
+          <button data-rel-action="event"><span>🎉</span><b>مناسبة</b></button>
+          <button data-rel-action="promise"><span>🤝</span><b>وعد</b></button>
+        </div>
+        <div class="domain-tabs" data-tab-group="relationships">
+          <button class="active" data-rel-tab="overview">المتابعة</button>
+          <button data-rel-tab="people">الأشخاص</button>
+          <button data-rel-tab="events">المناسبات</button>
+          <button data-rel-tab="promises">الوعود</button>
+          <button data-rel-tab="gifts">الهدايا</button>
+        </div>
+        <section class="domain-panel active" data-rel-panel="overview">
+          <div class="domain-card-wide"><div class="card-row-head"><div><span class="section-kicker">الأولوية</span><h2>أشخاص يحتاجون متابعة</h2></div></div><div class="domain-list" id="relDueList"></div></div>
+          <div class="domain-card-wide"><div class="card-row-head"><div><span class="section-kicker">آخر نشاط</span><h2>التواصل واللقاءات</h2></div></div><div class="domain-list" id="relInteractionList"></div></div>
+        </section>
+        <section class="domain-panel" data-rel-panel="people">
+          <div class="domain-card-wide"><div class="card-row-head"><div><span class="section-kicker">دوائري</span><h2>الأشخاص</h2></div><button class="text-btn" data-rel-action="person">+ شخص</button></div><div class="domain-list" id="relPeopleList"></div></div>
+        </section>
+        <section class="domain-panel" data-rel-panel="events">
+          <div class="domain-card-wide"><div class="card-row-head"><div><span class="section-kicker">القادم</span><h2>المناسبات والدعوات</h2></div><button class="text-btn" data-rel-action="event">+ مناسبة</button></div><div class="domain-list" id="relEventList"></div></div>
+        </section>
+        <section class="domain-panel" data-rel-panel="promises">
+          <div class="domain-card-wide"><div class="card-row-head"><div><span class="section-kicker">التزاماتي</span><h2>الوعود والمتابعة</h2></div><button class="text-btn" data-rel-action="promise">+ وعد</button></div><div class="domain-list" id="relPromiseList"></div></div>
+        </section>
+        <section class="domain-panel" data-rel-panel="gifts">
+          <div class="domain-card-wide"><div class="card-row-head"><div><span class="section-kicker">أفكار</span><h2>الهدايا</h2></div><button class="text-btn" data-rel-action="gift">+ هدية</button></div><div class="domain-list" id="relGiftList"></div></div>
+          <div class="phase-note"><b>الربط مع مالي</b><span>حاليًا نحفظ ميزانية الهدية هنا فقط. الربط المرجعي مع «مالي» سنفعله بعد اعتمادك لطريقة الربط بين الأقسام.</span></div>
+        </section>
+      </section>
+
+      <section class="view" data-view="family" id="view-family">
+        <button class="back-btn" data-nav="domains">→ الرجوع للأقسام</button>
+        <div class="domain-head family-head">
+          <div><span class="section-kicker">عائلتي</span><h1>العائلة والذكريات</h1><p>أفراد العائلة، شجرة العائلة، المسؤوليات والذكريات في ألبومات صور.</p></div>
+          <span class="local-badge">محفوظ محليًا</span>
+        </div>
+        <div class="domain-stats family-stats">
+          <article><span>أفراد العائلة</span><b id="familyMembersCount">٠</b></article>
+          <article><span>مناسبات قريبة</span><b id="familyUpcomingCount">٠</b></article>
+          <article class="accent"><span>الألبومات</span><b id="familyAlbumsCount">٠</b></article>
+          <article><span>الصور المحفوظة</span><b id="familyPhotosCount">٠</b></article>
+        </div>
+        <section class="feature-card family-feature">
+          <div><span class="section-kicker">الذكرى</span><h2>أرشيف العائلة</h2><p id="familyMemorySummary">أنشئ أول ألبوم عائلي وارفع الصور من الآيفون.</p></div>
+          <button class="secondary-btn" data-family-action="album">ألبوم جديد</button>
+        </section>
+        <div class="domain-quick family-quick">
+          <button data-family-action="member"><span>👨‍👩‍👧</span><b>فرد</b></button>
+          <button data-family-action="album"><span>🖼️</span><b>ألبوم</b></button>
+          <button data-family-action="photo"><span>📷</span><b>صور</b></button>
+          <button data-family-action="task"><span>✅</span><b>مسؤولية</b></button>
+        </div>
+        <div class="domain-tabs" data-tab-group="family">
+          <button class="active" data-family-tab="tree">شجرة العائلة</button>
+          <button data-family-tab="albums">الألبومات</button>
+          <button data-family-tab="tasks">المسؤوليات</button>
+        </div>
+        <section class="domain-panel active" data-family-panel="tree">
+          <div class="domain-card-wide"><div class="card-row-head"><div><span class="section-kicker">العلاقات</span><h2>شجرة العائلة</h2></div><button class="text-btn" data-family-action="member">+ فرد</button></div><div id="familyTree" class="family-tree"></div></div>
+        </section>
+        <section class="domain-panel" data-family-panel="albums">
+          <div class="domain-card-wide"><div class="card-row-head"><div><span class="section-kicker">الذكريات</span><h2>ألبومات الصور</h2></div><button class="text-btn" data-family-action="album">+ ألبوم</button></div><div id="familyAlbumList" class="album-grid"></div></div>
+          <div class="phase-note"><b>حفظ الصور قبل Firebase</b><span>الصور تُحفظ داخل IndexedDB على هذا الجهاز، وتدخل ضمن النسخة الاحتياطية ZIP الكاملة.</span></div>
+        </section>
+        <section class="domain-panel" data-family-panel="tasks">
+          <div class="domain-card-wide"><div class="card-row-head"><div><span class="section-kicker">المسؤوليات</span><h2>مهام عائلية</h2></div><button class="text-btn" data-family-action="task">+ مهمة</button></div><div class="domain-list" id="familyTaskList"></div></div>
+        </section>
+        <input type="file" id="familyPhotoInput" accept="image/*" multiple hidden />
+      </section>
+
       <section class="view" data-view="section" id="view-section">
         <button class="back-btn" id="sectionBack">→ الرجوع للأقسام</button>
         <div class="section-shell-card">
@@ -494,8 +588,8 @@
           <h1 id="sectionTitle">علاقاتي</h1>
           <p id="sectionDescription">سيتم بناء تفاصيل هذا القسم في المرحلة التالية.</p>
           <div class="phase-note">
-            <b>المتبقي حاليًا</b>
-            <span>تم تفعيل «مالي»، «صحتي»، «ديني» و«معرفتي». بقي «علاقاتي» و«عائلتي» للبناء في الخطوة القادمة.</span>
+            <b>القسم غير متاح</b>
+            <span>هذا المسار احتياطي فقط؛ الأقسام الستة الأساسية مفعلة الآن.</span>
           </div>
           <button class="primary-btn" id="sectionAction">العودة إلى مركز حياتي</button>
         </div>
