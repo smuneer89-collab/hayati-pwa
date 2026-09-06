@@ -44,6 +44,7 @@ const FAMILY_KEY = 'hayati-family-v1';
 const TIMELINE_KEY = 'hayati-timeline-v1';
 const SNAPSHOT_KEY = 'hayati-backup-snapshots-v1';
 const BACKUP_META_KEY = 'hayati-backup-meta-v1';
+const DAILY_HADITH_STATE_KEY = 'hayati-daily-hadith-v1';
 const BACKUP_SCHEMA_VERSION = 2;
 
 const emptyFinance = () => ({ currentBalance: 0, monthlyIncome: 0, salaries: { mid: 0, end: 0 }, fixedExpenses: [], transactions: [], obligations: [], goals: [] });
@@ -125,7 +126,8 @@ function showView(name) {
   if (name === 'knowledge') renderKnowledge();
   if (name === 'relationships') renderRelationships();
   if (name === 'family') renderFamily();
-  if (name === 'settings') renderBackupSettings();
+  if (name === 'settings') { renderBackupSettings(); renderHadithManagerStats(); }
+  if (name === 'hadith-manager') renderHadithManager();
   if (name === 'story') renderStory();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -374,8 +376,114 @@ function toggleReligionProject(id){ const x=religion.projects.find(x=>x.id===id)
 function toggleDhikr(id){ const x=religion.adhkar.find(x=>x.id===id); if(!x)return; const t=todayKey(); x.doneDates=x.doneDates||[]; if(x.doneDates.includes(t))x.doneDates=x.doneDates.filter(d=>d!==t); else {x.doneDates.push(t); addTimeline(`أكملت: ${x.title}`,'ديني','🤲');} saveReligion(); }
 
 // ---------------- Knowledge ----------------
-function dailyHadith(){ if(!knowledge.hadiths.length)return null; const d=new Date(); const seed=Math.floor(new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime()/86400000); return knowledge.hadiths[seed%knowledge.hadiths.length]; }
+function dailyHadith(){
+  if(!knowledge.hadiths.length)return null;
+  const date=todayKey();
+  const validIds=new Set(knowledge.hadiths.map(x=>x.id));
+  let state=loadJSON(DAILY_HADITH_STATE_KEY,{date:'',currentId:'',shownIds:[]});
+  state.shownIds=Array.isArray(state.shownIds)?state.shownIds.filter(id=>validIds.has(id)):[];
+  if(state.date===date && state.currentId && validIds.has(state.currentId)) return knowledge.hadiths.find(x=>x.id===state.currentId)||null;
+  let candidates=knowledge.hadiths.filter(x=>!state.shownIds.includes(x.id));
+  if(!candidates.length){state.shownIds=[];candidates=[...knowledge.hadiths];}
+  const d=new Date(); const seed=Math.floor(new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime()/86400000);
+  const had=candidates[seed%candidates.length];
+  state={date,currentId:had.id,shownIds:[...state.shownIds,had.id]};
+  try{localStorage.setItem(DAILY_HADITH_STATE_KEY,JSON.stringify(state));}catch{}
+  return had;
+}
+
+function normalizeHadithForCompare(text=''){
+  return String(text).normalize('NFKC')
+    .replace(/[\u200e\u200f\u202a-\u202e\u2066-\u2069]/g,'')
+    .replace(/[\u064b-\u065f\u0670\u06d6-\u06ed]/g,'')
+    .replace(/ـ/g,'')
+    .replace(/[أإآٱ]/g,'ا')
+    .replace(/ى/g,'ي')
+    .replace(/[«»“”"'`،؛:,.!?؟()\[\]{}\-–—_/\\]/g,'')
+    .replace(/\s+/g,'')
+    .trim();
+}
+function cleanHadithChunk(text=''){
+  return String(text)
+    .replace(/[\u200e\u200f\u202a-\u202e\u2066-\u2069]/g,'')
+    .replace(/\r\n?/g,'\n')
+    .split('\n').map(line=>line.replace(/[ \t]+/g,' ').trim()).join('\n')
+    .replace(/\n{3,}/g,'\n\n').trim();
+}
+function parseHadithBatch(raw=''){
+  const text=String(raw).replace(/\r\n?/g,'\n').trim();
+  if(!text)return [];
+  const separator=/^\s*(?:-{3,}|—{3,}|–{3,}|\*{3,})\s*$/m;
+  let parts;
+  if(separator.test(text)) parts=text.split(/^\s*(?:-{3,}|—{3,}|–{3,}|\*{3,})\s*$/m);
+  else parts=text.split(/\n\s*\n+/);
+  return parts.map(cleanHadithChunk).filter(x=>x.length>=4);
+}
+function analyzeHadithBatch(){
+  const topic=(document.getElementById('hadithBatchTopic')?.value||'').trim();
+  const raw=document.getElementById('hadithBatchText')?.value||'';
+  const items=parseHadithBatch(raw);
+  const existing=new Set(knowledge.hadiths.map(x=>normalizeHadithForCompare(x.text)).filter(Boolean));
+  const batchSeen=new Set(); let duplicates=0;
+  const analyzed=items.map(text=>{
+    const key=normalizeHadithForCompare(text);
+    const duplicate=!key || existing.has(key) || batchSeen.has(key);
+    if(duplicate)duplicates++; else batchSeen.add(key);
+    return {text,key,duplicate};
+  });
+  return {topic,items:analyzed,detected:analyzed.length,newCount:analyzed.length-duplicates,duplicateCount:duplicates};
+}
+function renderHadithManagerStats(){
+  const total=knowledge.hadiths.length;
+  const topics=new Set(knowledge.hadiths.map(x=>(x.category||x.topic||'').trim()).filter(Boolean)).size;
+  const favorites=knowledge.hadiths.filter(x=>x.favorite).length;
+  setText('hadithSettingsCount',`${total.toLocaleString('ar-BH')} حديث`);
+  setText('hadithManagerTotal',total.toLocaleString('ar-BH'));
+  setText('hadithManagerTopics',topics.toLocaleString('ar-BH'));
+  setText('hadithManagerFavorites',favorites.toLocaleString('ar-BH'));
+}
+function renderHadithBatchPreview(result=analyzeHadithBatch()){
+  const box=document.getElementById('hadithBatchPreview'); if(!box)return result;
+  box.hidden=false;
+  const topic=result.topic||'بدون موضوع';
+  setText('hadithPreviewTitle',result.detected?`الموضوع: ${topic}`:'لم يتم اكتشاف أحاديث');
+  setText('hadithPreviewStatus',`${result.newCount.toLocaleString('ar-BH')} جديد`);
+  setText('hadithDetectedCount',result.detected.toLocaleString('ar-BH'));
+  setText('hadithNewCount',result.newCount.toLocaleString('ar-BH'));
+  setText('hadithDuplicateCount',result.duplicateCount.toLocaleString('ar-BH'));
+  const list=document.getElementById('hadithPreviewList');
+  if(list){
+    if(!result.detected) list.innerHTML='<div class="finance-empty">الصق حديثًا واحدًا على الأقل. إذا كانت لديك عدة أحاديث، اترك سطرًا فارغًا بين كل حديث والآخر.</div>';
+    else list.innerHTML=result.items.slice(0,5).map((x,i)=>`<div class="hadith-preview-item ${x.duplicate?'duplicate':''}"><span>${x.duplicate?'مكرر':'جديد'}</span><div><b>حديث ${(i+1).toLocaleString('ar-BH')}</b><p>${escapeHTML(x.text.length>180?x.text.slice(0,180)+'…':x.text)}</p></div></div>`).join('')+(result.items.length>5?`<div class="hadith-preview-more">+ ${(result.items.length-5).toLocaleString('ar-BH')} حديث آخر</div>`:'');
+  }
+  return result;
+}
+function renderHadithManager(){ renderHadithManagerStats(); const box=document.getElementById('hadithBatchPreview'); if(box && !(document.getElementById('hadithBatchText')?.value||'').trim()) box.hidden=true; }
+function addHadithBatch(event){
+  event?.preventDefault();
+  const result=renderHadithBatchPreview();
+  if(!result.topic) return openModal('اكتب موضوع الأحاديث','اكتب اسم الموضوع أولًا حتى يربط حياتي المجموعة به.','📚');
+  if(!result.detected) return openModal('لم أجد أحاديث','الصق الأحاديث في المربع، واترك سطرًا فارغًا بين كل حديث والآخر أو استخدم --- كفاصل.','📋');
+  const fresh=result.items.filter(x=>!x.duplicate);
+  if(!fresh.length) return openModal('لا توجد أحاديث جديدة',`كل الأحاديث المكتشفة (${result.detected.toLocaleString('ar-BH')}) موجودة مسبقًا في القاعدة أو مكررة داخل نفس المجموعة.`,'♻️');
+  const batchId=makeId(), importedAt=new Date().toISOString();
+  const before=[...knowledge.hadiths];
+  knowledge.hadiths.push(...fresh.map(x=>({id:makeId(),text:x.text,source:'',category:result.topic,topic:result.topic,favorite:false,readDates:[],batchId,importedAt})));
+  try{
+    localStorage.setItem(KNOWLEDGE_KEY,JSON.stringify(knowledge));
+    scheduleSnapshot();renderKnowledge();renderDashboard();renderHadithManagerStats();
+  }catch(e){
+    knowledge.hadiths=before;
+    return openModal('مساحة التخزين غير كافية','تعذر حفظ هذه المجموعة على الجهاز. احتفظ بنسخة احتياطية، ثم قلّل حجم الدفعة أو ننتقل لاحقًا إلى قاعدة بيانات أكبر.','⚠️');
+  }
+  addTimeline(`أضفت ${fresh.length.toLocaleString('ar-BH')} حديثًا • ${result.topic}`,'معرفتي','📚');
+  const form=document.getElementById('hadithBatchForm'); if(form)form.reset();
+  const box=document.getElementById('hadithBatchPreview'); if(box)box.hidden=true;
+  openModal('تمت إضافة المجموعة',`أضيف ${fresh.length.toLocaleString('ar-BH')} حديثًا إلى «${result.topic}»${result.duplicateCount?`، وتم تجاهل ${result.duplicateCount.toLocaleString('ar-BH')} مكرر.`:'.'} ستدخل الأحاديث الجديدة تلقائيًا ضمن حديث اليوم.`,'✅');
+}
+
 function renderKnowledge(){
+  renderHadithManagerStats();
   const had=dailyHadith(); setText('knowledgeHadithCount',knowledge.hadiths.length.toLocaleString('ar-BH')); const t=todayKey(); const todayTasks=knowledge.english.tasks.filter(x=>x.date===t); const done=todayTasks.filter(x=>x.done).length; setText('knowledgeEnglishDone',`${done.toLocaleString('ar-BH')} / ${todayTasks.length.toLocaleString('ar-BH')}`); setText('knowledgeNextExam',knowledge.english.weeklyExamDay||'غير محدد'); setText('knowledgeReadingBooks',knowledge.books.filter(x=>x.status==='أقرأ الآن').length.toLocaleString('ar-BH'));
   setText('dailyHadithText',had?had.text:'أضف أحاديثك ليظهر هنا حديث اليوم.'); setText('dailyHadithSource',had?(had.source||'المصدر غير مضاف'):'المصدر اختياري'); const fav=document.getElementById('hadithFavoriteBtn'); if(fav)fav.textContent=had?.favorite?'★':'☆'; const read=document.getElementById('hadithReadBtn'); if(read) read.textContent=had?.readDates?.includes(t)?'تمت القراءة ✓':'تمت القراءة';
   renderList('knowledgeHadithList',knowledge.hadiths,x=>`<div class="domain-row hadith-row"><div><b>${escapeHTML(x.text)}</b><small>${escapeHTML(x.source||'بدون مصدر')} ${x.category?`• ${escapeHTML(x.category)}`:''}${x.favorite?' • ★ مفضلة':''}</small></div><button class="row-delete" data-knowledge-favorite="${x.id}">${x.favorite?'★':'☆'}</button><button class="row-delete" data-knowledge-delete="hadith" data-id="${x.id}">حذف</button></div>`,'لم تضف أحاديث بعد.');
@@ -601,6 +709,9 @@ document.addEventListener('click', (event) => {
   }
 });
 
+document.getElementById('hadithManagerOpenBtn')?.addEventListener('click',()=>showView('hadith-manager'));
+document.getElementById('hadithAnalyzeBtn')?.addEventListener('click',()=>renderHadithBatchPreview());
+document.getElementById('hadithBatchForm')?.addEventListener('submit',addHadithBatch);
 const hadithReadBtn=document.getElementById('hadithReadBtn'); if(hadithReadBtn)hadithReadBtn.addEventListener('click',markDailyHadithRead);
 const hadithFavoriteBtn=document.getElementById('hadithFavoriteBtn'); if(hadithFavoriteBtn)hadithFavoriteBtn.addEventListener('click',toggleDailyHadithFavorite);
 document.getElementById('sectionBack').addEventListener('click', () => showView('domains'));
@@ -614,5 +725,5 @@ document.getElementById('backupImportInput')?.addEventListener('change',async e=
 document.getElementById('familyPhotoInput')?.addEventListener('change',async e=>{const files=e.target.files;if(files?.length&&pendingFamilyAlbumId)await handleFamilyFiles(files,pendingFamilyAlbumId);pendingFamilyAlbumId='';e.target.value='';});
 window.addEventListener('beforeinstallprompt', (event) => { event.preventDefault(); deferredPrompt = event; });
 
-const savedTheme = localStorage.getItem('hayati-theme'); setTheme(savedTheme || 'dark'); document.getElementById('todayDate').textContent = formatArabicDate(); renderFinance(); renderHealth(); renderReligion(); renderKnowledge(); renderRelationships(); renderFamily(); renderStory(); renderDashboard(); renderBackupSettings(); maybeShowBackupReminder();
+const savedTheme = localStorage.getItem('hayati-theme'); setTheme(savedTheme || 'dark'); document.getElementById('todayDate').textContent = formatArabicDate(); renderFinance(); renderHealth(); renderReligion(); renderKnowledge(); renderRelationships(); renderFamily(); renderStory(); renderDashboard(); renderBackupSettings(); renderHadithManagerStats(); maybeShowBackupReminder();
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));

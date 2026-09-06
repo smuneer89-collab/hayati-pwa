@@ -153,6 +153,7 @@
         <div class="settings-list">
           <button class="setting-row" id="settingInstall"><span>📲</span><div><b>تثبيت التطبيق</b><small>إضافة حياتي إلى الشاشة الرئيسية.</small></div><em>←</em></button>
           <button class="setting-row" id="settingTheme"><span>🌗</span><div><b>المظهر</b><small>التبديل بين الداكن والفاتح.</small></div><em>←</em></button>
+          <button class="setting-row" id="hadithManagerOpenBtn"><span>📚</span><div><b>إدارة قاعدة الأحاديث</b><small>اكتب موضوع المجموعة والصق الأحاديث؛ حياتي يفصلها ويفحص التكرار ويحفظها تلقائيًا.</small></div><em id="hadithSettingsCount">0 حديث</em></button>
           <button class="setting-row" id="backupExportBtn"><span>💾</span><div><b>إنشاء نسخة احتياطية كاملة</b><small>ملف ZIP يشمل البيانات وصور الألبومات العائلية.</small></div><em>تنزيل</em></button>
           <button class="setting-row" id="backupImportBtn"><span>♻️</span><div><b>استعادة نسخة احتياطية</b><small>يفحص النسخة أولًا ويأخذ نسخة أمان من الحالة الحالية قبل الاستعادة.</small></div><em>استعادة</em></button>
           <div class="setting-row static"><span>🕘</span><div><b>آخر نسخة كاملة</b><small id="backupLastFull">لم تُنشأ نسخة كاملة بعد.</small></div><em>ZIP</em></div>
@@ -162,6 +163,65 @@
           <div class="setting-row static"><span>🤖</span><div><b>مساعد حياتي</b><small>سيُضاف تدريجيًا بعد استقرار البيانات والأقسام.</small></div><em>لاحقًا</em></div>
         </div>
         <input type="file" id="backupImportInput" accept=".zip,application/zip" hidden />
+      </section>
+
+      <section class="view" data-view="hadith-manager" id="view-hadith-manager">
+        <button class="back-btn" data-nav="settings">→ الرجوع للإعدادات</button>
+        <div class="page-title">
+          <span class="section-kicker">معرفتي • الأحاديث</span>
+          <h1>إدارة قاعدة الأحاديث</h1>
+          <p>اكتب موضوع المجموعة، ثم الصق الأحاديث فقط. حياتي ينشئ الأرقام تلقائيًا ويربط كل حديث بالموضوع ويفحص التكرارات.</p>
+        </div>
+
+        <section class="hadith-manager-summary">
+          <div><span>إجمالي الأحاديث</span><b id="hadithManagerTotal">0</b></div>
+          <div><span>الموضوعات</span><b id="hadithManagerTopics">0</b></div>
+          <div><span>المفضلة</span><b id="hadithManagerFavorites">0</b></div>
+        </section>
+
+        <form class="hadith-import-card" id="hadithBatchForm">
+          <div class="card-row-head">
+            <div><span class="section-kicker">إضافة مجموعة</span><h2>الصق الأحاديث دفعة واحدة</h2></div>
+            <span class="local-badge">محفوظ محليًا</span>
+          </div>
+
+          <div class="form-field hadith-topic-field">
+            <label for="hadithBatchTopic">موضوع الأحاديث</label>
+            <input id="hadithBatchTopic" name="topic" type="text" placeholder="مثال: مناقب أهل البيت (ع) وفضائلهم" required />
+          </div>
+
+          <div class="form-field">
+            <label for="hadithBatchText">الأحاديث</label>
+            <textarea id="hadithBatchText" name="hadiths" rows="12" placeholder="الصق الحديث الأول هنا...
+
+الصق الحديث الثاني هنا...
+
+الصق الحديث الثالث هنا..." required></textarea>
+          </div>
+
+          <div class="phase-note compact-note">
+            <b>ما الذي يفعله حياتي تلقائيًا؟</b>
+            <span>يفصل الأحاديث عند السطر الفارغ أو عند السطر ---، يعطي كل حديث رقمًا داخليًا، يربطه بالموضوع، يتجاهل التكرارات، ثم يدخله مباشرة ضمن «حديث اليوم». لا تحتاج إلى كتابة JSON أو أرقام أو مصادر.</span>
+          </div>
+
+          <div class="hadith-import-actions">
+            <button class="secondary-btn" type="button" id="hadithAnalyzeBtn">فحص المجموعة</button>
+            <button class="primary-btn" type="submit">إضافة إلى قاعدة الأحاديث</button>
+          </div>
+        </form>
+
+        <section class="hadith-preview-card" id="hadithBatchPreview" hidden>
+          <div class="card-row-head">
+            <div><span class="section-kicker">نتيجة الفحص</span><h2 id="hadithPreviewTitle">المجموعة جاهزة</h2></div>
+            <span class="status-pill" id="hadithPreviewStatus">0 جديد</span>
+          </div>
+          <div class="hadith-preview-stats">
+            <div><span>تم اكتشافه</span><b id="hadithDetectedCount">0</b></div>
+            <div><span>جديد</span><b id="hadithNewCount">0</b></div>
+            <div><span>مكرر</span><b id="hadithDuplicateCount">0</b></div>
+          </div>
+          <div class="hadith-preview-list" id="hadithPreviewList"></div>
+        </section>
       </section>
 
       <section class="view" data-view="finance" id="view-finance">

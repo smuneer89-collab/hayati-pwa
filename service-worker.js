@@ -1,4 +1,4 @@
-const CACHE = 'hayati-v1-finance-cycle-2';
+const CACHE = 'hayati-v1-hadith-manager-1';
 const ASSETS = [
   './',
   './index.html',

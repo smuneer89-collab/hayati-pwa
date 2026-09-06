@@ -387,3 +387,26 @@ html[data-theme="light"] .nav-item.active { color: #0369a1; }
 .end-marker { background:linear-gradient(135deg,rgba(13,148,136,.18),rgba(37,99,235,.08)); }
 .form-hint { padding:9px 10px; border-radius:12px; background:var(--surface-2); border:1px solid var(--line); color:var(--muted); font-size:8px; line-height:1.6; }
 @media (max-width:380px){ .reserve-grid{grid-template-columns:1fr;} .salary-marker{grid-template-columns:auto 1fr;} .salary-marker button{grid-column:1/-1;width:100%;} }
+
+
+/* Hadith database manager */
+.hadith-manager-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 14px}
+.hadith-manager-summary>div,.hadith-preview-stats>div{padding:12px 10px;border-radius:16px;background:var(--surface);border:1px solid var(--line);text-align:center}
+.hadith-manager-summary span,.hadith-preview-stats span{display:block;color:var(--muted);font-size:8px;margin-bottom:5px}
+.hadith-manager-summary b,.hadith-preview-stats b{display:block;font-size:15px}
+.hadith-import-card,.hadith-preview-card{padding:16px;border-radius:22px;background:var(--surface);border:1px solid var(--line);margin-bottom:14px}
+.hadith-import-card .form-field{margin-top:13px}
+.hadith-topic-field input{font-weight:700}
+.compact-note{margin:13px 0}
+.hadith-import-actions{display:grid;grid-template-columns:1fr 1.35fr;gap:8px;margin-top:12px}
+.secondary-btn{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--surface-2);color:var(--text);font-family:inherit;font-size:11px;font-weight:800}
+.hadith-preview-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0}
+.hadith-preview-list{display:grid;gap:8px}
+.hadith-preview-item{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:11px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line)}
+.hadith-preview-item>span{padding:4px 7px;border-radius:999px;background:rgba(45,212,191,.12);color:#5eead4;font-size:8px;font-weight:800;white-space:nowrap}
+.hadith-preview-item.duplicate>span{background:rgba(245,158,11,.12);color:#fbbf24}
+.hadith-preview-item b{font-size:10px}
+.hadith-preview-item p{margin:4px 0 0;color:var(--muted);font-size:9px;line-height:1.75;white-space:pre-line}
+.hadith-preview-more{text-align:center;color:var(--muted);font-size:9px;padding:7px}
+#hadithBatchText{min-height:260px;line-height:1.9}
+@media(max-width:390px){.hadith-import-actions{grid-template-columns:1fr}.hadith-manager-summary{gap:6px}.hadith-manager-summary>div{padding-inline:6px}}
