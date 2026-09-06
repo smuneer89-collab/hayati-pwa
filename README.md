@@ -21,3 +21,9 @@
 - خط القراءة يُطلب من QUL/Tarteel CDN ولا يتم تضمين ملف الخط داخل المشروع.
 
 أول فتح لصفحة جديدة يحتاج اتصال إنترنت. بعد فتحها يحاول Service Worker الاحتفاظ بها للكاش.
+
+
+## V8.1 Mushaf fix
+- Uses alfurqan.online layout/font API first, then GitHub mirrors.
+- Copies canonical Tanzil Uthmani Unicode text, not QCF PUA glyphs.
+- QCF V2 is display-only; Tanzil remains the copy/search source.

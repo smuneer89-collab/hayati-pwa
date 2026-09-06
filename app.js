@@ -681,6 +681,8 @@ async function handleFamilyFiles(files,albumId){ const album=family.albums.find(
 const quranSurahNames = ['الفاتحة','البقرة','آل عمران','النساء','المائدة','الأنعام','الأعراف','الأنفال','التوبة','يونس','هود','يوسف','الرعد','إبراهيم','الحجر','النحل','الإسراء','الكهف','مريم','طه','الأنبياء','الحج','المؤمنون','النور','الفرقان','الشعراء','النمل','القصص','العنكبوت','الروم','لقمان','السجدة','الأحزاب','سبأ','فاطر','يس','الصافات','ص','الزمر','غافر','فصلت','الشورى','الزخرف','الدخان','الجاثية','الأحقاف','محمد','الفتح','الحجرات','ق','الذاريات','الطور','النجم','القمر','الرحمن','الواقعة','الحديد','المجادلة','الحشر','الممتحنة','الصف','الجمعة','المنافقون','التغابن','الطلاق','التحريم','الملك','القلم','الحاقة','المعارج','نوح','الجن','المزمل','المدثر','القيامة','الإنسان','المرسلات','النبأ','النازعات','عبس','التكوير','الانفطار','المطففين','الانشقاق','البروج','الطارق','الأعلى','الغاشية','الفجر','البلد','الشمس','الليل','الضحى','الشرح','التين','العلق','القدر','البينة','الزلزلة','العاديات','القارعة','التكاثر','العصر','الهمزة','الفيل','قريش','الماعون','الكوثر','الكافرون','النصر','المسد','الإخلاص','الفلق','الناس'];
 const quranSurahStartPages=[1,2,50,77,106,128,151,177,187,208,221,235,249,255,262,267,282,293,305,312,322,332,342,350,359,367,377,385,396,404,411,415,418,428,434,440,446,453,458,467,477,483,489,496,499,502,507,511,515,518,520,523,526,528,531,534,537,542,545,549,551,553,554,556,558,560,562,564,566,568,570,572,574,575,577,578,580,582,583,585,586,587,587,589,590,591,591,592,593,594,595,595,596,596,597,597,598,598,599,599,600,600,601,601,601,602,602,602,603,603,603,604,604,604];
 const MUSHAF_TOTAL_PAGES=604;
+const MUSHAF_LAYOUT_API='https://alfurqan.online/api/v1/quran-fonts/layout/';
+const MUSHAF_FONT_API='https://alfurqan.online/api/v1/quran-fonts/v2/';
 const MUSHAF_PAGE_BASE='https://raw.githubusercontent.com/zonetecde/mushaf-layout/refs/heads/main/mushaf/';
 const MUSHAF_PAGE_FALLBACK='https://cdn.jsdelivr.net/gh/zonetecde/mushaf-layout@main/mushaf/';
 let quranVerses=[];
@@ -723,14 +725,50 @@ async function fetchMushafPage(page){
   page=Math.min(604,Math.max(1,Number(page)||1));
   if(mushafPageMemory.has(page))return mushafPageMemory.get(page);
   const file=mushafPageFile(page);let lastErr=null;
-  for(const base of [MUSHAF_PAGE_BASE,MUSHAF_PAGE_FALLBACK]){
+  const attempts=[
+    `./data/mushaf/${file}`,
+    `${MUSHAF_LAYOUT_API}${page}`,
+    `${MUSHAF_PAGE_BASE}${file}`,
+    `${MUSHAF_PAGE_FALLBACK}${file}`
+  ];
+  for(const url of attempts){
     try{
-      const r=await fetch(base+file,{cache:'force-cache'});if(!r.ok)throw new Error(`HTTP ${r.status}`);
+      const r=await fetch(url,{cache:'force-cache'});if(!r.ok)throw new Error(`HTTP ${r.status}`);
       const data=await r.json();if(!data||!Array.isArray(data.lines))throw new Error('بيانات صفحة غير صالحة');
       mushafPageMemory.set(page,data);return data;
     }catch(e){lastErr=e;}
   }
   throw lastErr||new Error('تعذر تحميل صفحة المصحف');
+}
+
+const qcfLoadedFonts=new Set();
+async function ensureQcfPageFont(page){
+  page=Math.min(604,Math.max(1,Number(page)||1));
+  const family=`HayatiQCFV2_${String(page).padStart(3,'0')}`;
+  if(qcfLoadedFonts.has(family))return family;
+  try{
+    const ff=new FontFace(family,`url(${MUSHAF_FONT_API}${page}) format('truetype')`,{style:'normal',weight:'400',display:'swap'});
+    await ff.load();document.fonts.add(ff);qcfLoadedFonts.add(family);return family;
+  }catch(e){return '';}
+}
+
+function lineQcfGlyphs(line){
+  if(!Array.isArray(line?.words)||!line.words.length)return '';
+  return line.words.map(w=>w.qpcV2||'').filter(Boolean).join(' ');
+}
+function quranTextForVerseRange(range){
+  if(!range)return '';
+  const [a,b]=String(range).split('-');
+  const parse=v=>{const [s,n]=String(v||'').split(':').map(Number);return {s:s||1,n:n||1};};
+  const start=parse(a),end=parse(b||a);const out=[];
+  if(start.s===end.s){for(let n=start.n;n<=end.n;n++){const v=quranBySurah.get(start.s)?.find(x=>x.ayah===n);if(v)out.push(v.text);}}
+  else{
+    for(let s=start.s;s<=end.s;s++){
+      const verses=quranBySurah.get(s)||[];const from=s===start.s?start.n:1,to=s===end.s?end.n:verses.length;
+      for(let n=from;n<=to;n++){const v=verses.find(x=>x.ayah===n);if(v)out.push(v.text);}
+    }
+  }
+  return out.join(' ');
 }
 function firstVerseRange(data){return data?.lines?.find(x=>x.verseRange)?.verseRange||'';}
 function parseRangeEdge(range,end=false){const parts=String(range||'').split('-');const v=(end?parts[1]:parts[0])||parts[0]||'';const [s,a]=v.split(':').map(Number);return {surah:s||1,ayah:a||1};}
@@ -766,16 +804,20 @@ function fitMushafLines(){
   });
 }
 function showMushafControls(autoHide=true){const pane=document.getElementById('quranReadingPane');if(!pane)return;pane.classList.add('controls-visible');clearTimeout(quranControlsTimer);if(autoHide)quranControlsTimer=setTimeout(()=>pane.classList.remove('controls-visible'),3200);}
-function renderMushafPage(data,page){
+async function renderMushafPage(data,page){
   quranCurrentPageData=data;quranCurrentPage=page;const r=ensureQuranReaderState(),lines=document.getElementById('mushafLines');if(!lines)return;
   const primary=pagePrimarySurah(data,page);setText('mushafSurahName',`سورة ${quranSurahNames[primary-1]||''}`);setText('mushafPageTop',`صفحة ${toArabicDigits(page)} من ٦٠٤`);setText('mushafPageNumber',toArabicDigits(page));
-  const textCount=(data.lines||[]).filter(x=>x.type==='text').length;
+  const qcfFamily=await ensureQcfPageFont(page);
+  const textCount=(data.lines||[]).filter(x=>x.type==='text'||x.type==='basmala').length;
   lines.classList.toggle('short-page',textCount<10);
   lines.innerHTML=(data.lines||[]).map(line=>{
     if(line.type==='surah-header')return `<div class="mushaf-line surah-header-line" data-line="${line.line}"><span>۞</span><b>${escapeHTML(line.text)}</b><span>۞</span></div>`;
-    if(line.type==='basmala')return `<div class="mushaf-line basmala-line" data-line="${line.line}">بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ</div>`;
     const saved=r.lastPage===page&&r.lastLine===Number(line.line);
-    return `<div class="mushaf-line text-line${saved?' saved-line':''}" data-line="${line.line}" data-range="${escapeHTML(line.verseRange||'')}" tabindex="0"><span class="mushaf-line-text">${escapeHTML(line.text||'')}</span>${saved?'<i class="mushaf-saved-mark">موضعك</i>':''}</div>`;
+    const glyphs=qcfFamily?lineQcfGlyphs(line):'';
+    const visible=glyphs||line.text||'';
+    const cls=line.type==='basmala'?' basmala-line':'';
+    const fontStyle=glyphs?` style="font-family:${qcfFamily},serif" data-qcf="1"`:'';
+    return `<div class="mushaf-line text-line${cls}${saved?' saved-line':''}" data-line="${line.line}" data-range="${escapeHTML(line.verseRange||'')}" tabindex="0"><span class="mushaf-line-text"${fontStyle}>${escapeHTML(visible)}</span>${saved?'<i class="mushaf-saved-mark">موضعك</i>':''}</div>`;
   }).join('');
   document.querySelectorAll('.mushaf-line').forEach(x=>x.classList.toggle('selected-line',Number(x.dataset.line)===quranSelectedLine));
   const prev=document.getElementById('mushafPrevPage'),next=document.getElementById('mushafNextPage');if(prev)prev.disabled=page<=1;if(next)next.disabled=page>=604;
@@ -788,7 +830,7 @@ async function openMushafPage(page){
   const lib=document.getElementById('quranLibraryPane'),read=document.getElementById('quranReadingPane');if(lib)lib.hidden=true;if(read)read.hidden=false;
   updateMushafTheme();const lines=document.getElementById('mushafLines');if(lines)lines.innerHTML='<div class="mushaf-loading"><span>۞</span><b>جارٍ فتح صفحة المصحف…</b></div>';
   try{
-    const data=await fetchMushafPage(page);renderMushafPage(data,page);const r=ensureQuranReaderState();
+    const data=await fetchMushafPage(page);await renderMushafPage(data,page);const r=ensureQuranReaderState();
     if(r.lastPage===page&&r.lastLine){quranSelectedLine=r.lastLine;document.querySelector(`[data-line="${r.lastLine}"]`)?.classList.add('selected-line');setText('mushafSelectionText',`موضعك المحفوظ: السطر ${toArabicDigits(r.lastLine)}`);}
     else setText('mushafSelectionText','اضغط على السطر الذي انتهيت عنده');
   }catch(e){if(lines)lines.innerHTML=`<div class="mushaf-loading error"><b>تعذر تحميل صفحة المصحف</b><span>أول فتح لصفحة جديدة يحتاج اتصالًا بالإنترنت. بعد فتحها يحاول التطبيق حفظها للكاش.</span><button type="button" data-mushaf-retry="${page}">إعادة المحاولة</button></div>`;showMushafControls(false);}
@@ -808,7 +850,7 @@ function saveMushafPosition(notify=true){
   religion.quran.lastPosition=`صفحة ${toArabicDigits(quranCurrentPage)} • السطر ${toArabicDigits(quranSelectedLine)} • سورة ${quranSurahNames[edge.surah-1]}`;
   saveReligion();addTimeline(`انتهيت من قراءة القرآن عند ${religion.quran.lastPosition}`,'ديني','📖');renderMushafPage(quranCurrentPageData,quranCurrentPage);if(notify)openModal('تم حفظ موضعك',religion.quran.lastPosition,'🔖');
 }
-async function copySelectedMushafLine(){const line=quranCurrentPageData?.lines?.find(x=>Number(x.line)===quranSelectedLine);if(!line?.text){openModal('حدد سطرًا','اضغط على سطر من المصحف أولًا.','📖');return;}try{await navigator.clipboard.writeText(line.text);openModal('تم النسخ',`تم نسخ السطر من صفحة ${toArabicDigits(quranCurrentPage)} كنص عثماني Unicode.`,'✓');}catch{openModal('تعذر النسخ','يمكنك الضغط مطولًا على النص وتحديده ونسخه مباشرة.','⚠️');}}
+async function copySelectedMushafLine(){const line=quranCurrentPageData?.lines?.find(x=>Number(x.line)===quranSelectedLine);if(!line?.verseRange){openModal('حدد سطرًا','اضغط على سطر من المصحف أولًا.','📖');return;}const copyText=quranTextForVerseRange(line.verseRange)||line.text||'';try{await navigator.clipboard.writeText(copyText);openModal('تم النسخ',`تم نسخ الآية/الآيات من ملف Tanzil العثماني، وليس رموز خط العرض.`,'✓');}catch{openModal('تعذر النسخ','جرّب مرة أخرى أو استخدم زر النسخ بعد تحديد السطر.','⚠️');}}
 function jumpMushafPageFromInput(){const i=document.getElementById('mushafPageJumpInput'),p=Math.min(604,Math.max(1,Number(i?.value)||1));if(i)i.value='';openMushafPage(p);}
 function quranSearch(query){
   const results=document.getElementById('quranSearchResults'),section=document.getElementById('quranSurahSection'),list=document.getElementById('quranSearchResultList'),heading=document.getElementById('quranSearchHeading');if(!results||!list)return;

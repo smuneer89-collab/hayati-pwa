@@ -575,6 +575,7 @@ body.quran-fullscreen-mode .app-shell{max-width:none!important;}
 .mushaf-line{position:relative;width:100%;min-height:0;display:flex;align-items:center;justify-content:center;text-align:center;white-space:nowrap;direction:rtl;}
 .mushaf-line.text-line{font-family:"Hayati Uthmanic Hafs","Amiri Quran","Noto Naskh Arabic","Geeza Pro",serif;line-height:1.28;font-weight:400;letter-spacing:0;cursor:pointer;border-radius:7px;padding:1px 2px;transition:background .15s,outline .15s;}
 .mushaf-line-text{display:inline-block;white-space:nowrap;unicode-bidi:plaintext;}
+.mushaf-line-text[data-qcf="1"]{font-weight:400!important;letter-spacing:0!important;word-spacing:.07em;line-height:1!important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
 .mushaf-line.text-line.selected-line{background:rgba(205,168,81,.18);outline:1px solid rgba(162,118,37,.45);}
 [data-mushaf-theme="night"] .mushaf-line.text-line.selected-line{background:rgba(211,174,92,.13);outline-color:rgba(232,198,119,.40);}
 .mushaf-line.text-line.saved-line:before{content:"";position:absolute;right:-8px;width:4px;height:70%;border-radius:4px;background:#b98a32;}
