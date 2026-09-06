@@ -1,4 +1,4 @@
-const CACHE = 'hayati-v1-rel-family-backup-1';
+const CACHE = 'hayati-v1-finance-cycle-2';
 const ASSETS = [
   './',
   './index.html',

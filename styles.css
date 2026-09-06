@@ -353,3 +353,37 @@ html[data-theme="light"] .nav-item.active { color: #0369a1; }
 .backup-snapshots-row{align-items:flex-start}
 .snapshot-list{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.snapshot-list button{border:1px solid var(--line);background:var(--surface-2);color:var(--text);border-radius:999px;padding:5px 8px;font-size:8px}.snapshot-list span{font-size:8px;color:var(--muted)}
 @media(max-width:390px){.album-grid{grid-template-columns:1fr}.tree-person{grid-template-columns:38px 1fr auto}.tree-avatar{width:38px;height:38px}}
+
+/* Finance two-cycle monthly planner */
+.finance-stats article small { color:var(--muted); font-size:7.5px; line-height:1.45; margin-top:4px; }
+.stat-title-row { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.stat-edit { border:0; border-radius:999px; padding:4px 7px; background:rgba(255,255,255,.10); color:#bae6fd; font-family:inherit; font-size:7px; font-weight:700; }
+.balance-stat b { color:#86efac; }
+.reserve-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-top:13px; }
+.reserve-grid>div { padding:10px; border-radius:13px; background:var(--surface-2); border:1px solid var(--line); display:grid; gap:4px; }
+.reserve-grid span { color:var(--muted); font-size:7.5px; }
+.reserve-grid b { font-size:10px; }
+.month-chip { padding:6px 8px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); color:var(--muted); font-size:8px; white-space:nowrap; }
+.cashflow-period { margin-top:14px; }
+.cashflow-period-head { display:flex; justify-content:space-between; align-items:flex-end; gap:10px; padding:0 2px 8px; border-bottom:1px solid var(--line); }
+.cashflow-period-head>div { display:grid; gap:2px; }
+.cashflow-period-head b { font-size:11px; }
+.cashflow-period-head span { color:var(--muted); font-size:8px; }
+.cashflow-period-head strong { color:#fda4af; font-size:10px; }
+.cashflow-list { margin-top:8px; }
+.cashflow-row { position:relative; grid-template-columns:1fr auto; }
+.flow-status { grid-column:1/-1; justify-self:start; padding:3px 7px; border-radius:999px; background:rgba(251,191,36,.10); border:1px solid rgba(251,191,36,.18); color:#fde68a; font-size:7px; }
+.flow-status.paid { background:rgba(34,197,94,.10); border-color:rgba(34,197,94,.18); color:#86efac; }
+.salary-marker { margin:14px 0 2px; padding:11px; border-radius:16px; background:linear-gradient(135deg,rgba(37,99,235,.22),rgba(14,165,233,.08)); border:1px solid rgba(56,189,248,.20); display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px; }
+.salary-date { width:42px; height:42px; border-radius:14px; background:rgba(255,255,255,.08); display:grid; place-content:center; text-align:center; }
+.salary-date b { font-size:13px; line-height:1; color:#fff; }
+.salary-date span { margin-top:3px; font-size:6.5px; color:#bae6fd; }
+.salary-marker-main { min-width:0; display:grid; gap:2px; }
+.salary-marker-main span { color:#bae6fd; font-size:8px; }
+.salary-marker-main b { color:#fff; font-size:12px; }
+.salary-marker-main small { color:var(--muted); font-size:7px; }
+.salary-marker button { border:1px solid rgba(125,211,252,.25); background:#2563eb; color:#fff; border-radius:11px; padding:7px 9px; font-family:inherit; font-size:8px; font-weight:800; }
+.salary-marker button:disabled { opacity:.45; background:var(--surface-2); }
+.end-marker { background:linear-gradient(135deg,rgba(13,148,136,.18),rgba(37,99,235,.08)); }
+.form-hint { padding:9px 10px; border-radius:12px; background:var(--surface-2); border:1px solid var(--line); color:var(--muted); font-size:8px; line-height:1.6; }
+@media (max-width:380px){ .reserve-grid{grid-template-columns:1fr;} .salary-marker{grid-template-columns:auto 1fr;} .salary-marker button{grid-column:1/-1;width:100%;} }
