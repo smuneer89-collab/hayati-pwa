@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover" />
   <meta name="theme-color" content="#07111f" />
   <meta name="color-scheme" content="dark light" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://static-cdn.tarteel.ai" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles-v83.css?v=83" />
+  <link rel="stylesheet" href="styles-v102.css?v=102?v=83" />
   <title>حياتي</title>
   <meta name="hayati-build" content="10.0-qcf604" />
 </head>
@@ -199,15 +199,16 @@
           <button class="setting-row" id="settingInstall"><span>📲</span><div><b>تثبيت التطبيق</b><small>إضافة حياتي إلى الشاشة الرئيسية.</small></div><em>←</em></button>
           <button class="setting-row" id="settingTheme"><span>🌗</span><div><b>المظهر</b><small>التبديل بين الداكن والفاتح.</small></div><em>←</em></button>
           <button class="setting-row" id="hadithManagerOpenBtn"><span>📚</span><div><b>إدارة قاعدة الأحاديث</b><small>اكتب موضوع المجموعة والصق الأحاديث؛ حياتي يفصلها ويفحص التكرار ويحفظها تلقائيًا.</small></div><em id="hadithSettingsCount">0 حديث</em></button>
-          <button class="setting-row" id="backupExportBtn"><span>💾</span><div><b>إنشاء نسخة احتياطية كاملة</b><small>ملف ZIP يشمل البيانات وصور الألبومات العائلية.</small></div><em>تنزيل</em></button>
-          <button class="setting-row" id="backupImportBtn"><span>♻️</span><div><b>استعادة نسخة احتياطية</b><small>يفحص النسخة أولًا ويأخذ نسخة أمان من الحالة الحالية قبل الاستعادة.</small></div><em>استعادة</em></button>
+          <button class="setting-row" id="backupExportBtn"><span>💾</span><div><b>إنشاء نسخة احتياطية كاملة</b><small>على الآيفون تفتح ورقة المشاركة؛ اختر «حفظ في الملفات». تشمل البيانات وصور الألبومات.</small></div><em>حفظ</em></button>
+          <button class="setting-row" id="backupImportBtn"><span>♻️</span><div><b>استعادة نسخة احتياطية</b><small>اختر ملف ZIP من «الملفات». يفحصه حياتي ويأخذ لقطة أمان قبل الاستعادة.</small></div><em>اختيار ملف</em></button>
           <div class="setting-row static"><span>🕘</span><div><b>آخر نسخة كاملة</b><small id="backupLastFull">لم تُنشأ نسخة كاملة بعد.</small></div><em>ZIP</em></div>
           <button class="setting-row" id="backupReminderBtn"><span>🔔</span><div><b>تذكير أسبوعي بالنسخة</b><small>تذكير داخل التطبيق إذا مر أسبوع دون نسخة كاملة.</small></div><em id="backupReminderState">مفعل</em></button>
-          <div class="setting-row static backup-snapshots-row"><span>🧩</span><div><b>النسخ المحلية الأخيرة</b><small>آخر 5 لقطات من البيانات النصية داخل هذا الجهاز.</small><div id="backupSnapshotList" class="snapshot-list"></div></div><em>محلي</em></div>
+          <button class="setting-row" id="backupSnapshotNowBtn"><span>🧩</span><div><b>إنشاء نسخة محلية الآن</b><small>لقطة سريعة تبقى على هذا الجهاز، ويمكن الرجوع إليها من القائمة أدناه.</small></div><em>إنشاء</em></button>
+          <div class="setting-row static backup-snapshots-row"><span>🕘</span><div><b>النسخ المحلية الأخيرة</b><small>آخر 5 لقطات. اضغط على أي تاريخ لاستعادته.</small><div id="backupSnapshotList" class="snapshot-list"></div></div><em>آخر 5</em></div>
           <div class="setting-row static"><span>🔐</span><div><b>Firebase</b><small>لن نربطه الآن؛ نبني الأقسام أولًا كما اتفقنا.</small></div><em>لاحقًا</em></div>
           <div class="setting-row static"><span>🤖</span><div><b>مساعد حياتي</b><small>سيُضاف تدريجيًا بعد استقرار البيانات والأقسام.</small></div><em>لاحقًا</em></div>
         </div>
-        <input type="file" id="backupImportInput" accept=".zip,application/zip" hidden />
+        <input type="file" id="backupImportInput" accept=".zip,application/zip,application/x-zip-compressed" hidden />
       </section>
 
       <section class="view" data-view="hadith-manager" id="view-hadith-manager">
@@ -518,7 +519,7 @@
 
         <div class="domain-quick religion-quick">
           <button data-religion-action="project"><span>🎯</span><b>مشروع</b></button>
-          <button type="button" onclick="window.location.href='quran.html'"><span>📖</span><b>المصحف</b></button>
+          <button type="button" onclick="window.location.href='quran.html?v=102'"><span>📖</span><b>المصحف</b></button>
           <button data-religion-action="dhikr"><span>🤲</span><b>ذكر/دعاء</b></button>
           <button data-religion-action="fast"><span>🌙</span><b>صيام</b></button>
         </div>
@@ -554,8 +555,8 @@
               <div class="quran-entry-meta" id="religionQuranReaderMeta">١١٤ سورة • ٦٠٤ صفحة</div>
             </div>
             <div class="quran-entry-actions">
-              <button class="primary-btn" type="button" onclick="window.location.href='quran.html'">فتح المصحف</button>
-              <button class="secondary-btn" type="button" onclick="window.location.href='quran.html'">متابعة القراءة</button>
+              <button class="primary-btn" type="button" onclick="window.location.href='quran.html?v=102'">فتح المصحف</button>
+              <button class="secondary-btn" type="button" onclick="window.location.href='quran.html?v=102'">متابعة القراءة</button>
             </div>
           </section>
           <div class="domain-card-wide">
@@ -881,6 +882,6 @@
     </div>
   </div>
 
-  <script src="app-v83.js?v=83" defer></script>
+  <script src="app-v102.js?v=102" defer></script>
 </body>
 </html>
