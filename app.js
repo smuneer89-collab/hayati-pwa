@@ -721,36 +721,89 @@ async function loadQuranData(){
 }
 function quranVerseCount(surah){return quranBySurah.get(Number(surah))?.length||0;}
 function mushafPageFile(page){return `page-${String(page).padStart(3,'0')}.json`;}
+let localMushafPagesCache=null;
+function plainQuranLength(s=''){
+  return String(s).replace(/[\u064B-\u065F\u0670\u06D6-\u06EDـ]/g,'').replace(/\s+/g,' ').trim().length||1;
+}
+function buildLocalMushafPages(){
+  if(localMushafPagesCache)return localMushafPagesCache;
+  const pages=Array.from({length:605},()=>[]);
+  for(let surah=1;surah<=114;surah++){
+    const verses=quranBySurah.get(surah)||[]; if(!verses.length)continue;
+    const startPage=quranSurahStartPages[surah-1]||1;
+    const nextStart=surah<114?(quranSurahStartPages[surah]||604):605;
+    let endPage=surah===114?604:(nextStart>startPage?nextStart-1:startPage);
+    endPage=Math.max(startPage,Math.min(604,endPage));
+    const pageCount=endPage-startPage+1;
+    const weights=verses.map(v=>Math.max(8,plainQuranLength(v.text)));
+    const total=weights.reduce((a,b)=>a+b,0)||1;
+    let cum=0;
+    verses.forEach((v,i)=>{
+      const mid=cum+weights[i]/2;
+      let offset=Math.min(pageCount-1,Math.floor((mid/total)*pageCount));
+      pages[startPage+offset].push(v);
+      cum+=weights[i];
+    });
+  }
+  // Short surahs can share the same standard start page. Make sure page order stays canonical.
+  for(let p=1;p<=604;p++) pages[p].sort((a,b)=>a.surah-b.surah||a.ayah-b.ayah);
+  localMushafPagesCache=pages;
+  return pages;
+}
+function splitPageVersesIntoLines(verses,page){
+  const chunks=[];
+  let currentSurah=0;
+  for(const v of verses){
+    if(v.surah!==currentSurah){
+      currentSurah=v.surah;
+      if(v.ayah===1)chunks.push({kind:'header',surah:v.surah,text:`سُورَةُ ${quranSurahNames[v.surah-1]}`});
+    }
+    const marker=` ﴿${toArabicDigits(v.ayah)}﴾`;
+    const words=String(v.text||'').trim().split(/\s+/).filter(Boolean);
+    // Keep verses selectable/readable while allowing long verses to wrap across lines.
+    chunks.push({kind:'verse',surah:v.surah,ayah:v.ayah,words,marker});
+  }
+  const headerCount=chunks.filter(x=>x.kind==='header').length;
+  const targetTextLines=Math.max(8,15-headerCount);
+  const wordItems=[];
+  for(const c of chunks){
+    if(c.kind==='header'){wordItems.push(c);continue;}
+    c.words.forEach((w,i)=>wordItems.push({kind:'word',text:w,surah:c.surah,ayah:c.ayah,isLast:i===c.words.length-1,marker:c.marker}));
+  }
+  const textWords=wordItems.filter(x=>x.kind==='word');
+  const totalChars=textWords.reduce((n,x)=>n+plainQuranLength(x.text)+(x.isLast?plainQuranLength(x.marker):0)+1,0)||1;
+  const target=Math.max(18,totalChars/targetTextLines);
+  const lines=[]; let lineNo=1, buf=[], bufChars=0, firstKey=null,lastKey=null;
+  const flush=()=>{if(!buf.length)return; lines.push({line:lineNo++,type:'text',text:buf.join(' '),verseRange:`${firstKey}-${lastKey}`});buf=[];bufChars=0;firstKey=lastKey=null;};
+  for(const item of wordItems){
+    if(item.kind==='header'){
+      flush(); lines.push({line:lineNo++,type:'surah-header',text:item.text,surah:String(item.surah).padStart(3,'0')}); continue;
+    }
+    const key=`${item.surah}:${item.ayah}`;
+    const t=item.text+(item.isLast?item.marker:'');
+    const len=plainQuranLength(t)+1;
+    if(buf.length && bufChars+len>target*1.10 && lines.filter(x=>x.type==='text').length<targetTextLines-1) flush();
+    if(!firstKey)firstKey=key; lastKey=key; buf.push(t);bufChars+=len;
+  }
+  flush();
+  return {page,lines};
+}
+async function buildLocalMushafPage(page){
+  await loadQuranData();
+  const pages=buildLocalMushafPages();
+  const verses=pages[page]||[];
+  return splitPageVersesIntoLines(verses,page);
+}
 async function fetchMushafPage(page){
   page=Math.min(604,Math.max(1,Number(page)||1));
   if(mushafPageMemory.has(page))return mushafPageMemory.get(page);
-  const file=mushafPageFile(page);let lastErr=null;
-  const attempts=[
-    `./data/mushaf/${file}`,
-    `${MUSHAF_LAYOUT_API}${page}`,
-    `${MUSHAF_PAGE_BASE}${file}`,
-    `${MUSHAF_PAGE_FALLBACK}${file}`
-  ];
-  for(const url of attempts){
-    try{
-      const r=await fetch(url,{cache:'force-cache'});if(!r.ok)throw new Error(`HTTP ${r.status}`);
-      const data=await r.json();if(!data||!Array.isArray(data.lines))throw new Error('بيانات صفحة غير صالحة');
-      mushafPageMemory.set(page,data);return data;
-    }catch(e){lastErr=e;}
-  }
-  throw lastErr||new Error('تعذر تحميل صفحة المصحف');
+  const data=await buildLocalMushafPage(page);
+  if(!data||!Array.isArray(data.lines)||!data.lines.length)throw new Error('تعذر تكوين صفحة المصحف من الملف المحلي');
+  mushafPageMemory.set(page,data);return data;
 }
 
 const qcfLoadedFonts=new Set();
-async function ensureQcfPageFont(page){
-  page=Math.min(604,Math.max(1,Number(page)||1));
-  const family=`HayatiQCFV2_${String(page).padStart(3,'0')}`;
-  if(qcfLoadedFonts.has(family))return family;
-  try{
-    const ff=new FontFace(family,`url(${MUSHAF_FONT_API}${page}) format('truetype')`,{style:'normal',weight:'400',display:'swap'});
-    await ff.load();document.fonts.add(ff);qcfLoadedFonts.add(family);return family;
-  }catch(e){return '';}
-}
+async function ensureQcfPageFont(page){ return ''; }
 
 function lineQcfGlyphs(line){
   if(!Array.isArray(line?.words)||!line.words.length)return '';
@@ -833,7 +886,7 @@ async function openMushafPage(page){
     const data=await fetchMushafPage(page);await renderMushafPage(data,page);const r=ensureQuranReaderState();
     if(r.lastPage===page&&r.lastLine){quranSelectedLine=r.lastLine;document.querySelector(`[data-line="${r.lastLine}"]`)?.classList.add('selected-line');setText('mushafSelectionText',`موضعك المحفوظ: السطر ${toArabicDigits(r.lastLine)}`);}
     else setText('mushafSelectionText','اضغط على السطر الذي انتهيت عنده');
-  }catch(e){if(lines)lines.innerHTML=`<div class="mushaf-loading error"><b>تعذر تحميل صفحة المصحف</b><span>أول فتح لصفحة جديدة يحتاج اتصالًا بالإنترنت. بعد فتحها يحاول التطبيق حفظها للكاش.</span><button type="button" data-mushaf-retry="${page}">إعادة المحاولة</button></div>`;showMushafControls(false);}
+  }catch(e){if(lines)lines.innerHTML=`<div class="mushaf-loading error"><b>تعذر تكوين صفحة المصحف</b><span>تأكد أن ملف data/quran-uthmani.txt موجود داخل المشروع ثم أعد المحاولة.</span><button type="button" data-mushaf-retry="${page}">إعادة المحاولة</button></div>`;showMushafControls(false);}
 }
 function pageRangeKeys(data){const rs=(data?.lines||[]).filter(x=>x.verseRange);if(!rs.length)return [0,999999];const a=parseRangeEdge(rs[0].verseRange),b=parseRangeEdge(rs[rs.length-1].verseRange,true);return [a.surah*1000+a.ayah,b.surah*1000+b.ayah];}
 async function findMushafPageForAyah(surah,ayah){
