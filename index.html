@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://static-cdn.tarteel.ai" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles-v102.css?v=102?v=83" />
+  <link rel="stylesheet" href="styles-v103.css?v=103" />
   <title>حياتي</title>
   <meta name="hayati-build" content="10.0-qcf604" />
 </head>
@@ -49,12 +49,17 @@
           <div class="home-hadith-head">
             <div>
               <span class="section-kicker">حديث اليوم</span>
-              <h2>قبس اليوم</h2>
             </div>
-            <button class="text-btn" type="button" data-section="knowledge">فتح معرفتي</button>
+            <button class="text-btn" type="button" data-section="knowledge">⌑ فتح معرفتي</button>
           </div>
           <blockquote id="homeDailyHadithText">أضف أحاديثك من الإعدادات ليظهر هنا حديث اليوم.</blockquote>
           <div class="home-hadith-meta" id="homeDailyHadithMeta">قاعدة الأحاديث فارغة حاليًا.</div>
+          <div class="hadith-card-actions" aria-label="أدوات حديث اليوم">
+            <button type="button" id="homeHadithCopyBtn" class="hadith-action-btn" title="نسخ الحديث"><span>⧉</span><small>نسخ</small></button>
+            <button type="button" id="homeHadithShareBtn" class="hadith-action-btn" title="مشاركة الحديث"><span>⌯</span><small>مشاركة</small></button>
+            <button type="button" id="homeHadithFavoriteBtn" class="hadith-action-btn" title="إضافة إلى المفضلة"><span>♡</span><small>مفضلة</small></button>
+            <button type="button" id="homeHadithAiBtn" class="hadith-action-btn ai" title="نسخ للذكاء الاصطناعي"><span>✦</span><small>نسخ للذكاء الاصطناعي</small></button>
+          </div>
         </section>
 
         <section class="day-cycle-card" id="dayCycleCard">
@@ -236,9 +241,14 @@
             <input id="hadithBatchTopic" name="topic" type="text" placeholder="مثال: مناقب أهل البيت (ع) وفضائلهم" required />
           </div>
 
-          <div class="form-field">
+          <div class="form-field hadith-editor-field">
             <label for="hadithBatchText">الأحاديث</label>
-            <textarea id="hadithBatchText" name="hadiths" rows="12" placeholder="الصق الحديث الأول هنا...
+            <div class="hadith-quran-toolbar" aria-label="تمييز الآيات القرآنية">
+              <button type="button" data-hadith-bracket="open" data-target="hadithBatchText">﴿ فتح آية</button>
+              <button type="button" data-hadith-bracket="close" data-target="hadithBatchText">إغلاق آية ﴾</button>
+              <span>ضع الآية بين القوسين؛ حياتي يبحث عنها في المصحف ويحوّلها للرسم العثماني.</span>
+            </div>
+            <textarea id="hadithBatchText" name="hadiths" rows="12" placeholder="الصق الحديث الأول هنا... ثم استخدم ﴿ فتح آية / إغلاق آية ﴾ حول أي نص قرآني.
 
 الصق الحديث الثاني هنا...
 
@@ -266,6 +276,7 @@
             <div><span>جديد</span><b id="hadithNewCount">0</b></div>
             <div><span>مكرر</span><b id="hadithDuplicateCount">0</b></div>
           </div>
+          <div class="hadith-quran-check" id="hadithQuranCheck" hidden></div>
           <div class="hadith-preview-list" id="hadithPreviewList"></div>
         </section>
       </section>
@@ -680,9 +691,15 @@
         </div>
 
         <section class="hadith-feature" id="dailyHadithCard">
-          <div class="hadith-top"><span class="section-kicker">حديث اليوم</span><div class="hadith-actions"><button class="icon-chip" id="hadithFavoriteBtn" title="مفضلة">☆</button></div></div>
+          <div class="hadith-top"><span class="section-kicker">حديث اليوم</span></div>
           <blockquote id="dailyHadithText">أضف أحاديثك ليظهر هنا حديث اليوم.</blockquote>
           <div class="hadith-source" id="dailyHadithSource">المصدر اختياري</div>
+          <div class="hadith-card-actions compact" aria-label="أدوات الحديث">
+            <button type="button" id="knowledgeHadithCopyBtn" class="hadith-action-btn" title="نسخ الحديث"><span>⧉</span><small>نسخ</small></button>
+            <button type="button" id="knowledgeHadithShareBtn" class="hadith-action-btn" title="مشاركة الحديث"><span>⌯</span><small>مشاركة</small></button>
+            <button type="button" id="hadithFavoriteBtn" class="hadith-action-btn" title="مفضلة"><span id="hadithFavoriteIcon">♡</span><small>مفضلة</small></button>
+            <button type="button" id="knowledgeHadithAiBtn" class="hadith-action-btn ai" title="نسخ للذكاء الاصطناعي"><span>✦</span><small>نسخ للذكاء الاصطناعي</small></button>
+          </div>
           <div class="domain-inline-actions"><button class="chip-btn" id="hadithReadBtn">تمت القراءة</button><button class="chip-btn" data-knowledge-action="hadith">+ إضافة حديث</button></div>
         </section>
 
@@ -882,6 +899,6 @@
     </div>
   </div>
 
-  <script src="app-v102.js?v=102" defer></script>
+  <script src="app-v103.js?v=103" defer></script>
 </body>
 </html>
