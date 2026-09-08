@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://static-cdn.tarteel.ai" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles-v105.css?v=105" />
+  <link rel="stylesheet" href="styles-v105.css?v=106" />
   <title>حياتي</title>
   <meta name="hayati-build" content="10.0-qcf604" />
 </head>
@@ -301,37 +301,34 @@
           <div>
             <span class="section-kicker">مالي</span>
             <h1>إدارة مالي</h1>
-            <p>تنظيم الشهر على دورتين: من بداية الشهر إلى راتب يوم 15، ثم من يوم 15 إلى راتب نهاية الشهر.</p>
+            <p>ميزانية مرنة تعتمد على فترات الرواتب الفعلية، مع حجز المصروفات القادمة وحساب المسموح اليومي تلقائيًا.</p>
           </div>
           <span class="local-badge">محفوظ محليًا</span>
         </div>
 
         <div class="finance-stats">
-          <article class="accent balance-stat">
-            <div class="stat-title-row"><span>المبلغ الحالي</span><button type="button" class="stat-edit" data-fin-action="balance">تعديل</button></div>
-            <b id="finBalance">٠.٠٠٠ د.ب</b>
-            <small>الرصيد الفعلي الآن</small>
-          </article>
-          <article><span>المصاريف الثابتة</span><b id="finFixed">٠.٠٠٠ د.ب</b><small>إجمالي الشهر</small></article>
-          <article><span>راتب الشهر</span><b id="finSalary">٠.٠٠٠ د.ب</b><small id="finSalarySplit">15 الشهر + نهاية الشهر</small></article>
-          <article><span>مصروف هذا الشهر</span><b id="finSpent">٠.٠٠٠ د.ب</b><small>ما تم صرفه فعليًا</small></article>
+          <article class="accent balance-stat"><div class="stat-title-row"><span>المبلغ الحالي</span><button type="button" class="stat-edit" data-fin-action="balance">تعديل</button></div><b id="finBalance">٠.٠٠٠ د.ب</b><small>الرصيد الفعلي الآن</small></article>
+          <article><span>المصاريف الثابتة</span><b id="finFixed">٠.٠٠٠ د.ب</b><small>إجمالي المسجل</small></article>
+          <article><span>إجمالي الرواتب</span><b id="finSalary">٠.٠٠٠ د.ب</b><small>كل الرواتب الشهرية</small></article>
+          <article><span>مصروف هذا الشهر</span><b id="finSpent">٠.٠٠٠ د.ب</b><small>ما تم صرفه فعليًا حتى اليوم</small></article>
         </div>
 
-        <section class="finance-setup-card">
-          <div>
-            <span class="section-kicker">الدورة المالية</span>
-            <h2>راتبان خلال الشهر</h2>
-            <p>راتب بتاريخ 15 من كل شهر + راتب في نهاية الشهر.</p>
-          </div>
-          <button class="secondary-btn" data-fin-action="salaryPlan">تعديل الرواتب</button>
+        <section class="finance-card daily-budget-card">
+          <div class="card-row-head"><div><span class="section-kicker">الفترة الحالية</span><h2 id="finPeriodTitle">أضف راتبًا لبدء الميزانية</h2></div><span class="daily-pill">المسموح اليوم</span></div>
+          <div class="daily-allowed"><span>المسموح لك اليوم</span><b id="finDailyAllowed">٠.٠٠٠ د.ب</b></div>
+          <div class="reserve-grid"><div><span>المتاح بعد الحجوزات</span><b id="finPeriodAvailable">٠.٠٠٠ د.ب</b></div><div><span>إجمالي المحجوز</span><b id="finPeriodReserved">٠.٠٠٠ د.ب</b></div><div><span>الأيام المتبقية</span><b id="finDaysLeft">—</b></div></div>
+          <div class="overspend-alert" id="finOverspendAlert" hidden></div>
+          <p class="finance-note">عند دخول فترة الراتب، أي مصروف مجدول يقع داخلها يُحجز مباشرة حتى لو لم يأتِ تاريخ دفعه بعد، وبناءً عليه يتغير المسموح اليومي.</p>
         </section>
 
         <div class="finance-quick">
+          <button data-fin-action="salary"><span>💵</span><b>راتب</b></button>
           <button data-fin-action="expense"><span>💳</span><b>مصروف</b></button>
-          <button data-fin-action="extraIncome"><span>💵</span><b>دخل إضافي</b></button>
           <button data-fin-action="fixed"><span>📌</span><b>مصروف ثابت</b></button>
-          <button data-fin-action="obligation"><span>🗓️</span><b>التزام</b></button>
+          <button data-fin-action="saving"><span>🏦</span><b>ادخار عام</b></button>
           <button data-fin-action="goal"><span>🎯</span><b>هدف مالي</b></button>
+          <button data-fin-action="extraIncome"><span>➕</span><b>دخل إضافي</b></button>
+          <button data-fin-action="obligation"><span>🗓️</span><b>التزام</b></button>
         </div>
 
         <div class="finance-tabs" role="tablist">
@@ -342,94 +339,45 @@
         </div>
 
         <section class="fin-panel active" data-fin-panel="overview">
-          <div class="finance-card next-salary-card">
-            <div class="card-row-head">
-              <div><span class="section-kicker">حتى الدخل القادم</span><h2 id="finNextSalaryLabel">المتاح حتى الراتب القادم</h2></div>
-              <b class="big-money" id="finAvailableToNext">٠.٠٠٠ د.ب</b>
-            </div>
-            <div class="reserve-grid">
-              <div><span>الرصيد الحالي</span><b id="finCycleBalance">٠.٠٠٠ د.ب</b></div>
-              <div><span>محجوز قبل الراتب</span><b id="finReservedToNext">٠.٠٠٠ د.ب</b></div>
-              <div><span>موعد الراتب</span><b id="finNextSalaryWhen">—</b></div>
-            </div>
-            <p class="finance-note">المتاح هنا = المبلغ الحالي − المصاريف الثابتة والالتزامات غير المدفوعة قبل الراتب القادم.</p>
-          </div>
-
-          <div class="finance-card monthly-flow-card">
-            <div class="card-row-head">
-              <div><span class="section-kicker">هذا الشهر</span><h2>جدول الشهر المالي</h2></div>
-              <span class="month-chip" id="finMonthName">الشهر الحالي</span>
-            </div>
-
-            <div class="cashflow-period">
-              <div class="cashflow-period-head">
-                <div><b>الفترة الأولى</b><span>من 1 إلى 14</span></div>
-                <strong id="finEarlyScheduled">٠.٠٠٠ د.ب</strong>
-              </div>
-              <div class="finance-list cashflow-list" id="earlyFlowList"></div>
-            </div>
-
-            <div class="salary-marker">
-              <div class="salary-date"><b>15</b><span>منتصف الشهر</span></div>
-              <div class="salary-marker-main"><span>راتب يوم 15</span><b id="finMidSalaryAmount">٠.٠٠٠ د.ب</b><small id="finMidSalaryStatus">لم يُستلم بعد</small></div>
-              <button type="button" data-fin-receive-salary="mid" id="finMidSalaryBtn">استلام</button>
-            </div>
-
-            <div class="cashflow-period">
-              <div class="cashflow-period-head">
-                <div><b>الفترة الثانية</b><span>من 15 إلى نهاية الشهر</span></div>
-                <strong id="finLateScheduled">٠.٠٠٠ د.ب</strong>
-              </div>
-              <div class="finance-list cashflow-list" id="lateFlowList"></div>
-            </div>
-
-            <div class="salary-marker end-marker">
-              <div class="salary-date"><b>آخر</b><span>يوم</span></div>
-              <div class="salary-marker-main"><span>راتب نهاية الشهر</span><b id="finEndSalaryAmount">٠.٠٠٠ د.ب</b><small id="finEndSalaryStatus">لم يُستلم بعد</small></div>
-              <button type="button" data-fin-receive-salary="end" id="finEndSalaryBtn">استلام</button>
-            </div>
+          <div class="finance-card">
+            <div class="card-row-head"><div><span class="section-kicker">الرواتب</span><h2>رواتب الشهر</h2></div><button class="text-btn" data-fin-action="salary">+ إضافة راتب</button></div>
+            <p class="finance-note">يمكن إضافة أي عدد من الرواتب، وتعديل مبلغ كل راتب ويوم نزوله في أي وقت. كل راتب يبدأ فترة ميزانية مستقلة حتى الراتب التالي.</p>
+            <div class="finance-list" id="salaryList"></div>
           </div>
 
           <div class="finance-card">
-            <div class="card-row-head">
-              <div><span class="section-kicker">ثابت شهريًا</span><h2>المصاريف الثابتة</h2></div>
-              <button class="text-btn" data-fin-action="fixed">+ إضافة</button>
-            </div>
+            <div class="card-row-head"><div><span class="section-kicker">فترات الميزانية</span><h2>من راتب إلى الراتب التالي</h2></div></div>
+            <div class="period-list" id="periodList"></div>
+          </div>
+
+          <div class="finance-card">
+            <div class="card-row-head"><div><span class="section-kicker">ثابت شهريًا</span><h2>المصاريف الثابتة</h2></div><button class="text-btn" data-fin-action="fixed">+ إضافة</button></div>
+            <p class="finance-note">كل مصروف ثابت مرتبط براتب واحد أو موزع على أكثر من راتب؛ مثال: 100 د.ب طعام = 50 من الراتب الأول + 50 من الثاني.</p>
             <div class="finance-list" id="fixedList"></div>
           </div>
 
-          <div class="finance-card">
-            <div class="card-row-head">
-              <div><span class="section-kicker">الخطة الذكية</span><h2>احتياج الأهداف هذا الشهر</h2></div>
-              <b id="finGoalNeed">٠.٠٠٠ د.ب</b>
-            </div>
-            <p class="finance-note" id="finGoalStatus">أضف أهدافك المالية حتى تظهر الخطة الشهرية.</p>
+          <div class="finance-card split-summary-card">
+            <div><span class="section-kicker">الخطة الذكية</span><h2>الأهداف والادخار</h2></div>
+            <div class="reserve-grid"><div><span>احتياج الأهداف هذا الشهر</span><b id="finGoalNeed">٠.٠٠٠ د.ب</b></div><div><span>الادخار العام لهذا الشهر</span><b id="finSavingMonth">٠.٠٠٠ د.ب</b></div></div>
+            <p class="finance-note">حصة الأهداف والادخار توزَّع تلقائيًا على فترات الرواتب بنسبة قيمة كل راتب، وتدخل مباشرة في حساب المسموح اليومي.</p>
           </div>
         </section>
 
         <section class="fin-panel" data-fin-panel="transactions">
           <div class="finance-card">
-            <div class="card-row-head"><div><span class="section-kicker">السجل</span><h2>العمليات المالية</h2></div><button class="text-btn" data-fin-action="expense">+ مصروف</button></div>
+            <div class="card-row-head"><div><span class="section-kicker">السجل</span><h2>المصروفات والدخل</h2></div><button class="text-btn" data-fin-action="expense">+ مصروف</button></div>
+            <p class="finance-note">المصروف المستقبلي يبقى «مجدولًا ومحجوزًا» في فترة راتبه، ولا يدخل ضمن المصروف الفعلي للشهر قبل تاريخ حدوثه.</p>
             <div class="finance-list" id="transactionList"></div>
           </div>
         </section>
 
         <section class="fin-panel" data-fin-panel="obligations">
-          <div class="finance-card">
-            <div class="card-row-head"><div><span class="section-kicker">القادم</span><h2>الالتزامات</h2></div><button class="text-btn" data-fin-action="obligation">+ إضافة</button></div>
-            <div class="finance-list" id="obligationList"></div>
-          </div>
+          <div class="finance-card"><div class="card-row-head"><div><span class="section-kicker">القادم</span><h2>الالتزامات</h2></div><button class="text-btn" data-fin-action="obligation">+ إضافة</button></div><div class="finance-list" id="obligationList"></div></div>
         </section>
 
         <section class="fin-panel" data-fin-panel="goals">
-          <div class="finance-card">
-            <div class="card-row-head"><div><span class="section-kicker">أهدافي</span><h2>الأهداف المالية</h2></div><button class="text-btn" data-fin-action="goal">+ هدف</button></div>
-            <div class="finance-list goals" id="goalList"></div>
-          </div>
-          <div class="phase-note">
-            <b>قاعدة الأهداف المعتمدة</b>
-            <span>يحسب «حياتي» المبلغ الشهري اللازم لكل هدف. إذا كان الفائض غير كافٍ، يبقى المبدأ أن يتقدم جميع الأهداف النشطة بدل تجميد بعضها. طريقة توزيع النقص الدقيقة لن نعتمدها من عندنا قبل مراجعتك.</span>
-          </div>
+          <div class="finance-card"><div class="card-row-head"><div><span class="section-kicker">أهدافي</span><h2>الأهداف المالية</h2></div><button class="text-btn" data-fin-action="goal">+ هدف</button></div><div class="finance-list goals" id="goalList"></div></div>
+          <div class="phase-note"><b>طريقة الحساب</b><span>المبلغ الشهري المطلوب لكل هدف = (تكلفة الهدف − المبلغ المدخر له حاليًا) ÷ عدد الأشهر المتبقية حتى التاريخ المستهدف.</span></div>
         </section>
       </section>
 
@@ -933,6 +881,6 @@
     </section>
   </div>
 
-  <script src="app-v105.js?v=105" defer></script>
+  <script src="app-v105.js?v=106" defer></script>
 </body>
 </html>
