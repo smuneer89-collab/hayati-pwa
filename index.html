@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://static-cdn.tarteel.ai" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles-v103.css?v=103" />
+  <link rel="stylesheet" href="styles-v104.css?v=104" />
   <title>حياتي</title>
   <meta name="hayati-build" content="10.0-qcf604" />
 </head>
@@ -224,10 +224,24 @@
           <p>اكتب موضوع المجموعة، ثم الصق الأحاديث فقط. حياتي ينشئ الأرقام تلقائيًا ويربط كل حديث بالموضوع ويفحص التكرارات.</p>
         </div>
 
-        <section class="hadith-manager-summary">
-          <div><span>إجمالي الأحاديث</span><b id="hadithManagerTotal">0</b></div>
-          <div><span>الموضوعات</span><b id="hadithManagerTopics">0</b></div>
-          <div><span>المفضلة</span><b id="hadithManagerFavorites">0</b></div>
+        <section class="hadith-manager-summary" aria-label="استعراض قاعدة الأحاديث">
+          <button type="button" data-hadith-manager-open="all"><span>إجمالي الأحاديث</span><b id="hadithManagerTotal">0</b><small>عرض وإدارة</small></button>
+          <button type="button" data-hadith-manager-open="topics"><span>الموضوعات</span><b id="hadithManagerTopics">0</b><small>عرض الموضوعات</small></button>
+          <button type="button" data-hadith-manager-open="favorites"><span>المفضلة</span><b id="hadithManagerFavorites">0</b><small>عرض المفضلة</small></button>
+        </section>
+
+        <div class="hadith-manager-quick-actions">
+          <button type="button" class="secondary-btn" data-hadith-manager-add-topic>+ إضافة موضوع</button>
+          <button type="button" class="secondary-btn" data-hadith-manager-add-hadith>+ إضافة حديث</button>
+        </div>
+
+        <section class="hadith-manager-browser" id="hadithManagerBrowser" hidden>
+          <div class="hadith-browser-head">
+            <div><span class="section-kicker" id="hadithBrowserKicker">قاعدة الأحاديث</span><h2 id="hadithBrowserTitle">الأحاديث</h2><p id="hadithBrowserSubtitle"></p></div>
+            <button type="button" class="text-btn" data-hadith-manager-close>إغلاق</button>
+          </div>
+          <div class="hadith-browser-actions" id="hadithBrowserActions"></div>
+          <div class="hadith-browser-list" id="hadithBrowserList"></div>
         </section>
 
         <form class="hadith-import-card" id="hadithBatchForm">
@@ -271,10 +285,10 @@
             <div><span class="section-kicker">نتيجة الفحص</span><h2 id="hadithPreviewTitle">المجموعة جاهزة</h2></div>
             <span class="status-pill" id="hadithPreviewStatus">0 جديد</span>
           </div>
-          <div class="hadith-preview-stats">
-            <div><span>تم اكتشافه</span><b id="hadithDetectedCount">0</b></div>
-            <div><span>جديد</span><b id="hadithNewCount">0</b></div>
-            <div><span>مكرر</span><b id="hadithDuplicateCount">0</b></div>
+          <div class="hadith-preview-stats" aria-label="قوائم نتيجة الفحص">
+            <button type="button" class="active" data-hadith-preview-filter="all"><span>تم اكتشافه</span><b id="hadithDetectedCount">0</b><small>عرض القائمة</small></button>
+            <button type="button" data-hadith-preview-filter="new"><span>جديد</span><b id="hadithNewCount">0</b><small>عرض الجديد</small></button>
+            <button type="button" data-hadith-preview-filter="duplicate"><span>مكرر</span><b id="hadithDuplicateCount">0</b><small>عرض المكرر</small></button>
           </div>
           <div class="hadith-quran-check" id="hadithQuranCheck" hidden></div>
           <div class="hadith-preview-list" id="hadithPreviewList"></div>
@@ -530,7 +544,7 @@
 
         <div class="domain-quick religion-quick">
           <button data-religion-action="project"><span>🎯</span><b>مشروع</b></button>
-          <button type="button" onclick="window.location.href='quran.html?v=102'"><span>📖</span><b>المصحف</b></button>
+          <button type="button" onclick="window.location.href='quran.html?v=104'"><span>📖</span><b>المصحف</b></button>
           <button data-religion-action="dhikr"><span>🤲</span><b>ذكر/دعاء</b></button>
           <button data-religion-action="fast"><span>🌙</span><b>صيام</b></button>
         </div>
@@ -566,8 +580,8 @@
               <div class="quran-entry-meta" id="religionQuranReaderMeta">١١٤ سورة • ٦٠٤ صفحة</div>
             </div>
             <div class="quran-entry-actions">
-              <button class="primary-btn" type="button" onclick="window.location.href='quran.html?v=102'">فتح المصحف</button>
-              <button class="secondary-btn" type="button" onclick="window.location.href='quran.html?v=102'">متابعة القراءة</button>
+              <button class="primary-btn" type="button" onclick="window.location.href='quran.html?v=104'">فتح المصحف</button>
+              <button class="secondary-btn" type="button" onclick="window.location.href='quran.html?v=104'">متابعة القراءة</button>
             </div>
           </section>
           <div class="domain-card-wide">
@@ -899,6 +913,6 @@
     </div>
   </div>
 
-  <script src="app-v103.js?v=103" defer></script>
+  <script src="app-v104.js?v=104" defer></script>
 </body>
 </html>
