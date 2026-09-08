@@ -744,3 +744,26 @@ body.garage-mode .main-content{padding:0!important;max-width:none!important}
 .garage-maintenance-duo{display:grid;grid-template-columns:1.38fr .98fr;gap:7px;margin-top:8px;direction:ltr}.garage-neon-panel{position:relative;border:1px solid #1ad4ff;border-radius:17px;background:linear-gradient(160deg,#082335,#04131f 76%);box-shadow:0 0 8px #00bfff77,inset 0 0 20px #00c8ff10;color:#f4fbff;direction:rtl;overflow:hidden}.latest-maint-card{padding:12px 10px}.garage-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}.garage-section-head h2{font-size:14px;margin:0}.garage-section-head button{border:0;background:transparent;color:#18d8ff;font-size:9px}.maint-row{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:7px;padding:8px 0;border-bottom:1px solid #0c3348}.maint-row:last-child{border-bottom:0}.maint-thumb{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#0a1a26;color:#bfcbd3;font-size:22px;box-shadow:inset 0 0 7px #fff1}.maint-thumb svg{width:26px;height:26px;fill:none;stroke:#c9d2d8;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.maint-row>div:nth-child(2) b{display:block;font-size:10px}.maint-row>div:nth-child(2) small{font-size:8px;color:#8ca2b1}.maint-row>strong{font-size:11px;color:#65edff;white-space:nowrap}.maint-row>strong small{font-size:7px;color:#b7c9d4}.next-maint-card{padding:12px 9px;text-align:center;display:flex;flex-direction:column;align-items:center}.next-maint-card h2{font-size:14px;margin:0 0 9px;align-self:stretch;text-align:right}.engine-line-icon{width:68px;height:58px;color:#ffad37}.engine-line-icon svg{width:100%;height:100%;fill:none;stroke:#ffad37;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px #ff9c2f66)}.next-maint-card>strong{font-size:17px;color:#ffad37;margin-top:2px}.next-maint-card>small{font-size:9px;color:#d9e5ec}.next-maint-card>b{font-size:9px;margin-top:5px}.service-timeline{height:9px;width:100%;background:#0d4a70;border-radius:99px;margin:10px 0;overflow:hidden;box-shadow:inset 0 1px 3px #000}.service-timeline i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#00d981,#6ff3b5);box-shadow:0 0 10px #34efa2}.next-maint-card button{width:100%;height:38px;border-radius:10px;border:1px solid #53e6ff;background:linear-gradient(#08a9f0,#0770d8);color:#fff;font-size:11px;font-weight:800;box-shadow:0 0 14px #00bfff66}.next-maint-card button span{float:left;font-size:18px}
 .garage-bottom-nav{position:fixed;z-index:100;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,430px);height:78px;padding:7px 11px calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(5,1fr);align-items:center;background:#03121dea;border-top:1px solid #154865;backdrop-filter:blur(18px);box-shadow:0 -10px 25px #0008;direction:rtl}.garage-bottom-nav button{height:56px;border:0;background:transparent;color:#a9bbc7;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:13px}.garage-bottom-nav button span{font-size:21px}.garage-bottom-nav button b{font-size:9px}.garage-bottom-nav button.active{color:#19dfff;text-shadow:0 0 8px #00c8ff}.garage-bottom-nav .garage-add{width:56px;height:56px;border-radius:50%;border:2px solid #1ad8ff;background:#06273b;color:#2ce3ff;margin:auto;box-shadow:0 0 16px #00bfff55}.garage-bottom-nav .garage-add span{font-size:30px;font-weight:300}
 @media(max-width:360px){.garage-shell{padding-inline:7px}.garage-hero{margin-inline:-7px;height:600px}.garage-side-menu{width:106px;left:5px}.garage-side-menu button{height:45px;padding-inline:5px}.garage-model{left:114px;right:70px}.bahrain-plate.garage-plate{right:5px;width:88px}.garage-car-wrap{top:190px!important;height:282px!important}.garage-swatch{width:28px!important;height:28px!important}.garage-xenon{height:142px}.garage-xenon>b{font-size:10px}.garage-xenon>strong{font-size:19px}.garage-maintenance-duo{grid-template-columns:1.3fr .95fr}}
+
+/* Garage v10.9.1 — replacement vehicle cutout, compact mobile scale */
+.garage-car-wrap{
+  top:228px!important;
+  height:218px!important;
+  left:10px!important;
+  right:10px!important;
+  pointer-events:none;
+}
+.garage-car-wrap img{
+  width:78%!important;
+  height:auto!important;
+  max-height:212px!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  mix-blend-mode:normal!important;
+  transform:translateX(28px)!important;
+  filter:drop-shadow(0 15px 13px rgba(0,0,0,.72))!important;
+}
+@media(max-width:360px){
+  .garage-car-wrap{top:224px!important;height:205px!important}
+  .garage-car-wrap img{width:76%!important;max-height:198px!important;transform:translateX(25px)!important}
+}
