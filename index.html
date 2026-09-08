@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://static-cdn.tarteel.ai" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles-v104.css?v=104" />
+  <link rel="stylesheet" href="styles-v105.css?v=105" />
   <title>حياتي</title>
   <meta name="hayati-build" content="10.0-qcf604" />
 </head>
@@ -275,7 +275,7 @@
           </div>
 
           <div class="hadith-import-actions">
-            <button class="secondary-btn" type="button" id="hadithAnalyzeBtn">فحص المجموعة</button>
+            <button class="secondary-btn" type="button" id="hadithAnalyzeBtn">فحص ومعاينة</button>
             <button class="primary-btn" type="submit">إضافة إلى قاعدة الأحاديث</button>
           </div>
         </form>
@@ -913,6 +913,26 @@
     </div>
   </div>
 
-  <script src="app-v1041.js?v=1041" defer></script>
+    <div class="hadith-correction-backdrop" id="hadithCorrectionBackdrop" hidden>
+    <section class="hadith-correction-modal" role="dialog" aria-modal="true" aria-labelledby="hadithCorrectionTitle">
+      <button class="modal-close" type="button" data-hadith-correction-close aria-label="إغلاق">×</button>
+      <div class="hadith-correction-icon">⚠️</div>
+      <span class="section-kicker">فحص الآيات</span>
+      <h2 id="hadithCorrectionTitle">تم اكتشاف خطأ</h2>
+      <p id="hadithCorrectionMessage">تم اكتشاف مقطع قرآني يحتاج مراجعة. ماذا تريد أن تفعل؟</p>
+      <div class="hadith-correction-choice" id="hadithCorrectionChoice">
+        <button type="button" class="primary-btn" data-hadith-correction-edit>هل تريد تعديله؟</button>
+        <button type="button" class="secondary-btn" data-hadith-correction-anyway>عرض على أي حال</button>
+      </div>
+      <div class="hadith-correction-editor" id="hadithCorrectionEditor" hidden>
+        <div class="hadith-correction-query"><span>النص الذي كتبته</span><b id="hadithCorrectionQuery"></b><small id="hadithCorrectionProgress"></small></div>
+        <p class="hadith-correction-help">اختر الآية الصحيحة من النتائج الأقرب. سيأخذ حياتي النص منها بالرسم العثماني.</p>
+        <div class="hadith-correction-suggestions" id="hadithCorrectionSuggestions"></div>
+        <button type="button" class="text-btn" data-hadith-correction-manual>تعديل النص يدويًا بدلًا من ذلك</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="app-v105.js?v=105" defer></script>
 </body>
 </html>
