@@ -134,6 +134,7 @@ function addTimeline(title, meta='حياتي', icon='✓') {
 
 function showView(name) {
   if (name !== 'quran-reader') document.body.classList.remove('quran-fullscreen-mode');
+  document.body.classList.toggle('garage-mode', name === 'garage');
   views.forEach(v => v.classList.toggle('active', v.dataset.view === name));
   navItems.forEach(item => item.classList.toggle('active', item.dataset.nav === name));
   if (name === 'garage') renderGarage();
@@ -7755,7 +7756,7 @@ window.addEventListener('load', async () => {
     if ('caches' in window) { const keys=await caches.keys(); await Promise.all(keys.map(k=>caches.delete(k))); }
   } catch {}
 });
-const GARAGE_KEY = 'hayati-garage-v1';
+const GARAGE_KEY = 'hayati-garage-v2';
 function renderGarage(){
   const saved=loadJSON(GARAGE_KEY,{filter:'none'});
   const img=document.getElementById('garageCarImage'); if(img) img.style.filter=saved.filter||'none';
@@ -7765,6 +7766,6 @@ document.addEventListener('click',e=>{
   const sw=e.target.closest('.garage-swatch');
   if(sw){const filter=sw.dataset.carFilter||'none';localStorage.setItem(GARAGE_KEY,JSON.stringify({filter}));renderGarage();return;}
   const g=e.target.closest('[data-garage-demo]');
-  if(g){const names={maintenance:'سجل الصيانة',documents:'الوثائق الرسمية',expenses:'مصاريف السيارة',customize:'تخصيص السيارة',edit:'تعديل معلومات السيارة'};openModal(names[g.dataset.garageDemo]||'الكراج','تم تجهيز واجهة الكراج الأساسية. هذه الشاشة ستكون الخطوة التالية لإدخال وإدارة بياناتك الفعلية.','🚙');}
+  if(g){const names={overview:'نظرة عامة',maintenance:'سجل الصيانة',documents:'الأوراق الرسمية',expenses:'مصاريف السيارة',customize:'تخصيص السيارة',edit:'تعديل معلومات السيارة'};openModal(names[g.dataset.garageDemo]||'الكراج','هذه الواجهة جاهزة بصريًا، وسيتم ربط البيانات الفعلية ونماذج الإدخال في المرحلة التالية.','🚙');}
 });
 

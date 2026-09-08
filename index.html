@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://static-cdn.tarteel.ai" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles-v105.css?v=107g" />
+  <link rel="stylesheet" href="styles-v105.css?v=108f" />
   <title>حياتي</title>
   <meta name="hayati-build" content="10.0-qcf604" />
 </head>
@@ -298,54 +298,80 @@
 
       <section class="view garage-view" data-view="garage" id="view-garage">
         <div class="garage-shell">
-          <div class="garage-topline"><div><span class="section-kicker">MY GARAGE</span><h1>الكراج</h1><p>سيارتك... دائمًا جاهزة</p></div><span class="garage-live"><i></i> متصلة</span></div>
+          <header class="garage-mobile-head">
+            <button class="garage-back" type="button" data-nav="domains" aria-label="رجوع">‹</button>
+            <div class="garage-brand"><b>حياتي</b><small>تنظيم حياة أفضل</small></div>
+            <button class="garage-bell" type="button" aria-label="التنبيهات">♢<i></i></button>
+          </header>
 
-          <section class="garage-stage" aria-label="سيارتي GMC Terrain 2016">
-            <div class="garage-gridfx"></div><div class="garage-beam beam-a"></div><div class="garage-beam beam-b"></div>
-            <div class="garage-model"><b>GMC</b><span>TERRAIN 2016</span></div>
-            <div class="garage-car-wrap"><img id="garageCarImage" src="garage-gmc-terrain-2016.webp" alt="GMC Terrain 2016 زرقاء" /></div>
+          <section class="garage-hero" aria-label="سيارتي GMC Terrain 2016">
+            <div class="garage-ceiling"><span></span><span></span><span></span></div>
+            <div class="garage-side-menu" aria-label="أقسام الكراج">
+              <button class="active" type="button" data-garage-demo="overview"><span>⌂</span><b>نظرة عامة</b></button>
+              <button type="button" data-garage-demo="maintenance"><span>⚒</span><b>الصيانة</b></button>
+              <button type="button" data-garage-demo="documents"><span>▤</span><b>الأوراق</b></button>
+              <button type="button" data-garage-demo="expenses"><span>▱</span><b>المصاريف</b></button>
+              <button type="button" data-garage-demo="customize"><span>◉</span><b>التخصيص</b></button>
+            </div>
+
+            <div class="garage-model">
+              <b>GMC</b><span>Terrain 2016</span><small>قوتك ... دائمًا معك</small>
+            </div>
+
+            <div class="bahrain-plate garage-plate">
+              <div class="plate-number"><small>البحرين</small><strong id="garagePlateNumber">12345</strong></div>
+              <div class="plate-flag" aria-hidden="true"><span></span></div>
+            </div>
+
+            <div class="garage-car-wrap"><img id="garageCarImage" src="garage-car.png" alt="GMC Terrain 2016 زرقاء" /></div>
             <div class="garage-platform"><span></span></div>
-            <div class="garage-colors" aria-label="اختيار لون السيارة">
-              <button class="garage-swatch active" data-car-filter="none" style="--sw:#244d82" aria-label="أزرق"></button>
-              <button class="garage-swatch" data-car-filter="grayscale(1) brightness(1.5)" style="--sw:#f4f6f8" aria-label="أبيض"></button>
-              <button class="garage-swatch" data-car-filter="grayscale(1) brightness(.42) contrast(1.35)" style="--sw:#17191d" aria-label="أسود"></button>
-              <button class="garage-swatch" data-car-filter="hue-rotate(125deg) saturate(1.8)" style="--sw:#b91f2c" aria-label="أحمر"></button>
-              <button class="garage-swatch" data-car-filter="grayscale(1) brightness(.9)" style="--sw:#8f969e" aria-label="فضي"></button>
+
+            <div class="garage-color-row">
+              <button class="garage-arrow" type="button" aria-label="السابق">‹</button>
+              <div class="garage-colors" aria-label="اختيار لون السيارة">
+                <button class="garage-swatch" data-car-filter="grayscale(1) brightness(1.65)" style="--sw:#f7f7f7" aria-label="أبيض"></button>
+                <button class="garage-swatch" data-car-filter="grayscale(1) brightness(1.05)" style="--sw:#bfc4c9" aria-label="فضي"></button>
+                <button class="garage-swatch" data-car-filter="grayscale(1) brightness(.4) contrast(1.4)" style="--sw:#15171b" aria-label="أسود"></button>
+                <button class="garage-swatch active" data-car-filter="none" style="--sw:#0e6bc6" aria-label="أزرق"></button>
+                <button class="garage-swatch" data-car-filter="hue-rotate(125deg) saturate(2.2) brightness(.92)" style="--sw:#d21326" aria-label="أحمر"></button>
+                <button class="garage-swatch" data-car-filter="sepia(.35) saturate(.7) brightness(.75)" style="--sw:#63584e" aria-label="بني"></button>
+              </div>
+              <button class="garage-arrow" type="button" aria-label="التالي">›</button>
             </div>
             <small class="garage-color-note">اختر لون سيارتك</small>
           </section>
 
-          <section class="garage-health-card">
-            <div class="health-ring" style="--score:87"><strong>87%</strong><small>حالة السيارة</small></div>
-            <div class="health-copy"><span>HEALTH SCORE</span><h2>بحالة جيدة</h2><p>الوثائق والصيانة الدورية مستقرة حاليًا.</p></div>
+          <section class="garage-xenon-grid" aria-label="حالة السيارة والأوراق">
+            <article class="garage-xenon health-x"><div class="health-ring" style="--score:87"><strong>87%</strong></div><b>حالة السيارة</b><small class="ok">بحالة جيدة</small></article>
+            <article class="garage-xenon"><span class="x-icon">▤</span><b>الاستمارة</b><strong>128</strong><small>يوم</small><em>15 يناير 2026</em></article>
+            <article class="garage-xenon"><span class="x-icon">◇</span><b>التأمين</b><strong>210</strong><small>يوم</small><em>8 مارس 2026</em></article>
+            <article class="garage-xenon"><span class="x-icon">⚒</span><b>الفحص الدوري</b><strong>65</strong><small>يوم</small><em>20 نوفمبر 2025</em></article>
           </section>
 
-          <section class="garage-alerts">
-            <div class="garage-section-head"><div><span class="section-kicker">تنبيهات قريبة</span><h2>الأوراق الرسمية</h2></div><button type="button" data-garage-demo="documents">عرض الكل</button></div>
-            <article><span class="ga-icon">▣</span><div><b>الاستمارة</b><small>تجديد تسجيل المركبة</small></div><em>بعد 28 يوم</em></article>
-            <article><span class="ga-icon">◇</span><div><b>التأمين</b><small>وثيقة التأمين السنوية</small></div><em>بعد 56 يوم</em></article>
-            <article><span class="ga-icon">⌁</span><div><b>الفحص الدوري</b><small>الفحص الفني للمركبة</small></div><em>بعد 112 يوم</em></article>
+          <section class="garage-maintenance-duo">
+            <article class="latest-maint-card garage-neon-panel">
+              <div class="garage-section-head"><h2>أحدث الصيانة</h2><button type="button" data-garage-demo="maintenance">عرض الكل</button></div>
+              <div class="maint-row"><div class="maint-thumb engine-svg"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M14 22h27l7 8v20H15V36H8V26h6zM22 15h15v7H22zM48 34h7v11h-7M20 31h20M24 42h12"/></svg></div><div><b>تغيير زيت المحرك</b><small>12 سبتمبر 2025</small></div><strong>28.000 <small>د.ب</small></strong></div>
+              <div class="maint-row"><div class="maint-thumb">◉</div><div><b>تغيير الإطارات</b><small>5 يونيو 2025</small></div><strong>120.000 <small>د.ب</small></strong></div>
+              <div class="maint-row"><div class="maint-thumb">▰</div><div><b>فحص البطارية</b><small>6 يناير 2025</small></div><strong>35.000 <small>د.ب</small></strong></div>
+            </article>
+
+            <article class="next-maint-card garage-neon-panel">
+              <h2>الصيانة القادمة</h2>
+              <div class="engine-line-icon"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M14 22h27l7 8v20H15V36H8V26h6zM22 15h15v7H22zM48 34h7v11h-7M20 31h20M24 42h12"/></svg></div>
+              <strong>بعد 2,550 كم</strong><small>أو 45 يوم</small><b>تغيير زيت المحرك</b>
+              <div class="service-timeline"><i style="width:72%"></i></div>
+              <button type="button" data-garage-demo="maintenance">إضافة صيانة <span>＋</span></button>
+            </article>
           </section>
 
-          <div class="garage-action-grid">
-            <button type="button" data-garage-demo="maintenance"><span>🛠</span><b>سجل الصيانة</b><small>التصليح والخدمات</small></button>
-            <button type="button" data-garage-demo="documents"><span>▤</span><b>الوثائق</b><small>الاستمارة والتأمين</small></button>
-            <button type="button" data-garage-demo="expenses"><span>◫</span><b>المصاريف</b><small>تكلفة السيارة</small></button>
-            <button type="button" data-garage-demo="customize"><span>◉</span><b>التخصيص</b><small>لون السيارة</small></button>
-          </div>
-
-          <section class="garage-info-card">
-            <div class="garage-section-head"><div><span class="section-kicker">سيارتي</span><h2>معلومات السيارة</h2></div><button type="button" data-garage-demo="edit">تعديل</button></div>
-            <div class="bahrain-plate"><div class="plate-side"><span>البحرين</span><b>BH</b></div><div class="plate-number"><small>البحرين</small><strong>12345</strong></div></div>
-            <dl><div><dt>الموديل</dt><dd>GMC Terrain</dd></div><div><dt>سنة الصنع</dt><dd>2016</dd></div><div><dt>اللون الحالي</dt><dd>أزرق</dd></div><div><dt>المسافة المقطوعة</dt><dd>128,450 كم</dd></div></dl>
-          </section>
-
-          <section class="garage-maintenance-card">
-            <div class="garage-section-head"><div><span class="section-kicker">الصيانة</span><h2>القادم</h2></div><button type="button" data-garage-demo="maintenance">السجل</button></div>
-            <div class="next-service"><span>🛢️</span><div><b>تغيير زيت المحرك</b><small>بعد 2,550 كم تقريبًا</small></div><em>قريب</em></div>
-            <div class="garage-mini-stats"><div><span>آخر صيانة</span><b>28.000 د.ب</b></div><div><span>إجمالي هذا الشهر</span><b>75.000 د.ب</b></div></div>
-          </section>
-          <p class="garage-footer-note">سيارتك ... جزء من رحلتك اليومية</p>
+          <nav class="garage-bottom-nav safe-bottom" aria-label="تنقل الكراج">
+            <button type="button" data-nav="today"><span>⌂</span><b>الرئيسية</b></button>
+            <button type="button" class="active"><span>🚙</span><b>الكراج</b></button>
+            <button type="button" class="garage-add" data-garage-demo="maintenance"><span>＋</span></button>
+            <button type="button" data-section="finance"><span>▱</span><b>المصاريف</b></button>
+            <button type="button" data-nav="domains"><span>▦</span><b>المزيد</b></button>
+          </nav>
         </div>
       </section>
 
