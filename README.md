@@ -11,3 +11,9 @@
 - ترحيل بيانات الرواتب القديمة تلقائيًا عند فتح النسخة.
 
 ملاحظة: تخزين قسم «مالي» في هذه الحزمة ما زال محليًا مثل النسخة الأصلية، ولم تتم إضافة إعدادات Firebase جديدة لأن الحزمة لا تحتوي إعداد اتصال Firebase جاهزًا.
+
+
+## v10.7 Finance dated salaries
+- Removed migration of old fixed-day salaries.
+- Salary entries now use independent full dates and can be edited/deleted.
+- Budget periods are calculated between exact salary dates.
