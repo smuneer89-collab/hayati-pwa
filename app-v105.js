@@ -27,6 +27,7 @@ let currentFinanceAction = null;
 let currentDomainAction = null;
 
 const sectionData = {
+  garage: { title: 'الكراج', kicker: 'سيارتي', icon: '🚙', description: 'إدارة السيارة والوثائق والصيانة والمصاريف والتخصيص.' },
   finance: { title: 'مالي', kicker: 'الشؤون المالية', icon: '💰', description: 'الدخل، المصروفات، الميزانية، الادخار، الالتزامات والديون والأهداف المالية.' },
   health: { title: 'صحتي', kicker: 'مشروع إنزال الوزن', icon: '🥗', description: 'تقييم البداية، الهدف، الخطة الغذائية، الوجبات والمشروبات والوزن والمتابعة الأسبوعية.' },
   religion: { title: 'ديني', kicker: 'المشاريع الدينية', icon: '🕌', description: 'القرآن، الأذكار، الصيام، التعلم، المواسم والمشاريع الدينية الشخصية.' },
@@ -135,6 +136,7 @@ function showView(name) {
   if (name !== 'quran-reader') document.body.classList.remove('quran-fullscreen-mode');
   views.forEach(v => v.classList.toggle('active', v.dataset.view === name));
   navItems.forEach(item => item.classList.toggle('active', item.dataset.nav === name));
+  if (name === 'garage') renderGarage();
   if (name === 'finance') renderFinance();
   if (name === 'health') renderHealth();
   if (name === 'religion') renderReligion();
@@ -149,7 +151,7 @@ function showView(name) {
 }
 
 function openSection(key) {
-  if (['finance','health','religion','knowledge','relationships','family'].includes(key)) {
+  if (['garage','finance','health','religion','knowledge','relationships','family'].includes(key)) {
     showView(key);
     navItems.forEach(i => i.classList.remove('active'));
     return;
@@ -7753,3 +7755,16 @@ window.addEventListener('load', async () => {
     if ('caches' in window) { const keys=await caches.keys(); await Promise.all(keys.map(k=>caches.delete(k))); }
   } catch {}
 });
+const GARAGE_KEY = 'hayati-garage-v1';
+function renderGarage(){
+  const saved=loadJSON(GARAGE_KEY,{filter:'none'});
+  const img=document.getElementById('garageCarImage'); if(img) img.style.filter=saved.filter||'none';
+  document.querySelectorAll('.garage-swatch').forEach(b=>b.classList.toggle('active',(b.dataset.carFilter||'none')===(saved.filter||'none')));
+}
+document.addEventListener('click',e=>{
+  const sw=e.target.closest('.garage-swatch');
+  if(sw){const filter=sw.dataset.carFilter||'none';localStorage.setItem(GARAGE_KEY,JSON.stringify({filter}));renderGarage();return;}
+  const g=e.target.closest('[data-garage-demo]');
+  if(g){const names={maintenance:'سجل الصيانة',documents:'الوثائق الرسمية',expenses:'مصاريف السيارة',customize:'تخصيص السيارة',edit:'تعديل معلومات السيارة'};openModal(names[g.dataset.garageDemo]||'الكراج','تم تجهيز واجهة الكراج الأساسية. هذه الشاشة ستكون الخطوة التالية لإدخال وإدارة بياناتك الفعلية.','🚙');}
+});
+
