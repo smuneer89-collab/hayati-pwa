@@ -99,13 +99,36 @@
             <button class="text-btn" data-nav="domains">كل الأقسام</button>
           </div>
 
-          <div class="priority-list today-summary-list">
-            <article class="priority-card finance" data-section="finance" tabindex="0"><div class="priority-icon">💰</div><div class="priority-body"><span class="priority-label">مالي</span><h3>المسموح اليوم</h3><p id="todayFinanceSummary">—</p></div><button class="mini-action" data-section="finance">فتح</button></article>
-            <article class="priority-card knowledge" data-section="knowledge" tabindex="0"><div class="priority-icon">📘</div><div class="priority-body"><span class="priority-label">معرفتي</span><h3>المهام المعرفية</h3><p id="todayKnowledgeSummary">—</p></div><button class="mini-action" data-section="knowledge">فتح</button></article>
-            <article class="priority-card family" data-section="family" tabindex="0"><div class="priority-icon">👨‍👩‍👧‍👦</div><div class="priority-body"><span class="priority-label">عائلتي</span><h3>الواجبات العائلية</h3><p id="todayFamilySummary">—</p></div><button class="mini-action" data-section="family">فتح</button></article>
-            <article class="priority-card religion" data-section="religion" tabindex="0"><div class="priority-icon">🕌</div><div class="priority-body"><span class="priority-label">ديني</span><h3>المهام الدينية</h3><p id="todayReligionSummary">—</p></div><button class="mini-action" data-section="religion">فتح</button></article>
-            <article class="priority-card relationships" data-section="relationships" tabindex="0"><div class="priority-icon">🤝</div><div class="priority-body"><span class="priority-label">علاقاتي</span><h3>مهام العلاقات</h3><p id="todayRelationshipsSummary">—</p></div><button class="mini-action" data-section="relationships">فتح</button></article>
-            <article class="priority-card health" data-section="health" tabindex="0"><div class="priority-icon">🍽️</div><div class="priority-body"><span class="priority-label">صحتي</span><h3>السعرات المتبقية</h3><p id="todayHealthSummary">—</p></div><button class="mini-action" data-section="health">فتح</button></article>
+          <div class="priority-list">
+            <article class="priority-card health" data-section="health" tabindex="0">
+              <div class="priority-icon">🍽️</div>
+              <div class="priority-body">
+                <span class="priority-label">صحتي</span>
+                <h3>مشروع إنزال الوزن</h3>
+                <p>ابدأ بتسجيل وجبتك أو وزنك اليوم.</p>
+              </div>
+              <button class="mini-action" data-action="meal">أضف وجبة</button>
+            </article>
+
+            <article class="priority-card knowledge" data-section="knowledge" tabindex="0">
+              <div class="priority-icon">📘</div>
+              <div class="priority-body">
+                <span class="priority-label">معرفتي</span>
+                <h3>مشروع الإنجليزية</h3>
+                <p>المهمة التعليمية اليومية ستظهر هنا.</p>
+              </div>
+              <button class="mini-action" data-action="learn">ابدأ</button>
+            </article>
+
+            <article class="priority-card religion" data-section="religion" tabindex="0">
+              <div class="priority-icon">📖</div>
+              <div class="priority-body">
+                <span class="priority-label">ديني</span>
+                <h3>ورد اليوم</h3>
+                <p>سيظهر هدف القرآن أو المشروع الديني النشط.</p>
+              </div>
+              <button class="mini-action" data-action="religion">فتح</button>
+            </article>
           </div>
         </section>
 
@@ -183,15 +206,15 @@
           <button class="setting-row" id="settingTheme"><span>🌗</span><div><b>المظهر</b><small>التبديل بين الداكن والفاتح.</small></div><em>←</em></button>
           <button class="setting-row" id="hadithManagerOpenBtn"><span>📚</span><div><b>إدارة قاعدة الأحاديث</b><small>اكتب موضوع المجموعة والصق الأحاديث؛ حياتي يفصلها ويفحص التكرار ويحفظها تلقائيًا.</small></div><em id="hadithSettingsCount">0 حديث</em></button>
           <button class="setting-row" id="backupExportBtn"><span>💾</span><div><b>إنشاء نسخة احتياطية كاملة</b><small>على الآيفون تفتح ورقة المشاركة؛ اختر «حفظ في الملفات». تشمل البيانات وصور الألبومات.</small></div><em>حفظ</em></button>
-          <button class="setting-row" id="backupImportBtn"><span>♻️</span><div><b>استعادة نسخة احتياطية</b><small>اختر ملف JSON واحد من «الملفات». يفحصه حياتي ويأخذ لقطة أمان قبل الاستعادة.</small></div><em>اختيار ملف</em></button>
-          <div class="setting-row static"><span>🕘</span><div><b>آخر نسخة كاملة</b><small id="backupLastFull">لم تُنشأ نسخة كاملة بعد.</small></div><em>JSON</em></div>
+          <button class="setting-row" id="backupImportBtn"><span>♻️</span><div><b>استعادة نسخة احتياطية</b><small>اختر ملف ZIP من «الملفات». يفحصه حياتي ويأخذ لقطة أمان قبل الاستعادة.</small></div><em>اختيار ملف</em></button>
+          <div class="setting-row static"><span>🕘</span><div><b>آخر نسخة كاملة</b><small id="backupLastFull">لم تُنشأ نسخة كاملة بعد.</small></div><em>ZIP</em></div>
           <button class="setting-row" id="backupReminderBtn"><span>🔔</span><div><b>تذكير أسبوعي بالنسخة</b><small>تذكير داخل التطبيق إذا مر أسبوع دون نسخة كاملة.</small></div><em id="backupReminderState">مفعل</em></button>
           <button class="setting-row" id="backupSnapshotNowBtn"><span>🧩</span><div><b>إنشاء نسخة محلية الآن</b><small>لقطة سريعة تبقى على هذا الجهاز، ويمكن الرجوع إليها من القائمة أدناه.</small></div><em>إنشاء</em></button>
           <div class="setting-row static backup-snapshots-row"><span>🕘</span><div><b>النسخ المحلية الأخيرة</b><small>آخر 5 لقطات. اضغط على أي تاريخ لاستعادته.</small><div id="backupSnapshotList" class="snapshot-list"></div></div><em>آخر 5</em></div>
           <div class="setting-row static"><span>🔐</span><div><b>Firebase</b><small>لن نربطه الآن؛ نبني الأقسام أولًا كما اتفقنا.</small></div><em>لاحقًا</em></div>
           <div class="setting-row static"><span>🤖</span><div><b>مساعد حياتي</b><small>سيُضاف تدريجيًا بعد استقرار البيانات والأقسام.</small></div><em>لاحقًا</em></div>
         </div>
-        <input type="file" id="backupImportInput" accept=".json,application/json" hidden />
+        <input type="file" id="backupImportInput" accept=".zip,application/zip,application/x-zip-compressed" hidden />
       </section>
 
       <section class="view" data-view="hadith-manager" id="view-hadith-manager">
@@ -274,68 +297,78 @@
       </section>
 
       <section class="view garage-view" data-view="garage" id="view-garage">
-        <div class="garage-shell-v3">
-          <header class="garage-head-v3">
-            <div class="garage-brand-v3"><b>حياتي</b><small>تنظيم حياة أفضل</small></div>
-            <div class="garage-head-actions-v3">
-              <button type="button" class="garage-notify-v3" aria-label="التنبيهات">♧<i></i></button>
-              <button type="button" class="garage-avatar-v3" aria-label="الحساب">H</button>
-            </div>
+        <div class="garage-shell">
+          <header class="garage-mobile-head">
+            <button class="garage-back" type="button" data-nav="domains" aria-label="رجوع">‹</button>
+            <div class="garage-brand"><b>حياتي</b><small>تنظيم حياة أفضل</small></div>
+            <button class="garage-bell" type="button" aria-label="التنبيهات">♢<i></i></button>
           </header>
 
-          <section class="garage-showroom-v3" aria-label="GMC Terrain 2016">
-            <div class="garage-light-v3 light-one"></div><div class="garage-light-v3 light-two"></div><div class="garage-light-v3 light-three"></div>
-            <nav class="garage-side-v3" aria-label="أقسام الكراج">
+          <section class="garage-hero" aria-label="سيارتي GMC Terrain 2016">
+            <div class="garage-ceiling"><span></span><span></span><span></span></div>
+            <div class="garage-side-menu" aria-label="أقسام الكراج">
               <button class="active" type="button" data-garage-demo="overview"><span>⌂</span><b>نظرة عامة</b></button>
               <button type="button" data-garage-demo="maintenance"><span>⚒</span><b>الصيانة</b></button>
               <button type="button" data-garage-demo="documents"><span>▤</span><b>الأوراق</b></button>
               <button type="button" data-garage-demo="expenses"><span>▱</span><b>المصاريف</b></button>
               <button type="button" data-garage-demo="customize"><span>◉</span><b>التخصيص</b></button>
-            </nav>
-
-            <div class="garage-model-v3">
-              <b>GMC</b><span>Terrain 2016</span><small>قوتك .. دائماً معك</small>
             </div>
 
-            <button class="bahrain-plate-v3" type="button" data-garage-demo="edit" aria-label="تعديل رقم اللوحة">
-              <div class="plate-copy-v3"><small>البحرين</small><strong id="garagePlateNumber">12345</strong></div>
-              <div class="plate-flag-v3" aria-hidden="true"></div>
-            </button>
-
-            <div class="garage-car-stage-v3">
-              <div class="garage-platform-v3"><i></i></div>
-              <img id="garageCarImage" src="garage-car-transparent.png?v=3" alt="GMC Terrain 2016" />
+            <div class="garage-model">
+              <b>GMC</b><span>Terrain 2016</span><small>قوتك ... دائمًا معك</small>
             </div>
+
+            <div class="bahrain-plate garage-plate">
+              <div class="plate-number"><small>البحرين</small><strong id="garagePlateNumber">12345</strong></div>
+              <div class="plate-flag" aria-hidden="true"><span></span></div>
+            </div>
+
+            <div class="garage-car-wrap"><img id="garageCarImage" src="garage-car.png" alt="GMC Terrain 2016 زرقاء" /></div>
+            <div class="garage-platform"><span></span></div>
+
+            <div class="garage-color-row">
+              <button class="garage-arrow" type="button" aria-label="السابق">‹</button>
+              <div class="garage-colors" aria-label="اختيار لون السيارة">
+                <button class="garage-swatch" data-car-filter="grayscale(1) brightness(1.65)" style="--sw:#f7f7f7" aria-label="أبيض"></button>
+                <button class="garage-swatch" data-car-filter="grayscale(1) brightness(1.05)" style="--sw:#bfc4c9" aria-label="فضي"></button>
+                <button class="garage-swatch" data-car-filter="grayscale(1) brightness(.4) contrast(1.4)" style="--sw:#15171b" aria-label="أسود"></button>
+                <button class="garage-swatch active" data-car-filter="none" style="--sw:#0e6bc6" aria-label="أزرق"></button>
+                <button class="garage-swatch" data-car-filter="hue-rotate(125deg) saturate(2.2) brightness(.92)" style="--sw:#d21326" aria-label="أحمر"></button>
+                <button class="garage-swatch" data-car-filter="sepia(.35) saturate(.7) brightness(.75)" style="--sw:#63584e" aria-label="بني"></button>
+              </div>
+              <button class="garage-arrow" type="button" aria-label="التالي">›</button>
+            </div>
+            <small class="garage-color-note">اختر لون سيارتك</small>
           </section>
 
-          <section class="garage-status-v3" aria-label="حالة السيارة والأوراق">
-            <article class="garage-status-card-v3 health-v3"><div class="health-ring-v3"><strong>87%</strong></div><b>حالة السيارة</b><small>بحالة جيدة</small></article>
-            <article class="garage-status-card-v3"><span class="status-icon-v3">▤</span><b>الاستمارة</b><strong>128</strong><small>يوم</small><em>15 يناير 2026</em></article>
-            <article class="garage-status-card-v3"><span class="status-icon-v3">◇</span><b>التأمين</b><strong>210</strong><small>يوم</small><em>8 مارس 2026</em></article>
-            <article class="garage-status-card-v3"><span class="status-icon-v3">⚒</span><b>الفحص الدوري</b><strong>65</strong><small>يوم</small><em>20 نوفمبر 2025</em></article>
+          <section class="garage-xenon-grid" aria-label="حالة السيارة والأوراق">
+            <article class="garage-xenon health-x"><div class="health-ring" style="--score:87"><strong>87%</strong></div><b>حالة السيارة</b><small class="ok">بحالة جيدة</small></article>
+            <article class="garage-xenon"><span class="x-icon">▤</span><b>الاستمارة</b><strong>128</strong><small>يوم</small><em>15 يناير 2026</em></article>
+            <article class="garage-xenon"><span class="x-icon">◇</span><b>التأمين</b><strong>210</strong><small>يوم</small><em>8 مارس 2026</em></article>
+            <article class="garage-xenon"><span class="x-icon">⚒</span><b>الفحص الدوري</b><strong>65</strong><small>يوم</small><em>20 نوفمبر 2025</em></article>
           </section>
 
-          <section class="garage-maint-v3">
-            <article class="garage-panel-v3 latest-v3">
-              <header><button type="button" data-garage-demo="maintenance">عرض الكل</button><h2>أحدث الصيانة</h2></header>
-              <div class="service-row-v3"><div class="part-icon-v3"><svg viewBox="0 0 64 64"><path d="M14 22h27l7 8v20H15V36H8V26h6zM22 15h15v7H22zM48 34h7v11h-7M20 31h20M24 42h12"/></svg></div><div><b>تغيير زيت المحرك</b><small>12 سبتمبر 2025</small></div><strong>28.000 <small>د.ب</small></strong></div>
-              <div class="service-row-v3"><div class="part-icon-v3 tire-v3">◉</div><div><b>تغيير الإطارات</b><small>5 يونيو 2025</small></div><strong>120.000 <small>د.ب</small></strong></div>
-              <div class="service-row-v3"><div class="part-icon-v3 battery-v3">▰</div><div><b>فحص البطارية</b><small>8 يناير 2025</small></div><strong>35.000 <small>د.ب</small></strong></div>
+          <section class="garage-maintenance-duo">
+            <article class="latest-maint-card garage-neon-panel">
+              <div class="garage-section-head"><h2>أحدث الصيانة</h2><button type="button" data-garage-demo="maintenance">عرض الكل</button></div>
+              <div class="maint-row"><div class="maint-thumb engine-svg"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M14 22h27l7 8v20H15V36H8V26h6zM22 15h15v7H22zM48 34h7v11h-7M20 31h20M24 42h12"/></svg></div><div><b>تغيير زيت المحرك</b><small>12 سبتمبر 2025</small></div><strong>28.000 <small>د.ب</small></strong></div>
+              <div class="maint-row"><div class="maint-thumb">◉</div><div><b>تغيير الإطارات</b><small>5 يونيو 2025</small></div><strong>120.000 <small>د.ب</small></strong></div>
+              <div class="maint-row"><div class="maint-thumb">▰</div><div><b>فحص البطارية</b><small>6 يناير 2025</small></div><strong>35.000 <small>د.ب</small></strong></div>
             </article>
 
-            <article class="garage-panel-v3 next-v3">
+            <article class="next-maint-card garage-neon-panel">
               <h2>الصيانة القادمة</h2>
-              <div class="engine-v3"><svg viewBox="0 0 64 64"><path d="M14 22h27l7 8v20H15V36H8V26h6zM22 15h15v7H22zM48 34h7v11h-7M20 31h20M24 42h12"/></svg></div>
+              <div class="engine-line-icon"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M14 22h27l7 8v20H15V36H8V26h6zM22 15h15v7H22zM48 34h7v11h-7M20 31h20M24 42h12"/></svg></div>
               <strong>بعد 2,550 كم</strong><small>أو 45 يوم</small><b>تغيير زيت المحرك</b>
-              <div class="timeline-v3"><i></i></div>
+              <div class="service-timeline"><i style="width:72%"></i></div>
               <button type="button" data-garage-demo="maintenance">إضافة صيانة <span>＋</span></button>
             </article>
           </section>
 
-          <nav class="garage-bottom-v3 safe-bottom" aria-label="تنقل الكراج">
+          <nav class="garage-bottom-nav safe-bottom" aria-label="تنقل الكراج">
             <button type="button" data-nav="today"><span>⌂</span><b>الرئيسية</b></button>
             <button type="button" class="active"><span>🚙</span><b>الكراج</b></button>
-            <button type="button" class="garage-add-v3" data-garage-demo="maintenance"><span>＋</span></button>
+            <button type="button" class="garage-add" data-garage-demo="maintenance"><span>＋</span></button>
             <button type="button" data-section="finance"><span>▱</span><b>المصاريف</b></button>
             <button type="button" data-nav="domains"><span>▦</span><b>المزيد</b></button>
           </nav>
@@ -524,7 +557,7 @@
         <div class="domain-stats religion-stats">
           <article><span>المشاريع النشطة</span><b id="religionProjectsCount">٠</b></article>
           <article><span>آخر موضع قرآن</span><b id="religionQuranPos">—</b></article>
-          <article class="accent"><span>مهام دينية مكتملة اليوم</span><b id="religionDhikrDone">٠</b></article>
+          <article class="accent"><span>أذكار مكتملة اليوم</span><b id="religionDhikrDone">٠</b></article>
           <article><span>صيام هذا الشهر</span><b id="religionFastCount">٠ يوم</b></article>
         </div>
 
@@ -540,7 +573,7 @@
         <div class="domain-quick religion-quick">
           <button data-religion-action="project"><span>🎯</span><b>مشروع</b></button>
           <button type="button" onclick="window.location.href='quran.html?v=104'"><span>📖</span><b>المصحف</b></button>
-          <button type="button" data-religion-open-miftah><span>🤲</span><b>مفاتيح الجنان</b></button>
+          <button data-religion-action="dhikr"><span>🤲</span><b>ذكر/دعاء</b></button>
           <button data-religion-action="fast"><span>🌙</span><b>صيام</b></button>
         </div>
 
@@ -548,7 +581,7 @@
           <button class="active" data-religion-tab="overview">اليوم</button>
           <button data-religion-tab="projects">المشاريع</button>
           <button data-religion-tab="quran">القرآن</button>
-          <button data-religion-tab="adhkar">المهام اليومية</button><button data-religion-tab="miftah">مفاتيح الجنان</button>
+          <button data-religion-tab="adhkar">الأذكار</button>
           <button data-religion-tab="fasting">الصيام</button>
         </div>
 
@@ -587,16 +620,8 @@
 
         <section class="domain-panel" data-religion-panel="adhkar">
           <div class="domain-card-wide">
-            <div class="card-row-head"><div><span class="section-kicker">اليوم</span><h2>المهام الدينية اليومية</h2></div><button class="text-btn" data-religion-action="dhikr">+ إضافة مهمة</button></div>
+            <div class="card-row-head"><div><span class="section-kicker">قوائمي</span><h2>الأذكار والأدعية</h2></div><button class="text-btn" data-religion-action="dhikr">+ إضافة</button></div>
             <div class="domain-list" id="religionDhikrList"></div>
-          </div>
-        </section>
-
-        <section class="domain-panel" data-religion-panel="miftah">
-          <div class="domain-card-wide">
-            <div class="card-row-head"><div><span class="section-kicker">مفاتيح الجنان</span><h2>المجموعات والنصوص</h2></div><button class="text-btn" data-religion-action="miftah">+ إضافة مجموعة</button></div>
-            <p class="finance-note">يمكنك بناء مجموعات داخل مجموعات بلا حد ثابت للمستويات، ثم وضع النص الكامل في آخر مستوى.</p>
-            <div class="miftah-tree" id="miftahTree"></div>
           </div>
         </section>
 

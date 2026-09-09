@@ -17,3 +17,11 @@
 - Removed migration of old fixed-day salaries.
 - Salary entries now use independent full dates and can be edited/deleted.
 - Budget periods are calculated between exact salary dates.
+
+
+## تحديث v11.1
+- مالي: حساب المسموح اليومي من المبلغ الحالي ومصاريف الشهر والادخار والأهداف حتى الراتب القادم.
+- يومي: ملخصات وروابط مباشرة إلى مالي، معرفتي، عائلتي، ديني، علاقاتي، وصحتي.
+- ديني: Checklist يومي + مفاتيح الجنان بهيكل مجموعات متداخل غير محدود.
+- المصحف: رجوع أكبر يختفي مع أدوات القراءة، حماية تحديد النص من حركة تقليب الصفحة، الفهرس، ومفضلة السور.
+- النسخ الاحتياطي: ملف JSON واحد يشمل localStorage وصور IndexedDB، مع استعادة متوافقة. لا يوجد اتصال Firebase/Firestore مفعّل داخل هذه الحزمة الحالية.
