@@ -113,19 +113,21 @@ function normalizeFinanceData(raw) {
       allocations:(migratedToDatedSalaries&&Array.isArray(x.allocations)?x.allocations:[]).filter(a=>salaryIds.has(a.salaryId)).map(a=>({salaryId:a.salaryId,amount:Number(a.amount||0)}))
     })):[],
     transactions:Array.isArray(f.transactions)?f.transactions:[],
-    obligations:Array.isArray(f.obligations)?f.obligations:[],
+    obligations:Array.isArray(f.obligations)?f.obligations.map(x=>({...x,id:x.id||makeId(),amount:Number(x.amount||0)})):[],
     goals:Array.isArray(f.goals)?f.goals:[],
     monthlySavings:(f.monthlySavings&&typeof f.monthlySavings==='object')?f.monthlySavings:{},
     savings:Array.isArray(f.savings)?f.savings.map(x=>({id:x.id||makeId(),amount:Number(x.amount||0),date:x.date||todayKey(),note:x.note||'ادخار عام'})):[]
   };
   // ترحيل قيمة الادخار القديمة (المخزنة شهريًا كرقم واحد) إلى سجل ادخار قابل للحذف.
   // للشهر الحالي نربط القيمة باليوم الحالي حتى تدخل كاملة في الفترة الحالية بدل تقسيمها نسبيًا على الرواتب.
-  if(!result.savings.length && result.monthlySavings && typeof result.monthlySavings==='object'){
+  if(!result.savings.length && !f.savingsMigrated && result.monthlySavings && typeof result.monthlySavings==='object'){
     Object.entries(result.monthlySavings).forEach(([month,amount])=>{
       amount=Number(amount||0); if(amount<=0)return;
       const date=month===currentMonthKey()?todayKey():`${month}-01`;
       result.savings.push({id:makeId(),amount,date,note:'ادخار عام'});
     });
+    result.savingsMigrated=true;
+    result.monthlySavings={};
   }
   result.monthlyIncome=result.salaryStreams.filter(x=>(x.date||'').slice(0,7)===currentMonthKey()).reduce((a,x)=>a+Number(x.amount||0),0);
   return result;
@@ -309,7 +311,7 @@ function periodDaily(p){
 function salaryLabel(s){ return `${s.title} • ${arabicDate(s.date)}`; }
 function renderSalaryList(){
   const el=document.getElementById('salaryList'); if(!el)return;
-  el.innerHTML=finance.salaryStreams.length?sortedSalaries().map(s=>`<div class="finance-row"><div><div class="row-title">${escapeHTML(s.title)}</div><div class="row-meta">${arabicDate(s.date)}</div></div><div class="row-amount income">${money(s.amount)}</div><div class="row-actions"><button data-fin-edit-salary="${s.id}">تعديل</button><button data-fin-delete="salary" data-id="${s.id}">حذف</button></div></div>`).join(''):emptyRow('لا توجد رواتب حاليًا. أضف أول راتب بأي تاريخ تريد أن تبدأ منه.');
+  el.innerHTML=finance.salaryStreams.length?sortedSalaries().map(s=>`<div class="finance-row"><div><div class="row-title">${escapeHTML(s.title)}</div><div class="row-meta">${arabicDate(s.date)}</div></div><div class="row-amount income">${money(s.amount)}</div><div class="row-actions"><button data-fin-edit-salary="${s.id}">تعديل</button><button type="button" data-fin-delete="salary" data-id="${s.id}">حذف</button></div></div>`).join(''):emptyRow('لا توجد رواتب حاليًا. أضف أول راتب بأي تاريخ تريد أن تبدأ منه.');
 }
 function renderPeriodCards(){
   const el=document.getElementById('periodList'); if(!el)return; const ps=periodsAround(), t=todayKey();
@@ -394,9 +396,9 @@ function renderFinance(){
   const cp=currentPeriod(); const sorted=[...finance.transactions].filter(x=>(x.date||'')<=todayKey() || (cp&&(x.date||'')>=cp.start&&(x.date||'')<cp.end)).sort((a,b)=>(b.date||'').localeCompare(a.date||'')); renderList('transactionList',sorted,x=>{const future=(x.date||'')>todayKey(), inCurrent=cp&&(x.date||'')>=cp.start&&(x.date||'')<cp.end, pending=x.type==='expense'&&x.planned&&!x.affectsBalance&&!future; const status=future&&inCurrent?'مجدول ومحجوز':future?'مجدول لفترة قادمة':pending?'حان موعده — بانتظار تأكيد الدفع':'فعلي'; const action=pending?`<button data-fin-pay-planned="${x.id}">تم الدفع</button>`:''; return financeRow(x.note||x.category||(x.type==='income'?'دخل':'مصروف'),`${status} • ${arabicDate(x.date)}`,`${x.type==='income'?'+':'−'} ${money(x.amount)}`,x.type,x.id,'transaction',action);});
   renderList('obligationList',[...finance.obligations].sort((a,b)=>(a.dueDate||'').localeCompare(b.dueDate||'')),x=>financeRow(x.title,`الاستحقاق: ${arabicDate(x.dueDate)}`,money(x.amount),'expense',x.id,'obligation'));
   renderList('savingList',[...(finance.savings||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||'')),x=>financeRow(x.note||'ادخار عام',`تاريخ الحجز: ${arabicDate(x.date)}`,money(x.amount),'expense',x.id,'saving'),'لا يوجد ادخار مسجل حاليًا.');
-  const goals=document.getElementById('goalList'); if(goals){goals.innerHTML=finance.goals.length?finance.goals.map(g=>{const rem=Math.max(0,Number(g.target||0)-Number(g.saved||0)),need=rem/monthsUntil(g.deadline),pct=Math.min(100,Number(g.saved||0)/Math.max(1,Number(g.target||0))*100);return `<div class="finance-row goal-row"><div><div class="row-title">${escapeHTML(g.title)}</div><div class="row-meta">الهدف ${money(g.target)} • ${arabicDate(g.deadline)}</div><div class="goal-detail"><span>المتبقي ${money(rem)}</span><span>المطلوب شهريًا ${money(need)}</span></div><div class="goal-progress"><span style="width:${pct}%"></span></div></div><div class="row-amount income">${Math.round(pct).toLocaleString('ar-BH')}٪</div><div class="row-actions"><button data-fin-delete="goal" data-id="${g.id}">حذف</button></div></div>`}).join(''):emptyRow('لم تضف أهدافًا مالية بعد.');}
+  const goals=document.getElementById('goalList'); if(goals){goals.innerHTML=finance.goals.length?finance.goals.map(g=>{const rem=Math.max(0,Number(g.target||0)-Number(g.saved||0)),need=rem/monthsUntil(g.deadline),pct=Math.min(100,Number(g.saved||0)/Math.max(1,Number(g.target||0))*100);return `<div class="finance-row goal-row"><div><div class="row-title">${escapeHTML(g.title)}</div><div class="row-meta">الهدف ${money(g.target)} • ${arabicDate(g.deadline)}</div><div class="goal-detail"><span>المتبقي ${money(rem)}</span><span>المطلوب شهريًا ${money(need)}</span></div><div class="goal-progress"><span style="width:${pct}%"></span></div></div><div class="row-amount income">${Math.round(pct).toLocaleString('ar-BH')}٪</div><div class="row-actions"><button type="button" data-fin-delete="goal" data-id="${g.id}">حذف</button></div></div>`}).join(''):emptyRow('لم تضف أهدافًا مالية بعد.');}
 }
-function financeRow(title,meta,amount,type,id,kind,extraAction=''){return `<div class="finance-row"><div><div class="row-title">${escapeHTML(title)}</div><div class="row-meta">${escapeHTML(meta)}</div></div><div class="row-amount ${type}">${amount}</div><div class="row-actions">${extraAction}<button data-fin-delete="${kind}" data-id="${id}">حذف</button></div></div>`;}
+function financeRow(title,meta,amount,type,id,kind,extraAction=''){return `<div class="finance-row"><div><div class="row-title">${escapeHTML(title)}</div><div class="row-meta">${escapeHTML(meta)}</div></div><div class="row-amount ${type}">${amount}</div><div class="row-actions">${extraAction}<button type="button" data-fin-delete="${kind}" data-id="${id}">حذف</button></div></div>`;}
 function salaryOptionsHTML(){return sortedSalaries().map(s=>`<option value="${s.id}">${escapeHTML(s.title)} — ${arabicDate(s.date)}</option>`).join('');}
 function fixedAllocationFields(x=null){
   if(!finance.salaryStreams.length)return `<div class="form-hint warning-hint">أضف راتبًا أولًا قبل إضافة المصروف الثابت.</div>`;
@@ -427,8 +429,14 @@ function deleteFinance(kind,id){
     return saveFinance();
   }
   const map={fixed:'fixedExpenses',transaction:'transactions',obligation:'obligations',goal:'goals',saving:'savings'},key=map[kind];if(!key)return;
-  if(kind==='transaction'){const tx=finance.transactions.find(x=>x.id===id);if(tx?.affectsBalance)finance.currentBalance+=tx.type==='expense'?Number(tx.amount||0):-Number(tx.amount||0);}
-  finance[key]=finance[key].filter(x=>x.id!==id);saveFinance();
+  const sid=String(id);
+  if(kind==='transaction'){const tx=finance.transactions.find(x=>String(x.id)===sid);if(tx?.affectsBalance)finance.currentBalance+=tx.type==='expense'?Number(tx.amount||0):-Number(tx.amount||0);}
+  finance[key]=finance[key].filter(x=>String(x.id)!==sid);
+  if(kind==='saving'){
+    finance.monthlySavings={};
+    finance.savingsMigrated=true;
+  }
+  saveFinance();
 }
 function payPlannedExpense(id){const x=finance.transactions.find(v=>v.id===id);if(!x||x.type!=='expense'||x.affectsBalance)return;x.affectsBalance=true;x.planned=false;finance.currentBalance-=Number(x.amount||0);addTimeline(`دفعت مصروفًا مجدولًا بقيمة ${money(x.amount)}`,x.category||'مالي','💳');saveFinance();}
 function receiveSalary(id,date){const s=finance.salaryStreams.find(x=>x.id===id);if(!s)return;if(txForSalaryOccurrence(s,date))return;const amount=Number(s.amount||0);finance.transactions.push({id:makeId(),type:'income',amount,category:'راتب',note:s.title,date:s.date,source:'salary',salaryId:s.id,salaryDate:s.date,affectsBalance:true});finance.currentBalance+=amount;addTimeline(`استلمت ${s.title} بقيمة ${money(amount)}`,'مالي','💵');saveFinance();}
@@ -7705,7 +7713,13 @@ document.addEventListener('click', (event) => {
 
   const finAction=event.target.closest('[data-fin-action]'); if(finAction){ openFinanceForm(finAction.dataset.finAction); return; }
   const finTab=event.target.closest('[data-fin-tab]'); if(finTab){ document.querySelectorAll('[data-fin-tab]').forEach(x=>x.classList.toggle('active',x===finTab)); document.querySelectorAll('[data-fin-panel]').forEach(x=>x.classList.toggle('active',x.dataset.finPanel===finTab.dataset.finTab)); return; }
-  const finDel=event.target.closest('[data-fin-delete]'); if(finDel){ if(confirm('حذف هذا العنصر؟')) deleteFinance(finDel.dataset.finDelete,finDel.dataset.id); return; }
+  const finDel=event.target.closest('[data-fin-delete]'); if(finDel){
+    event.preventDefault(); event.stopPropagation();
+    const kind=finDel.dataset.finDelete, id=finDel.dataset.id;
+    if(kind==='saving'||kind==='obligation'){ deleteFinance(kind,id); }
+    else if(confirm('حذف هذا العنصر؟')) deleteFinance(kind,id);
+    return;
+  }
   const finSalary=event.target.closest('[data-fin-receive-salary]'); if(finSalary){ receiveSalary(finSalary.dataset.finReceiveSalary,finSalary.dataset.salaryDate); return; }
   const finEditSalary=event.target.closest('[data-fin-edit-salary]'); if(finEditSalary){ openFinanceForm(`editSalary:${finEditSalary.dataset.finEditSalary}`); return; }
   const finPayPlanned=event.target.closest('[data-fin-pay-planned]'); if(finPayPlanned){ payPlannedExpense(finPayPlanned.dataset.finPayPlanned); return; }
