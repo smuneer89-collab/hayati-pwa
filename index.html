@@ -405,8 +405,14 @@
 
           <div class="finance-card split-summary-card">
             <div><span class="section-kicker">الخطة الذكية</span><h2>الأهداف والادخار</h2></div>
-            <div class="reserve-grid"><div><span>احتياج الأهداف هذا الشهر</span><b id="finGoalNeed">٠.٠٠٠ د.ب</b></div><div><span>الادخار العام لهذا الشهر</span><b id="finSavingMonth">٠.٠٠٠ د.ب</b></div></div>
-            <p class="finance-note">حصة الأهداف والادخار توزَّع تلقائيًا على فترات الرواتب بنسبة قيمة كل راتب، وتدخل مباشرة في حساب المسموح اليومي.</p>
+            <div class="reserve-grid"><div><span>احتياج الأهداف هذا الشهر</span><b id="finGoalNeed">٠.٠٠٠ د.ب</b></div><div><span>إجمالي الادخار هذا الشهر</span><b id="finSavingMonth">٠.٠٠٠ د.ب</b></div></div>
+            <p class="finance-note">كل مبلغ ادخار يدخل كاملًا في الفترة التي يقع فيها تاريخه، ولا يتم تقسيمه نسبيًا على الرواتب.</p>
+          </div>
+
+          <div class="finance-card">
+            <div class="card-row-head"><div><span class="section-kicker">الادخار</span><h2>قائمة الادخار</h2></div><button class="text-btn" data-fin-action="saving">+ إضافة ادخار</button></div>
+            <p class="finance-note">يمكنك مراجعة مبالغ الادخار المسجلة وحذف أي مبلغ منها، ويُعاد حساب المبلغ المتاح والمسموح اليومي فورًا.</p>
+            <div class="finance-list" id="savingList"></div>
           </div>
         </section>
 
