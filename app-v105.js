@@ -342,8 +342,13 @@ function fixedReservedForWindow(w){
   const ids=new Set(w.salaries.map(x=>x.id));
   return finance.fixedExpenses.reduce((sum,x)=>sum+(x.allocations||[]).filter(a=>ids.has(a.salaryId)).reduce((a,v)=>a+Number(v.amount||0),0),0);
 }
+function isActualFinanceTransaction(t){
+  // العمليات الجديدة تحمل affectsBalance صراحة. وللتوافق مع البيانات القديمة،
+  // العملية غير المجدولة ومن دون هذا الحقل تُعد عملية فعلية.
+  return t?.affectsBalance===true || (t?.affectsBalance==null && !t?.planned);
+}
 function plannedExpensesReservedForWindow(w){
-  return finance.transactions.filter(t=>t.type==='expense'&&!t.affectsBalance&&(t.date||'')>=w.start&&(t.date||'')<w.end).reduce((s,x)=>s+Number(x.amount||0),0);
+  return finance.transactions.filter(t=>t.type==='expense'&&!isActualFinanceTransaction(t)&&(t.date||'')>=w.start&&(t.date||'')<w.end).reduce((s,x)=>s+Number(x.amount||0),0);
 }
 function obligationsReservedForWindow(w){
   return finance.obligations.filter(x=>(x.dueDate||'')>=w.start&&(x.dueDate||'')<w.end).reduce((s,x)=>s+Number(x.amount||0),0);
@@ -363,7 +368,7 @@ function financeAllowanceNow(){
   const available=Number(finance.currentBalance||0)-reserved;
   const days=Math.max(1,dateDiffDays(today,w.end));
   const allowed=available/days;
-  const todaySpent=finance.transactions.filter(x=>x.type==='expense'&&x.affectsBalance&&x.date===today).reduce((s,x)=>s+Number(x.amount||0),0);
+  const todaySpent=finance.transactions.filter(x=>x.type==='expense'&&isActualFinanceTransaction(x)&&x.date===today).reduce((s,x)=>s+Number(x.amount||0),0);
   const beforeTodayAvailable=available+todaySpent;
   const beforeTodayAllowed=beforeTodayAvailable/days;
   const excess=Math.max(0,todaySpent-beforeTodayAllowed);
@@ -377,7 +382,7 @@ function dailyAllowanceFromCurrentBalance(){
 
 function renderFinance(){
   finance=normalizeFinanceData(finance); const month=currentMonthKey(), fixed=finance.fixedExpenses.reduce((s,x)=>s+Number(x.amount||0),0), salary=salaryTotal(month);
-  const spent=finance.transactions.filter(t=>t.type==='expense'&&(t.date||'').slice(0,7)===month&&(t.date||'')<=todayKey()).reduce((s,x)=>s+Number(x.amount||0),0);
+  const spent=finance.transactions.filter(t=>t.type==='expense'&&isActualFinanceTransaction(t)&&(t.date||'').slice(0,7)===month&&(t.date||'')<=todayKey()).reduce((s,x)=>s+Number(x.amount||0),0);
   const savingMonth=(finance.savings||[]).filter(x=>(x.date||'').slice(0,7)===month).reduce((a,x)=>a+Number(x.amount||0),0);
   setText('finBalance',money(finance.currentBalance)); setText('finFixed',money(fixed)); setText('finSalary',money(salary)); setText('finSpent',money(spent)); setText('finGoalNeed',money(monthlyGoalNeed(month))); setText('finSavingMonth',money(savingMonth));
   const calc=financeAllowanceNow(), w=calc.window;
