@@ -85,6 +85,13 @@ religion.quran = { ...emptyReligion().quran, ...(religion.quran||{}), reader: { 
 let knowledge = loadJSON(KNOWLEDGE_KEY, emptyKnowledge());
 knowledge.hadiths = Array.isArray(knowledge.hadiths) ? knowledge.hadiths : [];
 knowledge.hadithTopics = Array.isArray(knowledge.hadithTopics) ? knowledge.hadithTopics.map(x=>String(x||'').trim()).filter(Boolean) : [];
+knowledge.books = Array.isArray(knowledge.books) ? knowledge.books.map(b=>({
+  ...b,
+  currentPage:Number(b.currentPage||0),
+  totalPages:Number(b.totalPages||0),
+  baselinePage:Number(b.baselinePage ?? b.currentPage ?? 0),
+  readingLog:Array.isArray(b.readingLog)?b.readingLog:[]
+})) : [];
 let relationships = loadJSON(RELATIONSHIPS_KEY, emptyRelationships());
 let family = loadJSON(FAMILY_KEY, emptyFamily());
 let dayRhythm = loadJSON(DAY_RHYTHM_KEY, emptyDayRhythm());
@@ -504,7 +511,7 @@ financeSheetClose.addEventListener('click',closeFinanceForm);financeSheet.addEve
 if(reservedBreakdownClose)reservedBreakdownClose.addEventListener('click',closeReservedBreakdown);if(reservedBreakdownSheet)reservedBreakdownSheet.addEventListener('click',e=>{if(e.target===reservedBreakdownSheet)closeReservedBreakdown();});
 
 // ---------------- Generic sheet ----------------
-function openDomainForm(kicker,title,html,action){ currentDomainAction=action; domainFormKicker.textContent=kicker; domainFormTitle.textContent=title; domainFormFields.innerHTML=html; domainSheet.hidden=false; }
+function openDomainForm(kicker,title,html,action){ currentDomainAction=action; domainFormKicker.textContent=kicker; domainFormTitle.textContent=title; domainFormFields.innerHTML=html; const submit=document.getElementById('domainFormSubmit'); if(submit){submit.hidden=false;submit.textContent='حفظ';} domainSheet.hidden=false; }
 function closeDomainForm(){ domainSheet.hidden=true; currentDomainAction=null; domainForm.reset(); }
 domainSheetClose.addEventListener('click',closeDomainForm);
 domainSheet.addEventListener('click',e=>{if(e.target===domainSheet) closeDomainForm();});
@@ -1150,6 +1157,59 @@ function addHadithBatch(event){
   return handleHadithAnalyzeAndRoute(event);
 }
 
+function bookById(id){ return knowledge.books.find(b=>b.id===id); }
+function bookReadingLogs(book){
+  return [...(book?.readingLog||[])].sort((a,b)=>((a.date||'')+(a.createdAt||'')).localeCompare((b.date||'')+(b.createdAt||'')));
+}
+function recalcBookProgress(book){
+  if(!book)return;
+  book.baselinePage=Number(book.baselinePage ?? book.currentPage ?? 0);
+  const logs=bookReadingLogs(book);
+  let previous=Number(book.baselinePage||0);
+  logs.forEach(log=>{
+    log.reachedPage=Math.max(0,Number(log.reachedPage||0));
+    log.pagesRead=Math.max(0,log.reachedPage-previous);
+    previous=log.reachedPage;
+  });
+  book.currentPage=logs.length?Number(logs[logs.length-1].reachedPage||0):Number(book.baselinePage||0);
+  if(book.totalPages && book.currentPage>=Number(book.totalPages)) book.status='أنهيته';
+}
+function bookReadToday(book){ return (book?.readingLog||[]).some(x=>x.date===todayKey()); }
+function openBookDetails(id){
+  const b=bookById(id); if(!b)return;
+  recalcBookProgress(b);
+  const pct=b.totalPages?Math.min(100,Math.max(0,b.currentPage/b.totalPages*100)):0;
+  const logs=[...bookReadingLogs(b)].reverse();
+  const logHtml=logs.length?logs.map(x=>`<div class="book-log-item"><div><b>${arabicDate(x.date)}</b><small>وصلت إلى ص ${Number(x.reachedPage||0).toLocaleString('ar-BH')} • قرأت ${Number(x.pagesRead||0).toLocaleString('ar-BH')} صفحة${x.duration?` • ${Number(x.duration).toLocaleString('ar-BH')} دقيقة`:''}</small>${x.note?`<small>${escapeHTML(x.note)}</small>`:''}</div><div class="book-log-actions"><button type="button" data-book-log-edit="${x.id}" data-book-id="${b.id}">تعديل</button><button type="button" data-book-log-delete="${x.id}" data-book-id="${b.id}">حذف</button></div></div>`).join(''):'<div class="empty-inline">لم تسجل قراءة لهذا الكتاب بعد.</div>';
+  const html=`<div class="book-detail-summary"><div class="book-detail-progress"><b>${Number(b.currentPage||0).toLocaleString('ar-BH')} / ${b.totalPages?Number(b.totalPages).toLocaleString('ar-BH'):'—'} صفحة</b><strong>${Math.round(pct).toLocaleString('ar-BH')}٪</strong></div><div class="mini-progress book-detail-bar"><span style="width:${pct}%"></span></div><small>${bookReadToday(b)?'✓ سجلت قراءة اليوم':'لم تسجل قراءة اليوم بعد'}</small></div><div class="book-detail-actions"><button class="primary-btn" type="button" data-book-read="${b.id}">سجّل قراءة اليوم</button><button class="secondary-btn" type="button" data-book-edit="${b.id}">تعديل الكتاب</button></div><div class="book-log-head"><b>سجل القراءة</b><small>${logs.length.toLocaleString('ar-BH')} تسجيل</small></div><div class="book-log-list">${logHtml}</div>`;
+  openDomainForm('معرفتي',b.title,html,`knowledge:bookDetails:${b.id}`);
+  const submit=document.getElementById('domainFormSubmit'); if(submit)submit.hidden=true;
+}
+function openBookReadingForm(id){
+  const b=bookById(id); if(!b)return;
+  recalcBookProgress(b);
+  const max=b.totalPages?`max="${Number(b.totalPages)}"`:'';
+  openDomainForm('معرفتي',`سجّل قراءة • ${b.title}`,field('وصلت إلى صفحة','reachedPage','number',`min="0" ${max} value="${Number(b.currentPage||0)}"`)+field('التاريخ','date','date',`value="${todayKey()}"`)+optionalField('مدة القراءة بالدقائق','duration','number','min="1"')+textareaField('ملاحظة أو اقتباس','note','rows="3" placeholder="اختياري"'),`knowledge:bookProgress:${id}`);
+  const submit=document.getElementById('domainFormSubmit'); if(submit){submit.hidden=false;submit.textContent='حفظ التقدم';}
+}
+function openBookEditForm(id){
+  const b=bookById(id); if(!b)return;
+  openDomainForm('معرفتي','تعديل الكتاب',field('عنوان الكتاب','title','text',`value="${escapeHTML(b.title||'')}"`)+optionalField('المؤلف','author','text',`value="${escapeHTML(b.author||'')}"`)+selectField('الحالة','status',['أريد قراءته','أقرأ الآن','أنهيته','توقفت'],b.status)+optionalField('عدد الصفحات','totalPages','number',`min="1" value="${Number(b.totalPages||0)||''}"`)+textareaField('ملاحظاتي / ماذا استفدت؟','notes','rows="3"'),`knowledge:bookUpdate:${id}`);
+  const notes=domainForm?.querySelector('[name="notes"]');if(notes)notes.value=b.notes||'';
+  const submit=document.getElementById('domainFormSubmit'); if(submit){submit.hidden=false;submit.textContent='حفظ التعديل';}
+}
+function openBookLogEditForm(bookId,logId){
+  const b=bookById(bookId), log=b?.readingLog?.find(x=>x.id===logId); if(!b||!log)return;
+  const max=b.totalPages?`max="${Number(b.totalPages)}"`:'';
+  openDomainForm('معرفتي','تعديل سجل القراءة',field('وصلت إلى صفحة','reachedPage','number',`min="0" ${max} value="${Number(log.reachedPage||0)}"`)+field('التاريخ','date','date',`value="${log.date||todayKey()}"`)+optionalField('مدة القراءة بالدقائق','duration','number',`min="1" value="${Number(log.duration||0)||''}"`)+textareaField('ملاحظة أو اقتباس','note','rows="3"'),`knowledge:bookLogEdit:${bookId}:${logId}`);
+  const note=domainForm?.querySelector('[name="note"]');if(note)note.value=log.note||'';
+  const submit=document.getElementById('domainFormSubmit'); if(submit){submit.hidden=false;submit.textContent='حفظ التعديل';}
+}
+function deleteBookLog(bookId,logId){
+  const b=bookById(bookId); if(!b)return;
+  b.readingLog=(b.readingLog||[]).filter(x=>x.id!==logId); recalcBookProgress(b); saveKnowledge(); openBookDetails(bookId);
+}
+
 function renderKnowledge(){
   renderHadithManagerStats();
   const had=dailyHadith(); setText('knowledgeHadithCount',knowledge.hadiths.length.toLocaleString('ar-BH')); const t=todayKey(); const todayTasks=knowledge.english.tasks.filter(x=>x.date===t); const done=todayTasks.filter(x=>x.done).length; setText('knowledgeEnglishDone',`${done.toLocaleString('ar-BH')} / ${todayTasks.length.toLocaleString('ar-BH')}`); setText('knowledgeNextExam',knowledge.english.weeklyExamDay||'غير محدد'); setText('knowledgeReadingBooks',knowledge.books.filter(x=>x.status==='أقرأ الآن').length.toLocaleString('ar-BH'));
@@ -1158,7 +1218,7 @@ function renderKnowledge(){
   const e=knowledge.english; setText('englishSummary',e.level||e.goal||e.weeklyExamDay?`المستوى: ${e.level||'غير محدد'} • الهدف: ${e.goal||'غير محدد'} • الاختبار: ${e.weeklyExamDay||'غير محدد'}`:'حدد المستوى والهدف وموعد الاختبار الأسبوعي.');
   const tasks=[...e.tasks].sort((a,b)=>(b.date||'').localeCompare(a.date||'')); renderList('englishTaskList',tasks,x=>`<div class="domain-row ${x.done?'done-row':''}"><div><b>📘 ${escapeHTML(x.title)}</b><small>${escapeHTML(x.type||'مهمة')} • ${arabicDate(x.date)}</small></div><button class="row-toggle" data-english-toggle="${x.id}">${x.done?'↺':'✓'}</button><button class="row-delete" data-knowledge-delete="englishTask" data-id="${x.id}">حذف</button></div>`,'لا توجد مهام إنجليزية بعد.');
   const tests=[...e.tests].sort((a,b)=>(b.date||'').localeCompare(a.date||'')); renderList('englishTestList',tests,x=>`<div class="domain-row"><div><b>📝 ${Number(x.score).toLocaleString('ar-BH')} / ${Number(x.outOf).toLocaleString('ar-BH')}</b><small>${arabicDate(x.date)}${x.note?` • ${escapeHTML(x.note)}`:''}</small></div><button class="row-delete" data-knowledge-delete="englishTest" data-id="${x.id}">حذف</button></div>`,'لم تسجل نتائج اختبارات بعد.');
-  renderList('knowledgeBookList',knowledge.books,x=>{ const pct=x.totalPages?Math.min(100,Number(x.currentPage||0)/Number(x.totalPages)*100):0; return `<div class="domain-row book-row"><div><b>📚 ${escapeHTML(x.title)}</b><small>${escapeHTML(x.author||'بدون مؤلف')} • ${escapeHTML(x.status)}${x.totalPages?` • ص ${x.currentPage||0}/${x.totalPages}`:''}</small>${x.totalPages?`<div class="mini-progress"><span style="width:${pct}%"></span></div>`:''}${x.notes?`<small>${escapeHTML(x.notes)}</small>`:''}</div><button class="row-delete" data-knowledge-delete="book" data-id="${x.id}">حذف</button></div>`;},'لم تضف كتبًا بعد.');
+  renderList('knowledgeBookList',knowledge.books,x=>{ recalcBookProgress(x); const pct=x.totalPages?Math.min(100,Number(x.currentPage||0)/Number(x.totalPages)*100):0; const readToday=bookReadToday(x); return `<div class="domain-row book-row enhanced-book-row" data-book-details="${x.id}"><div><div class="book-row-title"><b>📚 ${escapeHTML(x.title)}</b><span class="book-today-badge ${readToday?'done':''}">${readToday?'✓ قرأت اليوم':'لم تقرأ اليوم'}</span></div><small>${escapeHTML(x.author||'بدون مؤلف')} • ${escapeHTML(x.status)}${x.totalPages?` • ص ${Number(x.currentPage||0).toLocaleString('ar-BH')}/${Number(x.totalPages).toLocaleString('ar-BH')}`:''}</small>${x.totalPages?`<div class="mini-progress"><span style="width:${pct}%"></span></div><small>${Math.round(pct).toLocaleString('ar-BH')}٪ مكتمل</small>`:''}${x.notes?`<small>${escapeHTML(x.notes)}</small>`:''}</div><button class="row-toggle book-quick-read" type="button" data-book-read="${x.id}">+ تحديث</button><button class="row-delete" type="button" data-knowledge-delete="book" data-id="${x.id}">حذف</button></div>`;},'لم تضف كتبًا بعد.');
   renderList('knowledgeProjectList',knowledge.projects,x=>`<div class="domain-row"><div><b>🎓 ${escapeHTML(x.title)}</b><small>${escapeHTML(x.status)}${x.note?` • ${escapeHTML(x.note)}`:''}</small></div><button class="row-delete" data-knowledge-delete="project" data-id="${x.id}" ${x.id==='english-project'?'disabled':''}>حذف</button></div>`,'لا توجد مشاريع تعلم.');
 }
 function openKnowledgeForm(action){ const e=knowledge.english;
@@ -1177,7 +1237,7 @@ function toggleDailyHadithFavorite(){ const x=dailyHadith(); if(!x)return; x.fav
 
 // ---------------- Domain form submit ----------------
 domainForm.addEventListener('submit',e=>{
-  e.preventDefault(); const fd=Object.fromEntries(new FormData(domainForm).entries()); const action=currentDomainAction;
+  e.preventDefault(); const fd=Object.fromEntries(new FormData(domainForm).entries()); const action=currentDomainAction; if(action?.startsWith('knowledge:bookDetails:')) return;
   if(action==='knowledge:hadith'){
     const q=processHadithQuranText(fd.text||'');
     if(q.issues.length)return openModal('راجع الآية القرآنية',q.issues[0].message+' لن أحفظ الحديث حتى أتأكد من مطابقة النص للمصحف.','⚠️');
@@ -1202,7 +1262,10 @@ domainForm.addEventListener('submit',e=>{
   if(action==='knowledge:englishSetup'){ knowledge.english.level=fd.level; knowledge.english.goal=fd.goal; knowledge.english.weeklyExamDay=fd.weeklyExamDay; addTimeline('حدّثت مشروع الإنجليزية','معرفتي','📘'); saveKnowledge(); }
   if(action==='knowledge:englishTask'){ knowledge.english.tasks.push({id:makeId(),title:fd.title,type:fd.type,date:fd.date,done:false}); addTimeline(`أضفت مهمة إنجليزية: ${fd.title}`,'معرفتي','📘'); saveKnowledge(); }
   if(action==='knowledge:englishTest'){ knowledge.english.tests.push({id:makeId(),score:Number(fd.score),outOf:Number(fd.outOf),date:fd.date,note:fd.note}); addTimeline(`سجلت نتيجة اختبار الإنجليزية: ${fd.score}/${fd.outOf}`,'معرفتي','📝'); saveKnowledge(); }
-  if(action==='knowledge:book'){ knowledge.books.push({id:makeId(),title:fd.title,author:fd.author,status:fd.status,currentPage:Number(fd.currentPage||0),totalPages:Number(fd.totalPages||0),notes:fd.notes}); addTimeline(`أضفت كتابًا: ${fd.title}`,'معرفتي','📚'); saveKnowledge(); }
+  if(action==='knowledge:book'){ const start=Number(fd.currentPage||0); knowledge.books.push({id:makeId(),title:fd.title,author:fd.author,status:fd.status,currentPage:start,baselinePage:start,totalPages:Number(fd.totalPages||0),notes:fd.notes,readingLog:[]}); addTimeline(`أضفت كتابًا: ${fd.title}`,'معرفتي','📚'); saveKnowledge(); }
+  if(action.startsWith('knowledge:bookProgress:')){ const id=action.split(':')[2],b=bookById(id); if(b){ const reached=Math.max(0,Number(fd.reachedPage||0)); if(b.totalPages&&reached>Number(b.totalPages))return openModal('تحقق من الصفحة',`عدد صفحات الكتاب ${b.totalPages}، فلا يمكن تسجيل الصفحة ${reached}.`,'📚'); b.readingLog=b.readingLog||[]; b.readingLog.push({id:makeId(),date:fd.date||todayKey(),reachedPage:reached,duration:Number(fd.duration||0),note:fd.note||'',createdAt:new Date().toISOString()}); recalcBookProgress(b); if(b.status==='أريد قراءته')b.status='أقرأ الآن'; addTimeline(`قرأت في ${b.title} ووصلت إلى ص ${reached}`,'معرفتي','📖'); saveKnowledge(); closeDomainForm(); return; } }
+  if(action.startsWith('knowledge:bookUpdate:')){ const id=action.split(':')[2],b=bookById(id); if(b){ b.title=fd.title;b.author=fd.author;b.status=fd.status;b.totalPages=Number(fd.totalPages||0);b.notes=fd.notes||'';recalcBookProgress(b);saveKnowledge();closeDomainForm();return; } }
+  if(action.startsWith('knowledge:bookLogEdit:')){ const parts=action.split(':'),b=bookById(parts[2]),log=b?.readingLog?.find(x=>x.id===parts[3]); if(b&&log){ const reached=Math.max(0,Number(fd.reachedPage||0)); if(b.totalPages&&reached>Number(b.totalPages))return openModal('تحقق من الصفحة',`عدد صفحات الكتاب ${b.totalPages}، فلا يمكن تسجيل الصفحة ${reached}.`,'📚'); log.reachedPage=reached;log.date=fd.date||todayKey();log.duration=Number(fd.duration||0);log.note=fd.note||'';recalcBookProgress(b);saveKnowledge();closeDomainForm();return; } }
   if(action==='knowledge:project'){ knowledge.projects.push({id:makeId(),title:fd.title,status:fd.status,note:fd.note}); addTimeline(`أضفت مشروع تعلم: ${fd.title}`,'معرفتي','🎓'); saveKnowledge(); }
 
   if(action==='rel:person'){ relationships.people.push({id:makeId(),name:fd.name,circle:fd.circle,cadenceDays:Number(fd.cadenceDays||0),lastContact:fd.lastContact,lastMeeting:fd.lastMeeting,birthday:fd.birthday,howMet:fd.howMet,notes:fd.notes}); addTimeline(`أضفت شخصًا إلى علاقاتي: ${fd.name}`,'علاقاتي','👤'); saveRelationships(); }
@@ -7771,7 +7834,7 @@ function quranSearch(query){
 function renderDashboard(){
   const d=dailyAllowanceFromCurrentBalance();
   setText('todayFinanceSummary',d.next?`${money(Math.max(0,d.allowed))} • ${d.days.toLocaleString('ar-BH')} يوم حتى ${d.next.title}`:'أضف راتبًا قادمًا لحساب المسموح اليومي.');
-  const kt=knowledge.english.tasks.filter(x=>x.date===todayKey()&&!x.done);setText('todayKnowledgeSummary',kt.length?`${kt.length.toLocaleString('ar-BH')} مهمة متبقية اليوم`:'لا توجد مهام معرفية متبقية اليوم.');
+  const kt=knowledge.english.tasks.filter(x=>x.date===todayKey()&&!x.done); const activeBook=knowledge.books.find(x=>x.status==='أقرأ الآن'); const bookSummary=activeBook?(bookReadToday(activeBook)?`✓ قرأت اليوم • ${escapeHTML(activeBook.title)} • ص ${Number(activeBook.currentPage||0).toLocaleString('ar-BH')}`:`📚 لم تسجل قراءة اليوم • ${escapeHTML(activeBook.title)} • ص ${Number(activeBook.currentPage||0).toLocaleString('ar-BH')}`):''; setText('todayKnowledgeSummary',bookSummary||(kt.length?`${kt.length.toLocaleString('ar-BH')} مهمة متبقية اليوم`:'لا توجد مهام معرفية متبقية اليوم.'));
   const ft=family.tasks.filter(x=>!x.done&&(!x.dueDate||x.dueDate<=todayKey()));setText('todayFamilySummary',ft.length?`${ft.length.toLocaleString('ar-BH')} واجب عائلي يحتاج انتباهك`:'لا توجد واجبات عائلية مستحقة اليوم.');
   const rt=religion.adhkar.filter(x=>!(x.doneDates||[]).includes(todayKey()));setText('todayReligionSummary',rt.length?`${rt.length.toLocaleString('ar-BH')} مهمة دينية لم تكتمل`:'اكتملت مهامك الدينية المسجلة اليوم.');
   const rp=relationships.promises.filter(x=>x.status!=='مكتمل'&&(!x.dueDate||x.dueDate<=todayKey()));setText('todayRelationshipsSummary',rp.length?`${rp.length.toLocaleString('ar-BH')} مهمة/وعد يحتاج متابعة`:'لا توجد مهام علاقات مستحقة اليوم.');
@@ -7825,6 +7888,11 @@ document.addEventListener('click', (event) => {
   const rp=event.target.closest('[data-religion-toggle-project]'); if(rp){toggleReligionProject(rp.dataset.religionToggleProject);return;}
   const rdh=event.target.closest('[data-religion-toggle-dhikr]'); if(rdh){toggleDhikr(rdh.dataset.religionToggleDhikr);return;}
 
+  const bookRead=event.target.closest('[data-book-read]'); if(bookRead){ event.preventDefault();event.stopPropagation();openBookReadingForm(bookRead.dataset.bookRead);return; }
+  const bookEdit=event.target.closest('[data-book-edit]'); if(bookEdit){ event.preventDefault();event.stopPropagation();openBookEditForm(bookEdit.dataset.bookEdit);return; }
+  const bookLogEdit=event.target.closest('[data-book-log-edit]'); if(bookLogEdit){ event.preventDefault();event.stopPropagation();openBookLogEditForm(bookLogEdit.dataset.bookId,bookLogEdit.dataset.bookLogEdit);return; }
+  const bookLogDelete=event.target.closest('[data-book-log-delete]'); if(bookLogDelete){ event.preventDefault();event.stopPropagation();if(confirm('حذف سجل القراءة هذا؟'))deleteBookLog(bookLogDelete.dataset.bookId,bookLogDelete.dataset.bookLogDelete);return; }
+  const bookDetails=event.target.closest('[data-book-details]'); if(bookDetails&&!event.target.closest('button')){openBookDetails(bookDetails.dataset.bookDetails);return;}
   const knowledgeAction=event.target.closest('[data-knowledge-action]'); if(knowledgeAction){ openKnowledgeForm(knowledgeAction.dataset.knowledgeAction); return; }
   const knowledgeTab=event.target.closest('[data-knowledge-tab]'); if(knowledgeTab){ document.querySelectorAll('[data-knowledge-tab]').forEach(x=>x.classList.toggle('active',x===knowledgeTab)); document.querySelectorAll('[data-knowledge-panel]').forEach(x=>x.classList.toggle('active',x.dataset.knowledgePanel===knowledgeTab.dataset.knowledgeTab)); return; }
   const kd=event.target.closest('[data-knowledge-delete]'); if(kd){ if(confirm('حذف هذا العنصر؟'))deleteKnowledge(kd.dataset.knowledgeDelete,kd.dataset.id);return; }
