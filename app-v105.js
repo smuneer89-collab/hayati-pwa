@@ -14,6 +14,10 @@ const financeForm = document.getElementById('financeForm');
 const financeFormTitle = document.getElementById('financeFormTitle');
 const financeFormFields = document.getElementById('financeFormFields');
 const financeSheetClose = document.getElementById('financeSheetClose');
+const reservedBreakdownSheet = document.getElementById('reservedBreakdownSheet');
+const reservedBreakdownClose = document.getElementById('reservedBreakdownClose');
+const reservedBreakdownSummary = document.getElementById('reservedBreakdownSummary');
+const reservedBreakdownList = document.getElementById('reservedBreakdownList');
 
 const domainSheet = document.getElementById('domainSheet');
 const domainForm = document.getElementById('domainForm');
@@ -132,7 +136,7 @@ function normalizeFinanceData(raw) {
   result.monthlyIncome=result.salaryStreams.filter(x=>(x.date||'').slice(0,7)===currentMonthKey()).reduce((a,x)=>a+Number(x.amount||0),0);
   return result;
 }
-function saveFinance() { localStorage.setItem(FINANCE_KEY, JSON.stringify(finance)); scheduleSnapshot(); renderFinance(); renderDashboard(); }
+function saveFinance() { localStorage.setItem(FINANCE_KEY, JSON.stringify(finance)); scheduleSnapshot(); renderFinance(); renderDashboard(); if(reservedBreakdownSheet && !reservedBreakdownSheet.hidden) renderReservedBreakdown(); }
 function saveHealth() { localStorage.setItem(HEALTH_KEY, JSON.stringify(health)); scheduleSnapshot(); renderHealth(); renderDashboard(); }
 function saveReligion() { localStorage.setItem(RELIGION_KEY, JSON.stringify(religion)); scheduleSnapshot(); renderReligion(); renderDashboard(); }
 function saveKnowledge() { localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(knowledge)); scheduleSnapshot(); renderKnowledge(); renderDashboard(); }
@@ -380,6 +384,33 @@ function dailyAllowanceFromCurrentBalance(){
   return {allowed:d.allowed,days:d.days,expenses:d.expenses,saving:d.saving,goals:0,next,available:d.available,reserved:d.reserved,obligations:d.obligations,window:d.window};
 }
 
+function reservedBreakdownItems(){
+  const w=currentFinanceWindow(), ids=new Set(w.salaries.map(x=>x.id));
+  const fixedItems=finance.fixedExpenses.map(x=>{
+    const amount=(x.allocations||[]).filter(a=>ids.has(a.salaryId)).reduce((s,a)=>s+Number(a.amount||0),0);
+    return amount>0?{kind:'fixed',id:x.id,title:x.title||'مصروف ثابت',meta:`مصروف ثابت • محجوز في ${w.label}`,amount}:null;
+  }).filter(Boolean);
+  const plannedItems=finance.transactions.filter(t=>t.type==='expense'&&!isActualFinanceTransaction(t)&&(t.date||'')>=w.start&&(t.date||'')<w.end).map(x=>({kind:'transaction',id:x.id,title:x.note||x.category||'مصروف مجدول',meta:`مصروف مجدول • ${arabicDate(x.date)}`,amount:Number(x.amount||0)}));
+  const obligationItems=finance.obligations.filter(x=>(x.dueDate||'')>=w.start&&(x.dueDate||'')<w.end).map(x=>({kind:'obligation',id:x.id,title:x.title||'التزام',meta:`التزام • ${arabicDate(x.dueDate)}`,amount:Number(x.amount||0)}));
+  const savingItems=(finance.savings||[]).filter(x=>(x.date||'')>=w.start&&(x.date||'')<w.end).map(x=>({kind:'saving',id:x.id,title:x.note||'ادخار عام',meta:`ادخار • ${arabicDate(x.date)}`,amount:Number(x.amount||0)}));
+  return {w,fixedItems,plannedItems,obligationItems,savingItems,all:[...fixedItems,...plannedItems,...obligationItems,...savingItems]};
+}
+function reservedEditButton(item){return `<button type="button" data-fin-edit-reserved="${item.kind}" data-id="${item.id}">تعديل</button>`;}
+function reservedGroupHTML(title,items){
+  if(!items.length)return '';
+  const total=items.reduce((s,x)=>s+Number(x.amount||0),0);
+  return `<section class="reserved-breakdown-group"><h3><span>${title}</span><b>${money(total)}</b></h3>${items.map(x=>financeRow(x.title,x.meta,money(x.amount),'expense',x.id,x.kind,reservedEditButton(x))).join('')}</section>`;
+}
+function renderReservedBreakdown(){
+  if(!reservedBreakdownSummary||!reservedBreakdownList)return;
+  const data=reservedBreakdownItems();
+  const fixedTotal=data.fixedItems.reduce((s,x)=>s+x.amount,0), plannedTotal=data.plannedItems.reduce((s,x)=>s+x.amount,0), obligationTotal=data.obligationItems.reduce((s,x)=>s+x.amount,0), savingTotal=data.savingItems.reduce((s,x)=>s+x.amount,0), total=fixedTotal+plannedTotal+obligationTotal+savingTotal;
+  reservedBreakdownSummary.innerHTML=`<div><span>المصاريف الثابتة</span><b>${money(fixedTotal)}</b></div><div><span>المصاريف المجدولة</span><b>${money(plannedTotal)}</b></div><div><span>الالتزامات</span><b>${money(obligationTotal)}</b></div><div><span>الادخار</span><b>${money(savingTotal)}</b></div><div style="grid-column:1/-1"><span>الإجمالي المحجوز</span><b>${money(total)}</b></div>`;
+  reservedBreakdownList.innerHTML=data.all.length ? reservedGroupHTML('المصاريف الثابتة',data.fixedItems)+reservedGroupHTML('المصاريف المجدولة',data.plannedItems)+reservedGroupHTML('الالتزامات',data.obligationItems)+reservedGroupHTML('الادخار',data.savingItems) : emptyRow('لا توجد مبالغ محجوزة في الفترة الحالية.');
+}
+function openReservedBreakdown(){renderReservedBreakdown();if(reservedBreakdownSheet)reservedBreakdownSheet.hidden=false;}
+function closeReservedBreakdown(){if(reservedBreakdownSheet)reservedBreakdownSheet.hidden=true;}
+
 function renderFinance(){
   finance=normalizeFinanceData(finance); const month=currentMonthKey(), fixed=finance.fixedExpenses.reduce((s,x)=>s+Number(x.amount||0),0), salary=salaryTotal(month);
   const spent=finance.transactions.filter(t=>t.type==='expense'&&isActualFinanceTransaction(t)&&(t.date||'').slice(0,7)===month&&(t.date||'')<=todayKey()).reduce((s,x)=>s+Number(x.amount||0),0);
@@ -418,6 +449,10 @@ function openFinanceForm(action){
   if(action==='extraIncome'){title='تسجيل دخل إضافي';html=field('المبلغ','amount','number','step="0.001" min="0"')+selectField('التصنيف','category',['دخل إضافي','مكافأة','هدية','استرداد','أخرى'])+optionalField('ملاحظة','note','text','placeholder="اختياري"')+field('التاريخ','date','date',`value="${today}"`);}
   if(action==='fixed'){title='إضافة مصروف ثابت';html=field('اسم المصروف','title','text','placeholder="مثال: إيجار أو طعام"')+field('المبلغ','amount','number','step="0.001" min="0"')+selectField('التصنيف','category',['سكن','فواتير','قسط','اشتراك','طعام','مواصلات','أخرى'])+optionalField('يوم الاستحقاق','dueDay','number','min="1" max="31" placeholder="مثال: 10"')+fixedAllocationFields();}
   if(action==='obligation'){title='إضافة التزام مالي';html=field('اسم الالتزام','title','text')+field('المبلغ','amount','number','step="0.001" min="0"')+field('تاريخ الاستحقاق','dueDate','date');}
+  if(action.startsWith('editFixed:')){const id=action.split(':')[1],x=finance.fixedExpenses.find(v=>String(v.id)===String(id));if(!x)return;title='تعديل المصروف الثابت';html=field('اسم المصروف','title','text',`value="${escapeHTML(x.title||'')}"`)+field('المبلغ','amount','number',`step="0.001" min="0" value="${Number(x.amount||0)}"`)+selectField('التصنيف','category',['سكن','فواتير','قسط','اشتراك','طعام','مواصلات','أخرى'],x.category||'أخرى')+optionalField('يوم الاستحقاق','dueDay','number',`min="1" max="31" value="${x.dueDay||''}"`)+fixedAllocationFields(x);}
+  if(action.startsWith('editTransaction:')){const id=action.split(':')[1],x=finance.transactions.find(v=>String(v.id)===String(id));if(!x||isActualFinanceTransaction(x))return;title='تعديل المصروف المحجوز';html=field('المبلغ','amount','number',`step="0.001" min="0" value="${Number(x.amount||0)}"`)+selectField('التصنيف','category',['طعام','مواصلات','فواتير','تسوق','منزل','ترفيه','صدقة','أخرى'],x.category||'أخرى')+optionalField('ملاحظة','note','text',`value="${escapeHTML(x.note||'')}"`)+field('التاريخ','date','date',`value="${x.date||today}"`)+`<div class="form-hint">هذا مصروف محجوز ولم يُخصم من المبلغ الحالي الحقيقي بعد.</div>`;}
+  if(action.startsWith('editObligation:')){const id=action.split(':')[1],x=finance.obligations.find(v=>String(v.id)===String(id));if(!x)return;title='تعديل الالتزام';html=field('اسم الالتزام','title','text',`value="${escapeHTML(x.title||'')}"`)+field('المبلغ','amount','number',`step="0.001" min="0" value="${Number(x.amount||0)}"`)+field('تاريخ الاستحقاق','dueDate','date',`value="${x.dueDate||today}"`);}
+  if(action.startsWith('editSaving:')){const id=action.split(':')[1],x=(finance.savings||[]).find(v=>String(v.id)===String(id));if(!x)return;title='تعديل الادخار';html=field('مبلغ الادخار','amount','number',`step="0.001" min="0" value="${Number(x.amount||0)}"`)+field('تاريخ الادخار','date','date',`value="${x.date||today}"`)+optionalField('ملاحظة','note','text',`value="${escapeHTML(x.note||'')}"`);}
   if(action==='goal'){title='إضافة هدف مالي';html=field('اسم الهدف','title','text')+field('تكلفة الهدف الإجمالية','target','number','step="0.001" min="0"')+field('المدخر حاليًا للهدف','saved','number','step="0.001" min="0" value="0"')+field('التاريخ المستهدف','deadline','date')+`<div class="form-hint">المطلوب شهريًا = (التكلفة − المدخر حاليًا) ÷ الأشهر المتبقية.</div>`;}
   if(action==='saving'){title='إضافة ادخار';html=field('مبلغ الادخار','amount','number','step="0.001" min="0"')+field('تاريخ الادخار','date','date',`value="${today}"`)+optionalField('ملاحظة','note','text','placeholder="مثال: ادخار عام"')+`<div class="form-hint">يُحجز مبلغ الادخار كاملًا داخل الفترة التي يقع فيها تاريخه، ويمكن حذفه لاحقًا من قائمة الادخار.</div>`;}
   financeFormTitle.textContent=title;financeFormFields.innerHTML=html;financeSheet.hidden=false;
@@ -457,11 +492,16 @@ financeForm.addEventListener('submit',e=>{
  if(action==='extraIncome'){const amount=Number(fd.amount||0),future=fd.date>todayKey();finance.transactions.push({id:makeId(),type:'income',amount,category:fd.category,note:fd.note,date:fd.date,planned:future,affectsBalance:!future});if(!future)finance.currentBalance+=amount;}
  if(action==='fixed'){const amount=Number(fd.amount||0),allocations=finance.salaryStreams.map(s=>({salaryId:s.id,amount:Number(fd[`alloc_${s.id}`]||0)})).filter(a=>a.amount>0),sum=allocations.reduce((a,x)=>a+x.amount,0);if(Math.abs(sum-amount)>0.001){openModal('راجع توزيع المصروف',`مبلغ المصروف ${money(amount)} بينما مجموع توزيعه على الرواتب ${money(sum)}. يجب أن يتساويا.`,'📌');return;}finance.fixedExpenses.push({id:makeId(),title:fd.title,amount,category:fd.category,dueDay:Number(fd.dueDay||1),allocations});}
  if(action==='obligation')finance.obligations.push({id:makeId(),title:fd.title,amount:Number(fd.amount||0),dueDate:fd.dueDate});
+ if(action?.startsWith('editFixed:')){const id=action.split(':')[1],x=finance.fixedExpenses.find(v=>String(v.id)===String(id));if(x){const amount=Number(fd.amount||0),allocations=finance.salaryStreams.map(s=>({salaryId:s.id,amount:Number(fd[`alloc_${s.id}`]||0)})).filter(a=>a.amount>0),sum=allocations.reduce((a,v)=>a+v.amount,0);if(Math.abs(sum-amount)>0.001){openModal('راجع توزيع المصروف',`مبلغ المصروف ${money(amount)} بينما مجموع توزيعه على الرواتب ${money(sum)}. يجب أن يتساويا.`,'📌');return;}Object.assign(x,{title:fd.title,amount,category:fd.category,dueDay:Number(fd.dueDay||1),allocations});}}
+ if(action?.startsWith('editTransaction:')){const id=action.split(':')[1],x=finance.transactions.find(v=>String(v.id)===String(id));if(x&&!isActualFinanceTransaction(x)){Object.assign(x,{amount:Number(fd.amount||0),category:fd.category,note:fd.note,date:fd.date,planned:true,affectsBalance:false});}}
+ if(action?.startsWith('editObligation:')){const id=action.split(':')[1],x=finance.obligations.find(v=>String(v.id)===String(id));if(x)Object.assign(x,{title:fd.title,amount:Number(fd.amount||0),dueDate:fd.dueDate});}
+ if(action?.startsWith('editSaving:')){const id=action.split(':')[1],x=(finance.savings||[]).find(v=>String(v.id)===String(id));if(x)Object.assign(x,{amount:Number(fd.amount||0),date:fd.date||todayKey(),note:fd.note||'ادخار عام'});}
  if(action==='goal')finance.goals.push({id:makeId(),title:fd.title,target:Number(fd.target||0),saved:Number(fd.saved||0),deadline:fd.deadline,done:false});
  if(action==='saving'){const amount=Number(fd.amount||0);if(amount>0)finance.savings.push({id:makeId(),amount,date:fd.date||todayKey(),note:fd.note||'ادخار عام'});}
  saveFinance();closeFinanceForm();
 });
 financeSheetClose.addEventListener('click',closeFinanceForm);financeSheet.addEventListener('click',e=>{if(e.target===financeSheet)closeFinanceForm();});
+if(reservedBreakdownClose)reservedBreakdownClose.addEventListener('click',closeReservedBreakdown);if(reservedBreakdownSheet)reservedBreakdownSheet.addEventListener('click',e=>{if(e.target===reservedBreakdownSheet)closeReservedBreakdown();});
 
 // ---------------- Generic sheet ----------------
 function openDomainForm(kicker,title,html,action){ currentDomainAction=action; domainFormKicker.textContent=kicker; domainFormTitle.textContent=title; domainFormFields.innerHTML=html; domainSheet.hidden=false; }
@@ -7716,6 +7756,8 @@ document.addEventListener('click', (event) => {
   const nav = event.target.closest('[data-nav]'); if (nav) { showView(nav.dataset.nav); return; }
   const section = event.target.closest('[data-section]'); if (section && !event.target.closest('[data-action]')) { openSection(section.dataset.section); return; }
 
+  const finReserved=event.target.closest('[data-fin-reserved-details]'); if(finReserved){ openReservedBreakdown(); return; }
+  const finReservedEdit=event.target.closest('[data-fin-edit-reserved]'); if(finReservedEdit){ const kind=finReservedEdit.dataset.finEditReserved,id=finReservedEdit.dataset.id; closeReservedBreakdown(); const map={fixed:'editFixed',transaction:'editTransaction',obligation:'editObligation',saving:'editSaving'}; if(map[kind])openFinanceForm(`${map[kind]}:${id}`); return; }
   const finAction=event.target.closest('[data-fin-action]'); if(finAction){ openFinanceForm(finAction.dataset.finAction); return; }
   const finTab=event.target.closest('[data-fin-tab]'); if(finTab){ document.querySelectorAll('[data-fin-tab]').forEach(x=>x.classList.toggle('active',x===finTab)); document.querySelectorAll('[data-fin-panel]').forEach(x=>x.classList.toggle('active',x.dataset.finPanel===finTab.dataset.finTab)); return; }
   const finDel=event.target.closest('[data-fin-delete]'); if(finDel){

@@ -363,7 +363,7 @@
         <section class="finance-card daily-budget-card">
           <div class="card-row-head"><div><span class="section-kicker">الفترة الحالية</span><h2 id="finPeriodTitle">أضف راتبًا لبدء الميزانية</h2></div><span class="daily-pill">المسموح اليوم</span></div>
           <div class="daily-allowed"><span>المسموح لك اليوم</span><b id="finDailyAllowed">٠.٠٠٠ د.ب</b></div>
-          <div class="reserve-grid"><div><span>المبلغ المتاح بعد الحجز</span><b id="finPeriodAvailable">٠.٠٠٠ د.ب</b></div><div><span>إجمالي المصروفات والالتزامات والادخار المحجوز</span><b id="finPeriodReserved">٠.٠٠٠ د.ب</b></div><div><span>الأيام المتبقية</span><b id="finDaysLeft">—</b></div></div>
+          <div class="reserve-grid"><div><span>المبلغ المتاح بعد الحجز</span><b id="finPeriodAvailable">٠.٠٠٠ د.ب</b></div><button type="button" class="reserve-detail-card" data-fin-reserved-details><span>إجمالي المصروفات والالتزامات والادخار المحجوز</span><b id="finPeriodReserved">٠.٠٠٠ د.ب</b><small>اضغط لمعرفة مصدر المبلغ والتعديل</small></button><div><span>الأيام المتبقية</span><b id="finDaysLeft">—</b></div></div>
           <div class="overspend-alert" id="finOverspendAlert" hidden></div>
           <p class="finance-note">عند دخول فترة الراتب، أي مصروف مجدول يقع داخلها يُحجز مباشرة حتى لو لم يأتِ تاريخ دفعه بعد، وبناءً عليه يتغير المسموح اليومي.</p>
         </section>
@@ -896,6 +896,20 @@
       <div class="form-grid" id="financeFormFields"></div>
       <button class="primary-btn full" type="submit" id="financeFormSubmit">حفظ</button>
     </form>
+  </div>
+
+
+  <div class="sheet-backdrop" id="reservedBreakdownSheet" hidden>
+    <div class="bottom-sheet reserved-breakdown-sheet" role="dialog" aria-modal="true" aria-labelledby="reservedBreakdownTitle">
+      <div class="sheet-handle"></div>
+      <button class="modal-close" type="button" id="reservedBreakdownClose" aria-label="إغلاق">×</button>
+      <div class="sheet-title">
+        <span class="section-kicker">مالي</span>
+        <h2 id="reservedBreakdownTitle">تفاصيل المبلغ المحجوز</h2>
+      </div>
+      <div class="reserved-breakdown-summary" id="reservedBreakdownSummary"></div>
+      <div class="reserved-breakdown-list" id="reservedBreakdownList"></div>
+    </div>
   </div>
 
 
