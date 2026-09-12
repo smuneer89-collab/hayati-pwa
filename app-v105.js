@@ -63,7 +63,8 @@ const emptyReligion = () => ({
   quran: { mode: 'قراءة', lastPosition: '', dailyTarget: '', note: '', reader: { lastSurah: 1, lastAyah: 1, lastPage: 1, lastLine: 0, lastVerseRange: '', lastAt: '', fontStep: 2, theme: 'night', mushafTheme: 'paper', bookmarks: [] } },
   adhkar: [],
   miftahGroups: [],
-  fasting: []
+  fasting: [],
+  tasbeeh: { mode: 'zahra', zahra: { count: 0 }, open: { count: 0 } }
 });
 const emptyKnowledge = () => ({
   hadiths: [],
@@ -81,6 +82,7 @@ let health = loadJSON(HEALTH_KEY, emptyHealth());
 let religion = loadJSON(RELIGION_KEY, emptyReligion());
 religion.adhkar = Array.isArray(religion.adhkar) ? religion.adhkar : [];
 religion.miftahGroups = Array.isArray(religion.miftahGroups) ? religion.miftahGroups : [];
+religion.tasbeeh = { ...emptyReligion().tasbeeh, ...(religion.tasbeeh||{}), zahra:{...emptyReligion().tasbeeh.zahra,...(religion.tasbeeh?.zahra||{})}, open:{...emptyReligion().tasbeeh.open,...(religion.tasbeeh?.open||{})} };
 religion.quran = { ...emptyReligion().quran, ...(religion.quran||{}), reader: { ...emptyReligion().quran.reader, ...(religion.quran?.reader||{}), bookmarks: Array.isArray(religion.quran?.reader?.bookmarks) ? religion.quran.reader.bookmarks : [] } };
 let knowledge = loadJSON(KNOWLEDGE_KEY, emptyKnowledge());
 knowledge.hadiths = Array.isArray(knowledge.hadiths) ? knowledge.hadiths : [];
@@ -418,6 +420,15 @@ function renderReservedBreakdown(){
 function openReservedBreakdown(){renderReservedBreakdown();if(reservedBreakdownSheet)reservedBreakdownSheet.hidden=false;}
 function closeReservedBreakdown(){if(reservedBreakdownSheet)reservedBreakdownSheet.hidden=true;}
 
+function openSalaryDropReview(){
+  const data=reservedBreakdownItems(), w=data.w;
+  const obligations=data.obligationItems, savings=data.savingItems;
+  const obligationTotal=obligations.reduce((s,x)=>s+Number(x.amount||0),0), savingTotal=savings.reduce((s,x)=>s+Number(x.amount||0),0);
+  const rows=(title,items)=>`<div class="salary-drop-group"><h3>${title}<b>${money(items.reduce((s,x)=>s+Number(x.amount||0),0))}</b></h3>${items.length?items.map(x=>`<div class="salary-drop-row"><span><b>${escapeHTML(x.title)}</b><small>${escapeHTML(x.meta)}</small></span><strong>${money(x.amount)}</strong></div>`).join(''):`<div class="finance-empty">لا توجد عناصر في هذه الفترة.</div>`}</div>`;
+  currentDomainAction='finance:salaryDropReview'; domainFormKicker.textContent='مالي'; domainFormTitle.textContent='نزل الراتب';
+  domainFormFields.innerHTML=`<div class="salary-drop-summary"><span>${escapeHTML(w.label)}</span><b>${money(obligationTotal+savingTotal)}</b><small>إجمالي الالتزامات + الادخار لهذه الفترة</small></div>${rows('الالتزامات',obligations)}${rows('الادخار',savings)}<div class="form-hint">هذه شاشة مراجعة سريعة لما هو محجوز من الالتزامات والادخار في الفترة الحالية. يمكنك تعديل العناصر من قسم مالي.</div>`;
+  const submit=document.getElementById('domainFormSubmit'); if(submit)submit.hidden=true; domainSheet.hidden=false;
+}
 function renderFinance(){
   finance=normalizeFinanceData(finance); const month=currentMonthKey(), fixed=finance.fixedExpenses.reduce((s,x)=>s+Number(x.amount||0),0), salary=salaryTotal(month);
   const spent=finance.transactions.filter(t=>t.type==='expense'&&isActualFinanceTransaction(t)&&(t.date||'').slice(0,7)===month&&(t.date||'')<=todayKey()).reduce((s,x)=>s+Number(x.amount||0),0);
@@ -558,8 +569,52 @@ function removeMiftahNode(id,nodes=religion.miftahGroups){for(let i=0;i<(nodes||
 function renderMiftahNodes(nodes){return (nodes||[]).map(n=>{const children=n.children||[],hasText=String(n.text||'').trim();return `<details class="miftah-node" ${children.length?'':'open'}><summary><span>📚 ${escapeHTML(n.title)}</span><span class="miftah-node-actions"><button type="button" data-miftah-add-child="${n.id}">+ فرعي</button><button type="button" data-miftah-delete="${n.id}">حذف</button></span></summary>${hasText?`<div class="miftah-text">${escapeHTML(n.text).replace(/\n/g,'<br>')}</div>`:''}${children.length?`<div class="miftah-children">${renderMiftahNodes(children)}</div>`:''}</details>`}).join('');}
 function renderMiftahTree(){const el=document.getElementById('miftahTree');if(!el)return;el.innerHTML=religion.miftahGroups.length?renderMiftahNodes(religion.miftahGroups):'<div class="empty-state">لا توجد مجموعات بعد. ابدأ مثلًا بـ «زيارات» ثم أضف ما تريد تحتها.</div>';}
 
+function ensureTasbeehState(){
+  religion.tasbeeh = religion.tasbeeh || {mode:'zahra',zahra:{count:0},open:{count:0}};
+  religion.tasbeeh.mode = religion.tasbeeh.mode==='open'?'open':'zahra';
+  religion.tasbeeh.zahra = religion.tasbeeh.zahra || {count:0};
+  religion.tasbeeh.open = religion.tasbeeh.open || {count:0};
+  religion.tasbeeh.zahra.count = Math.max(0,Math.min(100,Number(religion.tasbeeh.zahra.count||0)));
+  religion.tasbeeh.open.count = Math.max(0,Number(religion.tasbeeh.open.count||0));
+  return religion.tasbeeh;
+}
+function tasbeehZahraStage(total){
+  total=Math.max(0,Math.min(100,Number(total||0)));
+  if(total>=100)return {index:2,phrase:'اكتمل تسبيح الزهراء (ع) ✓',stageCount:33,target:33,total,complete:true};
+  if(total<34)return {index:0,phrase:'الله أكبر',stageCount:total,target:34,total};
+  if(total<67)return {index:1,phrase:'الحمد لله',stageCount:total-34,target:33,total};
+  return {index:2,phrase:'سبحان الله',stageCount:total-67,target:33,total};
+}
+function renderTasbeeh(){
+  const state=ensureTasbeehState(), mode=state.mode;
+  document.querySelectorAll('[data-tasbeeh-mode]').forEach(b=>b.classList.toggle('active',b.dataset.tasbeehMode===mode));
+  const phrase=document.getElementById('tasbeehPhrase'), count=document.getElementById('tasbeehCount'), meta=document.getElementById('tasbeehCountMeta'), targets=document.getElementById('tasbeehZahraTargets'), counter=document.querySelector('[data-tasbeeh-count]');
+  if(!phrase||!count||!meta||!counter)return;
+  if(mode==='zahra'){
+    const st=tasbeehZahraStage(state.zahra.count);
+    phrase.textContent=st.phrase; count.textContent=Number(st.stageCount).toLocaleString('ar-BH'); meta.textContent=st.complete?'١٠٠ من ١٠٠':`من ${Number(st.target).toLocaleString('ar-BH')}`;
+    if(targets){targets.hidden=false;targets.querySelectorAll('[data-stage]').forEach(x=>x.classList.toggle('active',Number(x.dataset.stage)===st.index));}
+    counter.style.setProperty('--tasbeeh-progress',`${Math.min(100,(st.stageCount/st.target)*100)}%`);
+  }else{
+    phrase.textContent='تسبيح مفتوح'; count.textContent=Number(state.open.count||0).toLocaleString('ar-BH'); meta.textContent='بدون حد'; if(targets)targets.hidden=true; counter.style.setProperty('--tasbeeh-progress','100%');
+  }
+  setText('religionTasbeehCount',Number(state[mode]?.count||0).toLocaleString('ar-BH'));
+}
+function setTasbeehMode(mode){ const s=ensureTasbeehState(); s.mode=mode==='open'?'open':'zahra'; saveReligion(); renderTasbeeh(); }
+function incrementTasbeeh(){ const s=ensureTasbeehState(); if(s.mode==='zahra'){if(s.zahra.count<100)s.zahra.count+=1;}else s.open.count+=1; saveReligion(); renderTasbeeh(); }
+function resetTasbeeh(){ const s=ensureTasbeehState(); if(!confirm('إعادة عداد المسبحة الحالية إلى صفر؟'))return; s[s.mode].count=0; saveReligion(); renderTasbeeh(); }
+function openTasbeehPanel(){ document.querySelectorAll('[data-religion-tab]').forEach(x=>x.classList.toggle('active',x.dataset.religionTab==='tasbeeh'));document.querySelectorAll('[data-religion-panel]').forEach(x=>x.classList.toggle('active',x.dataset.religionPanel==='tasbeeh'));renderTasbeeh(); }
+function openReligionPrintDialog(){ return openDomainForm('ديني','طباعة متابعة المهام الشهرية',field('الشهر','month','month',`value="${currentMonthKey()}"`)+`<div class="form-hint">سيتم تجهيز جدول بالأيام ١–٣١ وكل مهامك اليومية، ثم تفتح نافذة الطباعة لحفظه PDF.</div>`,'religion:printMonth'); }
+function printReligionMonthlyTracker(month){
+  month=String(month||currentMonthKey()); const [y,m]=month.split('-').map(Number); const daysInMonth=new Date(y,m,0).getDate(); const tasks=Array.isArray(religion.adhkar)?religion.adhkar:[];
+  const dayHeaders=Array.from({length:31},(_,i)=>`<th>${(i+1).toLocaleString('ar-BH')}</th>`).join('');
+  const rows=tasks.length?tasks.map(task=>{const cells=Array.from({length:31},(_,i)=>{const d=i+1;if(d>daysInMonth)return '<td class="na">—</td>';const key=`${month}-${String(d).padStart(2,'0')}`;return `<td class="${(task.doneDates||[]).includes(key)?'yes':'no'}">${(task.doneDates||[]).includes(key)?'✅':'❌'}</td>`;}).join('');return `<tr><th class="task">${escapeHTML(task.title)}</th>${cells}</tr>`;}).join(''):`<tr><td colspan="32">لا توجد مهام دينية يومية مسجلة.</td></tr>`;
+  const title=new Intl.DateTimeFormat('ar-BH',{month:'long',year:'numeric'}).format(new Date(y,m-1,1));
+  const w=window.open('','_blank'); if(!w){openModal('تعذر فتح الطباعة','اسمح للنوافذ المنبثقة لهذا الموقع ثم حاول مرة أخرى.','🖨️');return;}
+  w.document.write(`<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>متابعة المهام الدينية - ${escapeHTML(title)}</title><style>@page{size:A4 landscape;margin:8mm}body{font-family:Arial,Tahoma,sans-serif;color:#111;margin:0}h1{font-size:18px;margin:0 0 4px}p{font-size:11px;margin:0 0 12px;color:#555}table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:8px}th,td{border:1px solid #999;text-align:center;padding:3px 1px}thead th{background:#f1f1f1}.task{width:150px;text-align:right;padding:5px;font-size:9px}.yes{background:#e9f8ee}.no{color:#777}.na{background:#f3f3f3;color:#aaa}@media print{button{display:none}}</style></head><body><h1>متابعة المهام الدينية اليومية — ${escapeHTML(title)}</h1><p>✅ تم الإنجاز &nbsp;&nbsp; ❌ لم يُنجز</p><table><thead><tr><th class="task">المهمة</th>${dayHeaders}</tr></thead><tbody>${rows}</tbody></table><script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`); w.document.close();
+}
 function renderReligion(){
-  const active=religion.projects.filter(x=>x.status!=='مكتمل'); setText('religionProjectsCount',active.length.toLocaleString('ar-BH')); setText('religionQuranPos',religion.quran.lastPosition||'—'); const t=todayKey(); const done=religion.adhkar.filter(x=>(x.doneDates||[]).includes(t)).length; setText('religionDhikrDone',done.toLocaleString('ar-BH')); const month=currentMonthKey(); const fastCount=religion.fasting.filter(x=>(x.date||'').slice(0,7)===month).length; setText('religionFastCount',`${fastCount.toLocaleString('ar-BH')} يوم`);
+  const active=religion.projects.filter(x=>x.status!=='مكتمل'); setText('religionProjectsCount',active.length.toLocaleString('ar-BH')); setText('religionQuranPos',religion.quran.lastPosition||'—'); const t=todayKey(); const done=religion.adhkar.filter(x=>(x.doneDates||[]).includes(t)).length; setText('religionDhikrDone',done.toLocaleString('ar-BH')); const tas=ensureTasbeehState(); setText('religionTasbeehCount',Number(tas[tas.mode]?.count||0).toLocaleString('ar-BH'));
   const focus=active[0]; setText('religionFocusTitle',focus?focus.title:'اختر مشروعًا أو هدفًا دينيًا'); setText('religionFocusSummary',focus?`${focus.type||'مشروع ديني'}${focus.deadline?` • حتى ${arabicDate(focus.deadline)}`:''}${focus.why?` • ${focus.why}`:''}`:'يمكن أن يكون ختمة، وردًا يوميًا، حفظًا، مراجعة أو مشروع تعلم ديني.');
   const suggestions=[]; if(religion.quran.lastPosition||religion.quran.dailyTarget)suggestions.push({icon:'📖',title:religion.quran.dailyTarget?`أكمل هدف القرآن: ${religion.quran.dailyTarget}`:'تابع القرآن من آخر موضع',meta:religion.quran.lastPosition||'لم تحدد موضعًا'}); const pendingDhikr=religion.adhkar.find(x=>!(x.doneDates||[]).includes(t)); if(pendingDhikr)suggestions.push({icon:'🤲',title:pendingDhikr.title,meta:'مهمة دينية لم تكتمل اليوم'}); if(focus)suggestions.push({icon:'🎯',title:focus.title,meta:'المشروع الديني النشط'});
   renderList('religionTodayList',suggestions,x=>`<div class="domain-row"><div><b>${x.icon} ${escapeHTML(x.title)}</b><small>${escapeHTML(x.meta)}</small></div></div>`,'لا توجد أعمال محددة من بياناتك اليوم. أضف مشروعًا أو وردًا أو ذكرًا.');
@@ -568,7 +623,7 @@ function renderReligion(){
   const qrm=document.getElementById('religionQuranReaderMeta'); if(qrm){ const r=ensureQuranReaderState(); qrm.textContent=r.lastAt?`آخر قراءة: ${quranSurahNames[r.lastSurah-1]||'القرآن'} • آية ${toArabicDigits(r.lastAyah)}`:'١١٤ سورة • ٦٢٣٦ آية • جاهز للقراءة'; }
   renderList('religionDhikrList',religion.adhkar,x=>{ const isDone=(x.doneDates||[]).includes(t); return `<div class="domain-row ${isDone?'done-row':''}"><div><b>🤲 ${escapeHTML(x.title)}</b><small>${x.target?`الهدف ${escapeHTML(x.target)}`:'قائمة شخصية'}${isDone?' • اكتمل اليوم':''}</small></div><button class="row-toggle" data-religion-toggle-dhikr="${x.id}">${isDone?'↺':'✓'}</button><button class="row-delete" data-religion-delete="dhikr" data-id="${x.id}">حذف</button></div>`;},'لم تضف مهام دينية يومية بعد.');
   renderMiftahTree();
-  const fast=[...religion.fasting].sort((a,b)=>(b.date||'').localeCompare(a.date||'')); renderList('religionFastList',fast,x=>`<div class="domain-row"><div><b>🌙 ${arabicDate(x.date)}</b><small>${escapeHTML(x.note||'يوم صيام مسجل')}</small></div><button class="row-delete" data-religion-delete="fast" data-id="${x.id}">حذف</button></div>`,'لم تسجل أيام صيام بعد.');
+  renderTasbeeh();
 }
 function openReligionForm(action){ const q=religion.quran;
   if(action==='project') return openDomainForm('ديني','إضافة مشروع ديني',field('اسم المشروع','title','text','placeholder="مثال: ختم القرآن خلال 3 أشهر"')+selectField('النوع','type',['قرآن','حفظ ومراجعة','أذكار','صيام','تعلم ديني','صدقة','هدف خاص'])+optionalField('موعد النهاية','deadline','date')+optionalField('لماذا هذا الهدف مهم؟','why','text','placeholder="اختياري"')+selectField('الحالة','status',['نشط','في الانتظار','مكتمل']),'religion:project');
@@ -1258,6 +1313,7 @@ domainForm.addEventListener('submit',e=>{
   if(action==='religion:dhikr'){ religion.adhkar.push({id:makeId(),title:fd.title,target:fd.target,doneDates:[]}); addTimeline(`أضفت مهمة دينية: ${fd.title}`,'ديني','🤲'); saveReligion(); }
   if(action==='religion:miftah'){const node={id:makeId(),title:fd.title,text:fd.text||'',children:[]};const parent=fd.parentId?findMiftahNode(fd.parentId):null;(parent?parent.children:religion.miftahGroups).push(node);addTimeline(`أضفت في مفاتيح الجنان: ${fd.title}`,'ديني','📚');saveReligion();}
   if(action==='religion:fast'){ religion.fasting.push({id:makeId(),date:fd.date,note:fd.note}); addTimeline(`سجلت يوم صيام: ${arabicDate(fd.date)}`,'ديني','🌙'); saveReligion(); }
+  if(action==='religion:printMonth'){ closeDomainForm(); printReligionMonthlyTracker(fd.month||currentMonthKey()); return; }
 
   if(action==='knowledge:englishSetup'){ knowledge.english.level=fd.level; knowledge.english.goal=fd.goal; knowledge.english.weeklyExamDay=fd.weeklyExamDay; addTimeline('حدّثت مشروع الإنجليزية','معرفتي','📘'); saveKnowledge(); }
   if(action==='knowledge:englishTask'){ knowledge.english.tasks.push({id:makeId(),title:fd.title,type:fd.type,date:fd.date,done:false}); addTimeline(`أضفت مهمة إنجليزية: ${fd.title}`,'معرفتي','📘'); saveKnowledge(); }
@@ -7853,6 +7909,7 @@ document.addEventListener('click', (event) => {
   const section = event.target.closest('[data-section]'); if (section && !event.target.closest('[data-action]')) { openSection(section.dataset.section); return; }
 
   const finReserved=event.target.closest('[data-fin-reserved-details]'); if(finReserved){ openReservedBreakdown(); return; }
+  const finSalaryDrop=event.target.closest('[data-fin-salary-drop]'); if(finSalaryDrop){ openSalaryDropReview(); return; }
   const finReservedEdit=event.target.closest('[data-fin-edit-reserved]'); if(finReservedEdit){ const kind=finReservedEdit.dataset.finEditReserved,id=finReservedEdit.dataset.id; closeReservedBreakdown(); const map={fixed:'editFixed',transaction:'editTransaction',obligation:'editObligation',saving:'editSaving'}; if(map[kind])openFinanceForm(`${map[kind]}:${id}`); return; }
   const finAction=event.target.closest('[data-fin-action]'); if(finAction){ openFinanceForm(finAction.dataset.finAction); return; }
   const finTab=event.target.closest('[data-fin-tab]'); if(finTab){ document.querySelectorAll('[data-fin-tab]').forEach(x=>x.classList.toggle('active',x===finTab)); document.querySelectorAll('[data-fin-panel]').forEach(x=>x.classList.toggle('active',x.dataset.finPanel===finTab.dataset.finTab)); return; }
@@ -7881,6 +7938,11 @@ document.addEventListener('click', (event) => {
 
   const religionAction=event.target.closest('[data-religion-action]'); if(religionAction){ openReligionForm(religionAction.dataset.religionAction); return; }
   const religionMiftahOpen=event.target.closest('[data-religion-open-miftah]'); if(religionMiftahOpen){document.querySelectorAll('[data-religion-tab]').forEach(x=>x.classList.toggle('active',x.dataset.religionTab==='miftah'));document.querySelectorAll('[data-religion-panel]').forEach(x=>x.classList.toggle('active',x.dataset.religionPanel==='miftah'));return;}
+  const religionTasbeehOpen=event.target.closest('[data-religion-open-tasbeeh]'); if(religionTasbeehOpen){openTasbeehPanel();return;}
+  const religionPrint=event.target.closest('[data-religion-print]'); if(religionPrint){openReligionPrintDialog();return;}
+  const tasbeehMode=event.target.closest('[data-tasbeeh-mode]'); if(tasbeehMode){setTasbeehMode(tasbeehMode.dataset.tasbeehMode);return;}
+  const tasbeehCountBtn=event.target.closest('[data-tasbeeh-count]'); if(tasbeehCountBtn){incrementTasbeeh();return;}
+  const tasbeehResetBtn=event.target.closest('[data-tasbeeh-reset]'); if(tasbeehResetBtn){resetTasbeeh();return;}
   const mChild=event.target.closest('[data-miftah-add-child]');if(mChild){openReligionForm('miftah');setTimeout(()=>{const sel=domainForm?.querySelector('[name="parentId"]');if(sel)sel.value=mChild.dataset.miftahAddChild;},0);return;}
   const mDel=event.target.closest('[data-miftah-delete]');if(mDel){event.preventDefault();event.stopPropagation();if(confirm('حذف هذه المجموعة وكل ما بداخلها؟')){removeMiftahNode(mDel.dataset.miftahDelete);saveReligion();}return;}
   const religionTab=event.target.closest('[data-religion-tab]'); if(religionTab){ document.querySelectorAll('[data-religion-tab]').forEach(x=>x.classList.toggle('active',x===religionTab)); document.querySelectorAll('[data-religion-panel]').forEach(x=>x.classList.toggle('active',x.dataset.religionPanel===religionTab.dataset.religionTab)); return; }
@@ -8000,7 +8062,7 @@ window.addEventListener('resize',fitMushafLines);
 document.getElementById('sectionBack').addEventListener('click', () => showView('domains'));
 document.getElementById('sectionAction').addEventListener('click', () => showView('today'));
 modalClose.addEventListener('click', closeModal); modalOk.addEventListener('click', closeModal); modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) closeModal(); });
-installBtn.addEventListener('click', installApp); document.getElementById('settingInstall').addEventListener('click', installApp); themeBtn.addEventListener('click', toggleTheme); document.getElementById('settingTheme').addEventListener('click', toggleTheme);
+installBtn.addEventListener('click', installApp); document.getElementById('settingInstall').addEventListener('click', installApp); themeBtn.addEventListener('click', toggleTheme); document.getElementById('settingTheme')?.addEventListener('click', toggleTheme);
 document.getElementById('backupExportBtn')?.addEventListener('click',exportFullBackup);
 document.getElementById('backupImportBtn')?.addEventListener('click',()=>document.getElementById('backupImportInput')?.click());
 document.getElementById('backupReminderBtn')?.addEventListener('click',toggleBackupReminder);

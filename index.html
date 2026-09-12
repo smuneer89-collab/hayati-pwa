@@ -180,14 +180,16 @@
         </div>
         <div class="settings-list">
           <button class="setting-row" id="settingInstall"><span>📲</span><div><b>تثبيت التطبيق</b><small>إضافة حياتي إلى الشاشة الرئيسية.</small></div><em>←</em></button>
-          <button class="setting-row" id="settingTheme"><span>🌗</span><div><b>المظهر</b><small>التبديل بين الداكن والفاتح.</small></div><em>←</em></button>
           <button class="setting-row" id="hadithManagerOpenBtn"><span>📚</span><div><b>إدارة قاعدة الأحاديث</b><small>اكتب موضوع المجموعة والصق الأحاديث؛ حياتي يفصلها ويفحص التكرار ويحفظها تلقائيًا.</small></div><em id="hadithSettingsCount">0 حديث</em></button>
-          <button class="setting-row" id="backupExportBtn"><span>💾</span><div><b>إنشاء نسخة احتياطية كاملة</b><small>على الآيفون تفتح ورقة المشاركة؛ اختر «حفظ في الملفات». تشمل البيانات وصور الألبومات.</small></div><em>حفظ</em></button>
-          <button class="setting-row" id="backupImportBtn"><span>♻️</span><div><b>استعادة نسخة احتياطية</b><small>اختر ملف JSON واحد من «الملفات». يفحصه حياتي ويأخذ لقطة أمان قبل الاستعادة.</small></div><em>اختيار ملف</em></button>
-          <div class="setting-row static"><span>🕘</span><div><b>آخر نسخة كاملة</b><small id="backupLastFull">لم تُنشأ نسخة كاملة بعد.</small></div><em>JSON</em></div>
-          <button class="setting-row" id="backupReminderBtn"><span>🔔</span><div><b>تذكير أسبوعي بالنسخة</b><small>تذكير داخل التطبيق إذا مر أسبوع دون نسخة كاملة.</small></div><em id="backupReminderState">مفعل</em></button>
-          <button class="setting-row" id="backupSnapshotNowBtn"><span>🧩</span><div><b>إنشاء نسخة محلية الآن</b><small>لقطة سريعة تبقى على هذا الجهاز، ويمكن الرجوع إليها من القائمة أدناه.</small></div><em>إنشاء</em></button>
-          <div class="setting-row static backup-snapshots-row"><span>🕘</span><div><b>النسخ المحلية الأخيرة</b><small>آخر 5 لقطات. اضغط على أي تاريخ لاستعادته.</small><div id="backupSnapshotList" class="snapshot-list"></div></div><em>آخر 5</em></div>
+          <section class="settings-card backup-settings-card">
+            <div class="settings-card-head"><span>💾</span><div><b>النسخ الاحتياطية</b><small>كل أدوات النسخة في مكان واحد.</small></div></div>
+            <button class="setting-row" id="backupExportBtn"><span>⬇️</span><div><b>إنشاء نسخة احتياطية كاملة</b><small>على الآيفون تفتح ورقة المشاركة؛ اختر «حفظ في الملفات». تشمل البيانات وصور الألبومات.</small></div><em>حفظ</em></button>
+            <button class="setting-row" id="backupImportBtn"><span>♻️</span><div><b>استعادة نسخة احتياطية</b><small>اختر ملف JSON واحد من «الملفات». يفحصه حياتي ويأخذ لقطة أمان قبل الاستعادة.</small></div><em>اختيار ملف</em></button>
+            <div class="setting-row static"><span>🕘</span><div><b>آخر نسخة كاملة</b><small id="backupLastFull">لم تُنشأ نسخة كاملة بعد.</small></div><em>JSON</em></div>
+            <button class="setting-row" id="backupReminderBtn"><span>🔔</span><div><b>تذكير أسبوعي بالنسخة</b><small>تذكير داخل التطبيق إذا مر أسبوع دون نسخة كاملة.</small></div><em id="backupReminderState">مفعل</em></button>
+            <button class="setting-row" id="backupSnapshotNowBtn"><span>🧩</span><div><b>إنشاء نسخة محلية الآن</b><small>لقطة سريعة تبقى على هذا الجهاز، ويمكن الرجوع إليها من القائمة أدناه.</small></div><em>إنشاء</em></button>
+            <div class="setting-row static backup-snapshots-row"><span>🕘</span><div><b>النسخ المحلية الأخيرة</b><small>آخر 5 لقطات. اضغط على أي تاريخ لاستعادته.</small><div id="backupSnapshotList" class="snapshot-list"></div></div><em>آخر 5</em></div>
+          </section>
           <div class="setting-row static"><span>🔐</span><div><b>Firebase</b><small>لن نربطه الآن؛ نبني الأقسام أولًا كما اتفقنا.</small></div><em>لاحقًا</em></div>
           <div class="setting-row static"><span>🤖</span><div><b>مساعد حياتي</b><small>سيُضاف تدريجيًا بعد استقرار البيانات والأقسام.</small></div><em>لاحقًا</em></div>
         </div>
@@ -370,6 +372,7 @@
 
         <div class="finance-quick">
           <button data-fin-action="salary"><span>💵</span><b>راتب</b></button>
+          <button type="button" class="salary-drop-btn" data-fin-salary-drop><span>✅</span><b>نزل الراتب</b></button>
           <button data-fin-action="expense"><span>💳</span><b>مصروف</b></button>
           <button data-fin-action="fixed"><span>📌</span><b>مصروف ثابت</b></button>
           <button data-fin-action="saving"><span>🏦</span><b>ادخار عام</b></button>
@@ -522,7 +525,7 @@
           <div>
             <span class="section-kicker">ديني</span>
             <h1>مشاريعي الدينية</h1>
-            <p>تنظيم هادئ للقرآن والأذكار والصيام والمشاريع، بدون تقييم لدرجة التدين.</p>
+            <p>تنظيم هادئ للقرآن والأذكار والمسبحة والمشاريع، بدون تقييم لدرجة التدين.</p>
           </div>
           <span class="local-badge">محفوظ محليًا</span>
         </div>
@@ -531,7 +534,7 @@
           <article><span>المشاريع النشطة</span><b id="religionProjectsCount">٠</b></article>
           <article><span>آخر موضع قرآن</span><b id="religionQuranPos">—</b></article>
           <article class="accent"><span>مهام دينية مكتملة اليوم</span><b id="religionDhikrDone">٠</b></article>
-          <article><span>صيام هذا الشهر</span><b id="religionFastCount">٠ يوم</b></article>
+          <article><span>عداد المسبحة</span><b id="religionTasbeehCount">٠</b></article>
         </div>
 
         <section class="feature-card religion-feature">
@@ -547,7 +550,7 @@
           <button data-religion-action="project"><span>🎯</span><b>مشروع</b></button>
           <button type="button" onclick="window.location.href='quran.html?v=104'"><span>📖</span><b>المصحف</b></button>
           <button type="button" data-religion-open-miftah><span>🤲</span><b>مفاتيح الجنان</b></button>
-          <button data-religion-action="fast"><span>🌙</span><b>صيام</b></button>
+          <button type="button" data-religion-open-tasbeeh><span>📿</span><b>مسبحة</b></button>
         </div>
 
         <div class="domain-tabs" data-tab-group="religion">
@@ -555,7 +558,7 @@
           <button data-religion-tab="projects">المشاريع</button>
           <button data-religion-tab="quran">القرآن</button>
           <button data-religion-tab="adhkar">المهام اليومية</button><button data-religion-tab="miftah">مفاتيح الجنان</button>
-          <button data-religion-tab="fasting">الصيام</button>
+          <button data-religion-tab="tasbeeh">المسبحة</button>
         </div>
 
         <section class="domain-panel active" data-religion-panel="overview">
@@ -593,7 +596,7 @@
 
         <section class="domain-panel" data-religion-panel="adhkar">
           <div class="domain-card-wide">
-            <div class="card-row-head"><div><span class="section-kicker">اليوم</span><h2>المهام الدينية اليومية</h2></div><button class="text-btn" data-religion-action="dhikr">+ إضافة مهمة</button></div>
+            <div class="card-row-head"><div><span class="section-kicker">اليوم</span><h2>المهام الدينية اليومية</h2></div><div class="card-head-actions"><button class="text-btn" type="button" data-religion-print>🖨️ طباعة PDF</button><button class="text-btn" data-religion-action="dhikr">+ إضافة مهمة</button></div></div>
             <div class="domain-list" id="religionDhikrList"></div>
           </div>
         </section>
@@ -606,12 +609,24 @@
           </div>
         </section>
 
-        <section class="domain-panel" data-religion-panel="fasting">
-          <div class="domain-card-wide">
-            <div class="card-row-head"><div><span class="section-kicker">التقويم الشخصي</span><h2>أيام الصيام المسجلة</h2></div><button class="text-btn" data-religion-action="fast">+ يوم</button></div>
-            <div class="domain-list" id="religionFastList"></div>
+        <section class="domain-panel" data-religion-panel="tasbeeh">
+          <div class="tasbeeh-card">
+            <div class="tasbeeh-title-row"><div><span class="section-kicker">المسبحة الإلكترونية</span><h2>مسبحتي</h2></div><span>📿</span></div>
+            <div class="tasbeeh-mode-switch">
+              <button type="button" class="active" data-tasbeeh-mode="zahra">تسبيح الزهراء (ع)</button>
+              <button type="button" data-tasbeeh-mode="open">تسبيح مفتوح</button>
+            </div>
+            <div class="tasbeeh-phrase" id="tasbeehPhrase">الله أكبر</div>
+            <div class="tasbeeh-zahra-targets" id="tasbeehZahraTargets">
+              <span data-stage="0">٣٤</span><span data-stage="1">٣٣</span><span data-stage="2">٣٣</span>
+            </div>
+            <button class="tasbeeh-counter" type="button" data-tasbeeh-count aria-label="اضغط للتسبيح">
+              <strong id="tasbeehCount">٠</strong>
+              <small id="tasbeehCountMeta">من ٣٤</small>
+              <em>اضغط للتسبيح</em>
+            </button>
+            <button class="tasbeeh-reset" type="button" data-tasbeeh-reset>إعادة التصفير</button>
           </div>
-          <div class="phase-note"><b>تنظيم لا فتوى</b><span>هذا السجل يحفظ ما تدخله أنت فقط، ولا يستنتج أحكامًا شرعية أو عدد أيام واجبة تلقائيًا.</span></div>
         </section>
       </section>
 
