@@ -255,6 +255,7 @@ function endDay(){
   if(dayRhythm.currentEnd) return openModal('نهاية اليوم مسجلة',`سجلت نهاية اليوم عند ${formatClock(dayRhythm.currentEnd)}. ستُحسب مدة النوم عند تسجيل بداية اليوم التالية.`,'🌙');
   const nowIso=new Date().toISOString(); dayRhythm.currentEnd=nowIso; dayRhythm.lastEnd=nowIso; saveDayRhythm();
   addTimeline('أنهيت يومي','يومي','🌙');
+  openModal('نهاية اليوم', 'قال تعالى :\n﴿ قُلْ إِنَّمَا أَنَا بَشَرٌ مِّثْلُكُمْ يُوحَىٰ إِلَيَّ أَنَّمَا إِلَٰهُكُمْ إِلَٰهٌ وَاحِدٌ ۖ فَمَن كَانَ يَرْجُو لِقَاءَ رَبِّهِ فَلْيَعْمَلْ عَمَلًا صَالِحًا وَلَا يُشْرِكْ بِعِبَادَةِ رَبِّهِ أَحَدًا ﴾', '🌙');
 }
 function renderHomeHadith(){
   const had=dailyHadith(); const text=document.getElementById('homeDailyHadithText'), meta=document.getElementById('homeDailyHadithMeta');
@@ -603,7 +604,9 @@ function renderTasbeeh(){
 function setTasbeehMode(mode){ const s=ensureTasbeehState(); s.mode=mode==='open'?'open':'zahra'; saveReligion(); renderTasbeeh(); }
 function incrementTasbeeh(){ const s=ensureTasbeehState(); if(s.mode==='zahra'){if(s.zahra.count<100)s.zahra.count+=1;}else s.open.count+=1; saveReligion(); renderTasbeeh(); }
 function resetTasbeeh(){ const s=ensureTasbeehState(); if(!confirm('إعادة عداد المسبحة الحالية إلى صفر؟'))return; s[s.mode].count=0; saveReligion(); renderTasbeeh(); }
-function openTasbeehPanel(){ document.querySelectorAll('[data-religion-tab]').forEach(x=>x.classList.toggle('active',x.dataset.religionTab==='tasbeeh'));document.querySelectorAll('[data-religion-panel]').forEach(x=>x.classList.toggle('active',x.dataset.religionPanel==='tasbeeh'));renderTasbeeh(); }
+function openReligionSubpage(name){const view=document.getElementById('view-religion');view?.classList.add('religion-subpage-active');document.querySelectorAll('[data-religion-panel]').forEach(x=>x.classList.toggle('active',x.dataset.religionPanel===name));if(name==='tasbeeh')renderTasbeeh();if(name==='miftah')renderMiftahTree();window.scrollTo({top:0,behavior:'smooth'});}
+function closeReligionSubpage(){document.getElementById('view-religion')?.classList.remove('religion-subpage-active');document.querySelectorAll('[data-religion-tab]').forEach(x=>x.classList.toggle('active',x.dataset.religionTab==='overview'));document.querySelectorAll('[data-religion-panel]').forEach(x=>x.classList.toggle('active',x.dataset.religionPanel==='overview'));}
+function openTasbeehPanel(){openReligionSubpage('tasbeeh');}
 function openReligionPrintDialog(){ return openDomainForm('ديني','طباعة متابعة المهام الشهرية',field('الشهر','month','month',`value="${currentMonthKey()}"`)+`<div class="form-hint">سيتم تجهيز جدول بالأيام ١–٣١ وكل مهامك اليومية، ثم تفتح نافذة الطباعة لحفظه PDF.</div>`,'religion:printMonth'); }
 function printReligionMonthlyTracker(month){
   month=String(month||currentMonthKey()); const [y,m]=month.split('-').map(Number); const daysInMonth=new Date(y,m,0).getDate(); const tasks=Array.isArray(religion.adhkar)?religion.adhkar:[];
@@ -896,6 +899,44 @@ function buildHadithAiPrompt(hadithText){
 الحديث:
 "${String(hadithText||'')}"`;
 }
+function buildHadithFilmPrompt(hadithText){
+  return `أريد منك أن تحوّل الحديث إلى **ثلاث أفكار احترافية** لأفلام أنيميشن قصيرة (Animation Short Film)، بحيث تكون كل فكرة مستقلة تماماً عن الأخريات من حيث الزاوية الفنية، الأسلوب البصري، والمقاربة القصصية — بحيث لو اختار المُنتج أياً منها، يحصل على تجربة مختلفة كلياً عن البقية.
+
+لكل فكرة من الأفكار الثلاث، التزم بالبنية التالية بالضبط:
+
+**١. العنوان المقترح**
+اسم جذاب، مختصر، وقابل للتذكر.
+
+**٢. الفكرة الرئيسية (Logline)**
+جملة أو جملتان تلخّصان جوهر القصة بأسلوب سينمائي مشوّق.
+
+**٣. الأسلوب البصري (Visual Style)**
+حدّد نوع الأنيميشن الأنسب (ثنائي الأبعاد، ثلاثي الأبعاد، موشن غرافيك، رسم يدوي، ستوب موشن...) مع تبرير مختصر لماذا يخدم هذا الأسلوب الفكرة تحديداً.
+
+**٤. البنية القصصية (بداية - عقدة/تحوّل - خاتمة)**
+سرد مختصر لا يتجاوز ٤-٥ أسطر، يوضح كيف تتصاعد الأحداث وتصل إلى ذروتها ثم تُحل.
+
+**٥. الشخصيات الرئيسية**
+وصف موجز لشخصية أو شخصيتين محوريتين (من هي، ما دافعها، وكيف تتغيّر عبر القصة).
+
+**٦. كيفية توظيف الحديث فنياً (وليس مباشرة)**
+اشرح كيف تُترجَم رسالة الحديث بصرياً ورمزياً ضمن أحداث القصة، دون ذكر نص الحديث حرفياً أو الاستشهاد به بشكل مباشر داخل الفيلم — الهدف أن يشعر المُشاهد بالمعنى، لا أن يُلقَّن به.
+
+**٧. المدة التقريبية والفئة المستهدفة**
+حدد مدة الفيلم المقترحة (مثال: ٣-٥ دقائق) والجمهور الأنسب له (أطفال، يافعون، عام).
+
+**٨. مشهد مفتاحي (Signature Scene)**
+صف مشهداً واحداً بصرياً قوياً يمكن استخدامه كـ"لقطة دعائية" (Poster Moment) يلخّص روح الفيلم.
+
+**تعليمات عامة:**
+- لا تكرر نفس الأسلوب البصري أو نفس نوع الشخصيات بين الأفكار الثلاث.
+- تجنّب الحلول المباشرة أو الوعظية — الأفكار يجب أن تكون فنية وقصصية بالدرجة الأولى.
+- رتّب كل فكرة بعناوين واضحة وفواصل منظمة بدون حشو.
+
+**الحديث:**
+${String(hadithText||'')}`;
+}
+async function copyDailyHadithForFilm(){const h=dailyHadith();if(!h)return openModal('لا يوجد حديث','أضف حديثًا أولًا.','📜');const ok=await writeClipboardText(buildHadithFilmPrompt(h.text));openModal(ok?'جاهز لصناعة الأفلام':'تعذر النسخ',ok?'تم نسخ أمر صناعة أفلام الأنيميشن مع حديث اليوم.':'لم يتمكن المتصفح من نسخ الرسالة.','🎬');}
 async function copyDailyHadith(){const h=dailyHadith();if(!h)return openModal('لا يوجد حديث','أضف حديثًا أولًا.','📜');const ok=await writeClipboardText(h.text);openModal(ok?'تم النسخ':'تعذر النسخ',ok?'نُسخ نص الحديث إلى الحافظة.':'لم يتمكن المتصفح من نسخ النص.','⧉');}
 async function copyDailyHadithForAI(){const h=dailyHadith();if(!h)return openModal('لا يوجد حديث','أضف حديثًا أولًا.','📜');const ok=await writeClipboardText(buildHadithAiPrompt(h.text));openModal(ok?'جاهز للذكاء الاصطناعي':'تعذر النسخ',ok?'تم نسخ الرسالة كاملة مع الحديث. افتح برنامج الذكاء الاصطناعي والصقها مباشرة.':'لم يتمكن المتصفح من نسخ الرسالة.','✦');}
 async function shareDailyHadith(){const h=dailyHadith();if(!h)return openModal('لا يوجد حديث','أضف حديثًا أولًا.','📜');const text=h.text;try{if(navigator.share){await navigator.share({title:'حديث اليوم',text});return;}await writeClipboardText(text);openModal('تم النسخ','المشاركة المباشرة غير متاحة؛ نُسخ الحديث إلى الحافظة.','⌯');}catch(e){if(e?.name!=='AbortError')openModal('تعذرت المشاركة','يمكنك استخدام زر النسخ بدلًا من ذلك.','⌯');}}
@@ -7937,7 +7978,8 @@ document.addEventListener('click', (event) => {
   const retry=event.target.closest('[data-mushaf-retry]'); if(retry){openMushafPage(Number(retry.dataset.mushafRetry));return;}
 
   const religionAction=event.target.closest('[data-religion-action]'); if(religionAction){ openReligionForm(religionAction.dataset.religionAction); return; }
-  const religionMiftahOpen=event.target.closest('[data-religion-open-miftah]'); if(religionMiftahOpen){document.querySelectorAll('[data-religion-tab]').forEach(x=>x.classList.toggle('active',x.dataset.religionTab==='miftah'));document.querySelectorAll('[data-religion-panel]').forEach(x=>x.classList.toggle('active',x.dataset.religionPanel==='miftah'));return;}
+  const religionMiftahOpen=event.target.closest('[data-religion-open-miftah]'); if(religionMiftahOpen){openReligionSubpage('miftah');return;}
+  const religionSubBack=event.target.closest('[data-religion-subpage-back]'); if(religionSubBack){closeReligionSubpage();return;}
   const religionTasbeehOpen=event.target.closest('[data-religion-open-tasbeeh]'); if(religionTasbeehOpen){openTasbeehPanel();return;}
   const religionPrint=event.target.closest('[data-religion-print]'); if(religionPrint){openReligionPrintDialog();return;}
   const tasbeehMode=event.target.closest('[data-tasbeeh-mode]'); if(tasbeehMode){setTasbeehMode(tasbeehMode.dataset.tasbeehMode);return;}
@@ -8038,9 +8080,11 @@ document.getElementById('homeHadithFavoriteBtn')?.addEventListener('click',toggl
 document.getElementById('homeHadithCopyBtn')?.addEventListener('click',copyDailyHadith);
 document.getElementById('homeHadithShareBtn')?.addEventListener('click',shareDailyHadith);
 document.getElementById('homeHadithAiBtn')?.addEventListener('click',copyDailyHadithForAI);
+document.getElementById('homeHadithFilmBtn')?.addEventListener('click',copyDailyHadithForFilm);
 document.getElementById('knowledgeHadithCopyBtn')?.addEventListener('click',copyDailyHadith);
 document.getElementById('knowledgeHadithShareBtn')?.addEventListener('click',shareDailyHadith);
 document.getElementById('knowledgeHadithAiBtn')?.addEventListener('click',copyDailyHadithForAI);
+document.getElementById('knowledgeHadithFilmBtn')?.addEventListener('click',copyDailyHadithForFilm);
 document.getElementById('quranContinueBtn')?.addEventListener('click',()=>{const r=ensureQuranReaderState();openMushafPage(r.lastPage||1);});
 document.getElementById('quranReaderBack')?.addEventListener('click',openQuranLibrary);
 document.getElementById('mushafExitBtn')?.addEventListener('click',openQuranLibrary);
@@ -8072,6 +8116,7 @@ document.getElementById('familyPhotoInput')?.addEventListener('change',async e=>
 window.addEventListener('beforeinstallprompt', (event) => { event.preventDefault(); deferredPrompt = event; });
 
 const savedTheme = localStorage.getItem('hayati-theme'); setTheme(savedTheme || 'dark'); document.getElementById('todayDate').textContent = formatArabicDate(); activateDailyHadith(''); renderFinance(); renderHealth(); renderReligion(); renderKnowledge(); renderRelationships(); renderFamily(); renderStory(); renderDashboard(); renderBackupSettings(); if(!loadJSON(SNAPSHOT_KEY,[]).length) createLocalSnapshot('أول لقطة'); renderHadithManagerStats(); maybeShowBackupReminder();
+if(new URLSearchParams(location.search).get('open')==='religion'){showView('religion');navItems.forEach(i=>i.classList.remove('active'));history.replaceState(null,'',location.pathname);}
 window.addEventListener('load', async () => {
   try {
     if ('serviceWorker' in navigator) { const regs=await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map(r=>r.unregister())); }

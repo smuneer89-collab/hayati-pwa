@@ -59,6 +59,7 @@
             <button type="button" id="homeHadithShareBtn" class="hadith-action-btn" title="مشاركة الحديث"><span>⌯</span><small>مشاركة</small></button>
             <button type="button" id="homeHadithFavoriteBtn" class="hadith-action-btn" title="إضافة إلى المفضلة"><span>♡</span><small>مفضلة</small></button>
             <button type="button" id="homeHadithAiBtn" class="hadith-action-btn ai" title="نسخ للذكاء الاصطناعي"><span>✦</span><small>نسخ للذكاء الاصطناعي</small></button>
+            <button type="button" id="homeHadithFilmBtn" class="hadith-action-btn film" title="عمل أفلام"><span>🎬</span><small>عمل أفلام</small></button>
           </div>
         </section>
 
@@ -557,8 +558,7 @@
           <button class="active" data-religion-tab="overview">اليوم</button>
           <button data-religion-tab="projects">المشاريع</button>
           <button data-religion-tab="quran">القرآن</button>
-          <button data-religion-tab="adhkar">المهام اليومية</button><button data-religion-tab="miftah">مفاتيح الجنان</button>
-          <button data-religion-tab="tasbeeh">المسبحة</button>
+          <button data-religion-tab="adhkar">المهام اليومية</button>
         </div>
 
         <section class="domain-panel active" data-religion-panel="overview">
@@ -601,16 +601,18 @@
           </div>
         </section>
 
-        <section class="domain-panel" data-religion-panel="miftah">
-          <div class="domain-card-wide">
+        <section class="domain-panel religion-standalone-panel" data-religion-panel="miftah">
+          <div class="religion-subpage-head"><button type="button" class="back-btn" data-religion-subpage-back>→ ديني</button><div><span>✦ مفاتيح الجنان ✦</span><h1>مفاتيح الجنان</h1></div></div>
+          <div class="domain-card-wide miftah-library-card">
             <div class="card-row-head"><div><span class="section-kicker">مفاتيح الجنان</span><h2>المجموعات والنصوص</h2></div><button class="text-btn" data-religion-action="miftah">+ إضافة مجموعة</button></div>
             <p class="finance-note">يمكنك بناء مجموعات داخل مجموعات بلا حد ثابت للمستويات، ثم وضع النص الكامل في آخر مستوى.</p>
             <div class="miftah-tree" id="miftahTree"></div>
           </div>
         </section>
 
-        <section class="domain-panel" data-religion-panel="tasbeeh">
-          <div class="tasbeeh-card">
+        <section class="domain-panel religion-standalone-panel" data-religion-panel="tasbeeh">
+          <div class="religion-subpage-head"><button type="button" class="back-btn" data-religion-subpage-back>→ ديني</button><div><span>✦ الذكر ✦</span><h1>المسبحة</h1></div></div>
+          <div class="tasbeeh-card islamic-tasbeeh">
             <div class="tasbeeh-title-row"><div><span class="section-kicker">المسبحة الإلكترونية</span><h2>مسبحتي</h2></div><span>📿</span></div>
             <div class="tasbeeh-mode-switch">
               <button type="button" class="active" data-tasbeeh-mode="zahra">تسبيح الزهراء (ع)</button>
@@ -737,6 +739,7 @@
             <button type="button" id="knowledgeHadithShareBtn" class="hadith-action-btn" title="مشاركة الحديث"><span>⌯</span><small>مشاركة</small></button>
             <button type="button" id="hadithFavoriteBtn" class="hadith-action-btn" title="مفضلة"><span id="hadithFavoriteIcon">♡</span><small>مفضلة</small></button>
             <button type="button" id="knowledgeHadithAiBtn" class="hadith-action-btn ai" title="نسخ للذكاء الاصطناعي"><span>✦</span><small>نسخ للذكاء الاصطناعي</small></button>
+            <button type="button" id="knowledgeHadithFilmBtn" class="hadith-action-btn film" title="عمل أفلام"><span>🎬</span><small>عمل أفلام</small></button>
           </div>
           <div class="domain-inline-actions"><button class="chip-btn" id="hadithReadBtn">تمت القراءة</button><button class="chip-btn" data-knowledge-action="hadith">+ إضافة حديث</button></div>
         </section>
