@@ -8153,3 +8153,27 @@ document.addEventListener('click',e=>{
   openModal(names[key]||'الكراج','البيانات في هذه المرحلة تجريبية وسيتم ربطها لاحقًا بنماذج الإدخال والحفظ.','🚙');
 });
 
+
+// ===== v11.4.0: nail clipping weekday guide =====
+(() => {
+  const btn=document.getElementById('nailDayBtn'), backdrop=document.getElementById('nailModalBackdrop');
+  if(!btn||!backdrop)return;
+  const close=document.getElementById('nailModalClose'), modal=backdrop.querySelector('.nail-modal');
+  const dayEl=document.getElementById('nailModalDay'), badge=document.getElementById('nailModalBadge'), shortEl=document.getElementById('nailModalShort'), textEl=document.getElementById('nailModalText'), iconEl=document.getElementById('nailModalIcon'), weekEl=document.getElementById('nailWeek'), doneBtn=document.getElementById('nailDoneBtn'), lastEl=document.getElementById('nailLast');
+  const prayer='«بسم الله وبالله وعلى سنة رسول الله محمد وآل محمد صلى الله عليه وعليهم أجمعين»';
+  const days=[
+    {name:'الأحد',badge:'غير مستحب',good:false,short:'غير جيد ويذهب البركة',text:'عن الإمام أمير المؤمنين (ع): «من قلم أظافره يوم الأحد ذهبت البركة من يده»'},
+    {name:'الاثنين',badge:'مستحب',good:true,short:'مستحب - يُقال يزيد في الحفظ والقدرة على القراءة والكتابة',text:'دعاء قص الأظافر:\n'+prayer+'\n\nملاحظة: يبدأ بالخنصر من اليد اليسرى وينتهي بالخنصر من اليد اليمنى، وكذلك في أظافر الرجلين.'},
+    {name:'الثلاثاء',badge:'مكروه',good:false,short:'مكروه - قد يهلك فاعله',text:'عن النبي (ص): «من قلم أظافره يوم الثلاثاء يخاف الهلاك عليه»'},
+    {name:'الأربعاء',badge:'مكروه',good:false,short:'مكروه - قد يصبح سيء الخلق',text:'«من قلم أظافره يوم الأربعاء يصير سيء الخلق»'},
+    {name:'الخميس',badge:'مستحب',good:true,short:'مستحب - من أدمن قص أظافره يوم الخميس لم ترمد عينه (يُفضّل ترك ظفر واحد ليوم الجمعة)',text:'دعاء قص الأظافر:\n'+prayer+'\n\nعن النبي (ص): «من قلم أظافره يوم الخميس يخرج منه الداء ويدخل فيه الشفاء»\n\nورُويت رواية عن الإمام الرضا (ع) في تقليم الأظافر يوم الخميس لعلاج العين.'},
+    {name:'الجمعة',badge:'مستحب جداً',good:true,short:'مستحب جداً - تقليم الأظافر يوم الجمعة يزيل الفقر ويزيد في البركة، ويؤمن من الجذام والجنون',text:'دعاء قص الأظافر:\n'+prayer+'\n\nرُوي عن الإمام الصادق (ع) في أخذ الشارب وتقليم الأظافر يوم الجمعة أنه خير من التعقيب بين الفجر وطلوع الشمس.'},
+    {name:'السبت',badge:'غير مستحب',good:false,short:'مكروه - قد تقع الآفة في الأصابع ويذهب البركة',text:'حديث النبي (ص): «من قلم أظافره يوم السبت وقعت الآكلة في أصابعه»'}
+  ];
+  const svg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5h9.2a2.3 2.3 0 0 1 2.3 2.3v2.4H9.2A2.2 2.2 0 0 1 7 7V4.5Z"/><path d="M9.2 9.2 5.4 18a1.7 1.7 0 0 0 2.9 1.7l5.7-7.3"/><path d="M12.8 9.2 18.6 18a1.7 1.7 0 0 1-2.8 1.9l-6.2-7.5"/><circle cx="8.7" cy="8.8" r="1.4"/></svg>';
+  function current(){return days[new Date().getDay()]}
+  function refreshButton(){const d=current();btn.classList.toggle('good',d.good);btn.classList.toggle('bad',!d.good);btn.title=`${d.name} — ${d.badge}`;btn.setAttribute('aria-label',`تقليم الأظافر: ${d.name}، ${d.badge}`)}
+  function open(){const d=current(),idx=new Date().getDay();modal.classList.toggle('good',d.good);modal.classList.toggle('bad',!d.good);dayEl.textContent=d.name;badge.textContent=d.badge;shortEl.textContent=d.short;textEl.textContent=d.text;iconEl.innerHTML=svg;weekEl.innerHTML=days.map((x,i)=>`<span class="${x.good?'good':'bad'} ${i===idx?'today':''}">${x.name}</span>`).join('');const last=localStorage.getItem('hayati-nails-last');lastEl.textContent=last?`آخر تسجيل: ${new Date(last).toLocaleDateString('ar-BH')}`:'لم تسجّل تقليم الأظافر بعد';backdrop.hidden=false;document.body.style.overflow='hidden'}
+  function shut(){backdrop.hidden=true;document.body.style.overflow=''}
+  btn.addEventListener('click',open);close.addEventListener('click',shut);backdrop.addEventListener('click',e=>{if(e.target===backdrop)shut()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!backdrop.hidden)shut()});doneBtn.addEventListener('click',()=>{localStorage.setItem('hayati-nails-last',new Date().toISOString());lastEl.textContent=`تم التسجيل اليوم ✓`;doneBtn.textContent='✓ تم التسجيل اليوم'});refreshButton();
+})();
