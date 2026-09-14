@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://static-cdn.tarteel.ai" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles-v105.css?v=108f" />
+  <link rel="stylesheet" href="styles-v105.css?v=1138" />
   <title>حياتي</title>
   <meta name="hayati-build" content="10.0-qcf604" />
 </head>
@@ -856,17 +856,27 @@
         </section>
         <div class="domain-quick family-quick">
           <button data-family-action="member"><span>👨‍👩‍👧</span><b>فرد</b></button>
+          <button data-family-action="education"><span>🎓</span><b>تعليم ولدي</b></button>
           <button data-family-action="album"><span>🖼️</span><b>ألبوم</b></button>
-          <button data-family-action="photo"><span>📷</span><b>صور</b></button>
           <button data-family-action="task"><span>✅</span><b>مسؤولية</b></button>
         </div>
         <div class="domain-tabs" data-tab-group="family">
           <button class="active" data-family-tab="tree">شجرة العائلة</button>
+          <button data-family-tab="education">تعليم ولدي</button>
           <button data-family-tab="albums">الألبومات</button>
           <button data-family-tab="tasks">المسؤوليات</button>
         </div>
         <section class="domain-panel active" data-family-panel="tree">
           <div class="domain-card-wide"><div class="card-row-head"><div><span class="section-kicker">العلاقات</span><h2>شجرة العائلة</h2></div><button class="text-btn" data-family-action="member">+ فرد</button></div><div id="familyTree" class="family-tree"></div></div>
+        </section>
+        <section class="domain-panel" data-family-panel="education">
+          <div class="domain-card-wide family-education-card">
+            <div class="card-row-head">
+              <div><span class="section-kicker">المتابعة الشهرية</span><h2>تعليم ولدي</h2><p class="family-education-help">حدد نوع التعليم وأيام الحضور خلال الشهر، وسأذكرك في «يومي» في موعده.</p></div>
+              <button class="text-btn" data-family-action="education">+ تعليم جديد</button>
+            </div>
+            <div id="familyEducationList" class="family-education-list"></div>
+          </div>
         </section>
         <section class="domain-panel" data-family-panel="albums">
           <div class="domain-card-wide"><div class="card-row-head"><div><span class="section-kicker">الذكريات</span><h2>ألبومات الصور</h2></div><button class="text-btn" data-family-action="album">+ ألبوم</button></div><div id="familyAlbumList" class="album-grid"></div></div>
@@ -974,6 +984,6 @@
     </section>
   </div>
 
-  <script src="app-v105.js?v=107g" defer></script>
+  <script src="app-v105.js?v=1138" defer></script>
 </body>
 </html>
