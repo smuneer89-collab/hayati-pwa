@@ -127,7 +127,7 @@ function normalizeFinanceData(raw) {
       allocations:(migratedToDatedSalaries&&Array.isArray(x.allocations)?x.allocations:[]).filter(a=>salaryIds.has(a.salaryId)).map(a=>({salaryId:a.salaryId,amount:Number(a.amount||0)}))
     })):[],
     transactions:Array.isArray(f.transactions)?f.transactions:[],
-    obligations:Array.isArray(f.obligations)?f.obligations.map(x=>({...x,id:x.id||makeId(),amount:Number(x.amount||0)})):[],
+    obligations:Array.isArray(f.obligations)?f.obligations.map(x=>({...x,id:x.id||makeId(),amount:Number(x.amount||0),paid:!!x.paid,paidAt:x.paidAt||''})):[],
     goals:Array.isArray(f.goals)?f.goals:[],
     monthlySavings:(f.monthlySavings&&typeof f.monthlySavings==='object')?f.monthlySavings:{},
     savings:Array.isArray(f.savings)?f.savings.map(x=>({id:x.id||makeId(),amount:Number(x.amount||0),date:x.date||todayKey(),note:x.note||'ادخار عام'})):[]
@@ -367,7 +367,7 @@ function plannedExpensesReservedForWindow(w){
   return finance.transactions.filter(t=>t.type==='expense'&&!isActualFinanceTransaction(t)&&(t.date||'')>=w.start&&(t.date||'')<w.end).reduce((s,x)=>s+Number(x.amount||0),0);
 }
 function obligationsReservedForWindow(w){
-  return finance.obligations.filter(x=>(x.dueDate||'')>=w.start&&(x.dueDate||'')<w.end).reduce((s,x)=>s+Number(x.amount||0),0);
+  return finance.obligations.filter(x=>!x.paid&&(x.dueDate||'')>=w.start&&(x.dueDate||'')<w.end).reduce((s,x)=>s+Number(x.amount||0),0);
 }
 function savingReservedForWindow(w){
   // الادخار المسجل داخل الفترة يُحجز كاملًا كما أدخله المستخدم، بدون توزيع نسبي على الرواتب.
@@ -403,22 +403,30 @@ function reservedBreakdownItems(){
     return amount>0?{kind:'fixed',id:x.id,title:x.title||'مصروف ثابت',meta:`مصروف ثابت • محجوز في ${w.label}`,amount}:null;
   }).filter(Boolean);
   const plannedItems=finance.transactions.filter(t=>t.type==='expense'&&!isActualFinanceTransaction(t)&&(t.date||'')>=w.start&&(t.date||'')<w.end).map(x=>({kind:'transaction',id:x.id,title:x.note||x.category||'مصروف مجدول',meta:`مصروف مجدول • ${arabicDate(x.date)}`,amount:Number(x.amount||0)}));
-  const obligationItems=finance.obligations.filter(x=>(x.dueDate||'')>=w.start&&(x.dueDate||'')<w.end).map(x=>({kind:'obligation',id:x.id,title:x.title||'التزام',meta:`التزام • ${arabicDate(x.dueDate)}`,amount:Number(x.amount||0)}));
+  const obligationItems=finance.obligations.filter(x=>!x.paid&&(x.dueDate||'')>=w.start&&(x.dueDate||'')<w.end).map(x=>({kind:'obligation',id:x.id,title:x.title||'التزام',meta:`التزام • ${arabicDate(x.dueDate)}`,amount:Number(x.amount||0),paid:false}));
+  const paidObligationItems=finance.obligations.filter(x=>x.paid&&(x.dueDate||'')>=w.start&&(x.dueDate||'')<w.end).map(x=>({kind:'obligation',id:x.id,title:x.title||'التزام',meta:`تم الدفع${x.paidAt?` • ${arabicDate((x.paidAt||'').slice(0,10))}`:''}`,amount:Number(x.amount||0),paid:true}));
   const savingItems=(finance.savings||[]).filter(x=>(x.date||'')>=w.start&&(x.date||'')<w.end).map(x=>({kind:'saving',id:x.id,title:x.note||'ادخار عام',meta:`ادخار • ${arabicDate(x.date)}`,amount:Number(x.amount||0)}));
-  return {w,fixedItems,plannedItems,obligationItems,savingItems,all:[...fixedItems,...plannedItems,...obligationItems,...savingItems]};
+  return {w,fixedItems,plannedItems,obligationItems,paidObligationItems,savingItems,all:[...fixedItems,...plannedItems,...obligationItems,...savingItems]};
 }
 function reservedEditButton(item){return `<button type="button" data-fin-edit-reserved="${item.kind}" data-id="${item.id}">تعديل</button>`;}
 function reservedGroupHTML(title,items){
   if(!items.length)return '';
   const total=items.reduce((s,x)=>s+Number(x.amount||0),0);
-  return `<section class="reserved-breakdown-group"><h3><span>${title}</span><b>${money(total)}</b></h3>${items.map(x=>financeRow(x.title,x.meta,money(x.amount),'expense',x.id,x.kind,reservedEditButton(x))).join('')}</section>`;
+  return `<section class="reserved-breakdown-group"><h3><span>${title}</span><b>${money(total)}</b></h3>${items.map(x=>{
+    if(x.kind==='obligation'){
+      const check=`<button type="button" class="obligation-paid-check ${x.paid?'is-paid':''}" data-fin-pay-obligation="${x.id}" ${x.paid?'disabled':''} aria-label="${x.paid?'تم دفع الالتزام':'تحديد الالتزام كمدفوع'}">${x.paid?'✓':''}</button>`;
+      const actions=x.paid?'':reservedEditButton(x);
+      return `<div class="finance-row obligation-reserved-row ${x.paid?'paid':''}">${check}<div><div class="row-title">${escapeHTML(x.title)}</div><div class="row-meta">${escapeHTML(x.meta)}</div></div><div class="row-amount ${x.paid?'income':'expense'}">${money(x.amount)}</div><div class="row-actions">${actions}${x.paid?'':`<button type="button" data-fin-delete="obligation" data-id="${x.id}">حذف</button>`}</div></div>`;
+    }
+    return financeRow(x.title,x.meta,money(x.amount),'expense',x.id,x.kind,reservedEditButton(x));
+  }).join('')}</section>`;
 }
 function renderReservedBreakdown(){
   if(!reservedBreakdownSummary||!reservedBreakdownList)return;
   const data=reservedBreakdownItems();
   const fixedTotal=data.fixedItems.reduce((s,x)=>s+x.amount,0), plannedTotal=data.plannedItems.reduce((s,x)=>s+x.amount,0), obligationTotal=data.obligationItems.reduce((s,x)=>s+x.amount,0), savingTotal=data.savingItems.reduce((s,x)=>s+x.amount,0), total=fixedTotal+plannedTotal+obligationTotal+savingTotal;
   reservedBreakdownSummary.innerHTML=`<div><span>المصاريف الثابتة</span><b>${money(fixedTotal)}</b></div><div><span>المصاريف المجدولة</span><b>${money(plannedTotal)}</b></div><div><span>الالتزامات</span><b>${money(obligationTotal)}</b></div><div><span>الادخار</span><b>${money(savingTotal)}</b></div><div style="grid-column:1/-1"><span>الإجمالي المحجوز</span><b>${money(total)}</b></div>`;
-  reservedBreakdownList.innerHTML=data.all.length ? reservedGroupHTML('المصاريف الثابتة',data.fixedItems)+reservedGroupHTML('المصاريف المجدولة',data.plannedItems)+reservedGroupHTML('الالتزامات',data.obligationItems)+reservedGroupHTML('الادخار',data.savingItems) : emptyRow('لا توجد مبالغ محجوزة في الفترة الحالية.');
+  reservedBreakdownList.innerHTML=data.all.length ? reservedGroupHTML('المصاريف الثابتة',data.fixedItems)+reservedGroupHTML('المصاريف المجدولة',data.plannedItems)+reservedGroupHTML('الالتزامات',data.obligationItems)+reservedGroupHTML('الالتزامات المدفوعة',data.paidObligationItems)+reservedGroupHTML('الادخار',data.savingItems) : emptyRow('لا توجد مبالغ محجوزة في الفترة الحالية.');
 }
 function openReservedBreakdown(){renderReservedBreakdown();if(reservedBreakdownSheet)reservedBreakdownSheet.hidden=false;}
 function closeReservedBreakdown(){if(reservedBreakdownSheet)reservedBreakdownSheet.hidden=true;}
@@ -497,6 +505,16 @@ function deleteFinance(kind,id){
     finance.monthlySavings={};
     finance.savingsMigrated=true;
   }
+  saveFinance();
+}
+function payObligation(id){
+  const x=finance.obligations.find(v=>String(v.id)===String(id));
+  if(!x||x.paid)return;
+  const amount=Number(x.amount||0);
+  x.paid=true; x.paidAt=new Date().toISOString();
+  finance.currentBalance=Number(finance.currentBalance||0)-amount;
+  finance.transactions.push({id:makeId(),type:'expense',amount,category:'التزامات',note:x.title||'التزام',date:todayKey(),source:'obligation',obligationId:x.id,affectsBalance:true});
+  addTimeline(`تم دفع ${x.title||'التزام'} بقيمة ${money(amount)}`,'مالي','✅');
   saveFinance();
 }
 function payPlannedExpense(id){const x=finance.transactions.find(v=>v.id===id);if(!x||x.type!=='expense'||x.affectsBalance)return;x.affectsBalance=true;x.planned=false;finance.currentBalance-=Number(x.amount||0);addTimeline(`دفعت مصروفًا مجدولًا بقيمة ${money(x.amount)}`,x.category||'مالي','💳');saveFinance();}
@@ -8017,6 +8035,7 @@ document.addEventListener('click', (event) => {
 
   const finReserved=event.target.closest('[data-fin-reserved-details]'); if(finReserved){ openReservedBreakdown(); return; }
   const finSalaryDrop=event.target.closest('[data-fin-salary-drop]'); if(finSalaryDrop){ openSalaryDropReview(); return; }
+  const finPayObligation=event.target.closest('[data-fin-pay-obligation]'); if(finPayObligation){ payObligation(finPayObligation.dataset.finPayObligation); return; }
   const finReservedEdit=event.target.closest('[data-fin-edit-reserved]'); if(finReservedEdit){ const kind=finReservedEdit.dataset.finEditReserved,id=finReservedEdit.dataset.id; closeReservedBreakdown(); const map={fixed:'editFixed',transaction:'editTransaction',obligation:'editObligation',saving:'editSaving'}; if(map[kind])openFinanceForm(`${map[kind]}:${id}`); return; }
   const finAction=event.target.closest('[data-fin-action]'); if(finAction){ openFinanceForm(finAction.dataset.finAction); return; }
   const finTab=event.target.closest('[data-fin-tab]'); if(finTab){ document.querySelectorAll('[data-fin-tab]').forEach(x=>x.classList.toggle('active',x===finTab)); document.querySelectorAll('[data-fin-panel]').forEach(x=>x.classList.toggle('active',x.dataset.finPanel===finTab.dataset.finTab)); return; }
