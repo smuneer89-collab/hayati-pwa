@@ -74,7 +74,7 @@ const emptyKnowledge = () => ({
   projects: [{ id: 'english-project', title: 'تطوير اللغة الإنجليزية', status: 'أتعلمه الآن', note: 'المشروع التعليمي النشط حاليًا.' }]
 });
 const emptyRelationships = () => ({ people: [], interactions: [], events: [], promises: [], gifts: [] });
-const emptyFamily = () => ({ members: [], albums: [], tasks: [], photos: [], education: [] });
+const emptyFamily = () => ({ members: [], albums: [], tasks: [], photos: [], education: [], supermarketItems: [], supermarketRequests: [] });
 const emptyDayRhythm = () => ({ currentStart: '', currentEnd: '', lastEnd: '', lastSleepMinutes: null, lastSleepStart: '', lastSleepEnd: '', sleepHistory: [] });
 
 let finance = normalizeFinanceData(loadJSON(FINANCE_KEY, emptyFinance()));
@@ -96,7 +96,7 @@ knowledge.books = Array.isArray(knowledge.books) ? knowledge.books.map(b=>({
 })) : [];
 let relationships = loadJSON(RELATIONSHIPS_KEY, emptyRelationships());
 let family = loadJSON(FAMILY_KEY, emptyFamily());
-family = { ...emptyFamily(), ...(family&&typeof family==='object'?family:{}), education:Array.isArray(family?.education)?family.education.map(x=>({...x,days:Array.isArray(x.days)?x.days.map(Number).filter(n=>n>=1&&n<=31):[],attendance:(x.attendance&&typeof x.attendance==='object')?x.attendance:{}})):[] };
+family = { ...emptyFamily(), ...(family&&typeof family==='object'?family:{}), education:Array.isArray(family?.education)?family.education.map(x=>({...x,days:Array.isArray(x.days)?x.days.map(Number).filter(n=>n>=1&&n<=31):[],attendance:(x.attendance&&typeof x.attendance==='object')?x.attendance:{}})):[], supermarketItems:Array.isArray(family?.supermarketItems)?family.supermarketItems.map(x=>({...x,price:x.price===''?'':Number(x.price||0)})):[], supermarketRequests:Array.isArray(family?.supermarketRequests)?family.supermarketRequests.map(x=>({...x,quantity:Number(x.quantity||1),estimatedPrice:Number(x.estimatedPrice||0)})):[] };
 let dayRhythm = loadJSON(DAY_RHYTHM_KEY, emptyDayRhythm());
 dayRhythm = { ...emptyDayRhythm(), ...(dayRhythm && typeof dayRhythm === 'object' ? dayRhythm : {}), sleepHistory: Array.isArray(dayRhythm?.sleepHistory) ? dayRhythm.sleepHistory : [] };
 
@@ -1317,7 +1317,7 @@ function markDailyHadithRead(){ const x=dailyHadith(); if(!x)return openKnowledg
 function toggleDailyHadithFavorite(){ const x=dailyHadith(); if(!x)return; x.favorite=!x.favorite; saveKnowledge(); updateHadithActionStates(); }
 
 // ---------------- Domain form submit ----------------
-domainForm.addEventListener('submit',e=>{
+domainForm.addEventListener('submit',async e=>{
   e.preventDefault(); const fd=Object.fromEntries(new FormData(domainForm).entries()); const action=currentDomainAction; if(action?.startsWith('knowledge:bookDetails:')) return;
   if(action==='knowledge:hadith'){
     const q=processHadithQuranText(fd.text||'');
@@ -1361,6 +1361,22 @@ domainForm.addEventListener('submit',e=>{
   if(action==='family:task'){ family.tasks.push({id:makeId(),title:fd.title,assignee:fd.assignee,dueDate:fd.dueDate,note:fd.note,done:false}); addTimeline(`أضفت مسؤولية عائلية: ${fd.title}`,'عائلتي','✅'); saveFamily(); }
   if(action==='family:education'){ const days=[...domainForm.querySelectorAll('[data-education-day]:checked')].map(x=>Number(x.value)).sort((a,b)=>a-b); if(!days.length)return openModal('حدد أيام الحضور','اختر يومًا واحدًا على الأقل من أيام الشهر.','🎓'); family.education.push({id:makeId(),title:fd.title,childName:fd.childName||'',month:fd.month||currentMonthKey(),days,attendance:{}}); addTimeline(`أضفت تعليمًا: ${fd.title}`,'عائلتي','🎓'); saveFamily(); }
   if(action?.startsWith('family:educationEdit:')){ const id=action.split(':')[2],x=family.education.find(v=>v.id===id); if(x){ const days=[...domainForm.querySelectorAll('[data-education-day]:checked')].map(v=>Number(v.value)).sort((a,b)=>a-b); if(!days.length)return openModal('حدد أيام الحضور','اختر يومًا واحدًا على الأقل من أيام الشهر.','🎓'); x.title=fd.title;x.childName=fd.childName||'';x.month=fd.month||currentMonthKey();x.days=days;saveFamily(); } }
+  if(action==='family:supermarketItem'){
+    const price=(fd.price===''||fd.price===undefined)?'':Number(fd.price||0); const item={id:makeId(),name:(fd.name||'').trim(),category:fd.category||'أخرى',unit:(fd.unit||'وحدة').trim(),price,lastUpdated:price===''?'':todayKey(),imageId:'',createdAt:new Date().toISOString()};
+    if(!item.name)return openModal('اكتب اسم المادة','اسم المادة مطلوب حتى نحفظها في قائمة الأسعار.','🛒');
+    const file=domainForm.querySelector('[name="itemImage"]')?.files?.[0]; if(file)await saveSupermarketItemImage(item,file); family.supermarketItems.push(item); addTimeline(`أضفت مادة للسوبر ماركت: ${item.name}`,'عائلتي','🛒'); saveFamily(); closeDomainForm(); supermarketSetTab('prices'); return;
+  }
+  if(action?.startsWith('family:supermarketItemEdit:')){
+    const id=action.split(':')[2],item=supermarketItemById(id); if(!item)return; item.name=(fd.name||item.name).trim();item.category=fd.category||'أخرى';item.unit=(fd.unit||'وحدة').trim(); if(fd.price!==''&&fd.price!==undefined){const np=Number(fd.price||0);if(item.price!==np)item.lastUpdated=todayKey();item.price=np;} const file=domainForm.querySelector('[name="itemImage"]')?.files?.[0];if(file)await saveSupermarketItemImage(item,file);saveFamily();closeDomainForm();supermarketSetTab('prices');return;
+  }
+  if(action==='family:supermarketRequest'){
+    let item=fd.itemId?supermarketItemById(fd.itemId):null; const qty=Math.max(.001,Number(fd.quantity||1));
+    if(!item){const name=(fd.itemName||'').trim();if(!name)return openModal('اختر أو اكتب مادة','اختر مادة من القائمة أو اكتب اسم مادة جديدة.','🛒');item={id:makeId(),name,category:(fd.category||'أخرى').trim()||'أخرى',unit:(fd.unit||'وحدة').trim()||'وحدة',price:'',lastUpdated:'',imageId:'',createdAt:new Date().toISOString()};family.supermarketItems.push(item);}
+    family.supermarketRequests.push({id:makeId(),itemId:item.id,itemName:item.name,quantity:qty,unit:item.unit,estimatedPrice:supermarketEstimated(item,qty),status:'قيد الانتظار',addedAt:new Date().toISOString(),note:fd.note||''});addTimeline(`أضفت طلب سوبر ماركت: ${item.name}`,'عائلتي','🛒');saveFamily();closeDomainForm();supermarketSetTab('requests');return;
+  }
+  if(action?.startsWith('family:supermarketPurchase:')){
+    const id=action.split(':')[2],r=(family.supermarketRequests||[]).find(x=>x.id===id);if(!r)return;const item=supermarketItemById(r.itemId);const has=fd.actualUnitPrice!==''&&fd.actualUnitPrice!==undefined;const actual=has?Number(fd.actualUnitPrice):'';r.status='تم الشراء';r.purchasedAt=new Date().toISOString();r.actualPrice=has?actual*Number(r.quantity||1):'';if(has&&item&&fd.updateCatalog==='on'){item.price=actual;item.lastUpdated=todayKey();}addTimeline(`تم شراء ${item?.name||r.itemName||'مادة'}`,'عائلتي','✓');saveFamily();closeDomainForm();supermarketSetTab('requests');return;
+  }
   if(action==='family:photo'){ pendingFamilyAlbumId=fd.albumId; closeDomainForm(); document.getElementById('familyPhotoInput')?.click(); return; }
   closeDomainForm();
 });
@@ -1414,6 +1430,54 @@ async function getAllPhotoRecords(){ const db=await openFamilyDB(); return new P
 async function deletePhotoRecord(id){ const db=await openFamilyDB(); return new Promise((resolve,reject)=>{const tx=db.transaction(FAMILY_STORE,'readwrite');tx.objectStore(FAMILY_STORE).delete(id);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);}); }
 async function clearPhotoStore(){ const db=await openFamilyDB(); return new Promise((resolve,reject)=>{const tx=db.transaction(FAMILY_STORE,'readwrite');tx.objectStore(FAMILY_STORE).clear();tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);}); }
 function nextBirthdayDays(dateStr){ if(!dateStr)return Infinity; const src=new Date(dateStr+'T12:00:00'), now=new Date(); let d=new Date(now.getFullYear(),src.getMonth(),src.getDate(),12); if(d<now)d.setFullYear(d.getFullYear()+1); return Math.ceil((d-now)/86400000); }
+
+// ---------------- Family / Supermarket ----------------
+// Data model mirrors the requested Firestore collections:
+// supermarket_items and supermarket_requests. This build stores them locally
+// until Firebase is connected in the project settings, preserving full PWA use offline.
+let supermarketRequestFilter='pending';
+const SUPERMARKET_CATEGORIES=['خضار','فواكه','ألبان','لحوم','مخبوزات','مواد جافة','مشروبات','تنظيف','عناية شخصية','مجمدات','أخرى'];
+function supermarketEmoji(category=''){return ({'خضار':'🥬','فواكه':'🍎','ألبان':'🥛','لحوم':'🍗','مخبوزات':'🍞','مواد جافة':'🍚','مشروبات':'🧃','تنظيف':'🧴','عناية شخصية':'🧻','مجمدات':'❄️','أخرى':'🛒'})[category]||'🛒';}
+function supermarketItemById(id){return (family.supermarketItems||[]).find(x=>x.id===id);}
+function supermarketDaysOld(date){if(!date)return Infinity;const d=new Date(date+'T12:00:00'),n=new Date();n.setHours(12,0,0,0);return Math.max(0,Math.floor((n-d)/86400000));}
+function supermarketPriceLabel(v){return (v===''||v===null||v===undefined||Number.isNaN(Number(v)))?'—':`${Number(v).toFixed(3)} د.ب`;}
+function supermarketEstimated(item,qty){const p=item?.price;if(p===''||p===null||p===undefined)return 0;return Number(p||0)*Number(qty||0);}
+function supermarketSetTab(name){document.querySelectorAll('[data-supermarket-tab]').forEach(b=>b.classList.toggle('active',b.dataset.supermarketTab===name));document.querySelectorAll('[data-supermarket-panel]').forEach(p=>p.classList.toggle('active',p.dataset.supermarketPanel===name));if(name==='requests')renderSupermarketRequests();else renderSupermarketPrices();}
+function supermarketCategories(){return [...new Set((family.supermarketItems||[]).map(x=>x.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ar'));}
+async function supermarketLoadThumb(el,item){if(!el||!item)return;if(item.imageId){try{const rec=await getPhotoRecord(item.imageId);if(rec?.blob){const u=URL.createObjectURL(rec.blob);el.innerHTML=`<img alt="${escapeHTML(item.name)}" src="${u}">`;return;}}catch{}}el.textContent=supermarketEmoji(item.category);}
+async function renderSupermarketPrices(){
+  const wrap=document.getElementById('supermarketPriceList');if(!wrap)return;
+  const search=(document.getElementById('supermarketSearch')?.value||'').trim().toLowerCase();
+  const cat=document.getElementById('supermarketCategoryFilter')?.value||'';
+  const select=document.getElementById('supermarketCategoryFilter');if(select){const keep=select.value;select.innerHTML='<option value="">كل الفئات</option>'+supermarketCategories().map(c=>`<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join('');select.value=keep;}
+  const items=(family.supermarketItems||[]).filter(x=>(!search||(x.name||'').toLowerCase().includes(search))&&(!cat||x.category===cat)).sort((a,b)=>(a.category||'').localeCompare(b.category||'','ar')||(a.name||'').localeCompare(b.name||'','ar'));
+  wrap.innerHTML='';
+  if(!items.length){wrap.innerHTML='<div class="supermarket-empty">لا توجد مواد مطابقة. أضف أول مادة للسوبر ماركت.</div>';return;}
+  for(const x of items){const old=supermarketDaysOld(x.lastUpdated)>30;const row=document.createElement('article');row.className='supermarket-item';row.innerHTML=`<div class="supermarket-thumb" data-supermarket-thumb="${x.id}">${supermarketEmoji(x.category)}</div><div class="supermarket-info"><b>${escapeHTML(x.name)}</b><small>${escapeHTML(x.category||'بدون فئة')} • ${escapeHTML(x.unit||'وحدة')}</small>${old?`<small class="supermarket-stale">◷ السعر لم يُحدّث منذ ${Number.isFinite(supermarketDaysOld(x.lastUpdated))?supermarketDaysOld(x.lastUpdated).toLocaleString('ar-BH'):'أكثر من 30'} يوم</small>`:''}</div><div class="supermarket-price-side"><strong>${supermarketPriceLabel(x.price)}</strong><small>${x.lastUpdated?`آخر تحديث ${arabicDate(x.lastUpdated)}`:'لم يُسجل سعر بعد'}</small><div class="supermarket-inline"><input type="number" inputmode="decimal" min="0" step="0.001" value="${x.price===''?'':Number(x.price||0)}" data-supermarket-price-input="${x.id}" aria-label="تعديل سعر ${escapeHTML(x.name)}"><button class="save" data-supermarket-save-price="${x.id}">حفظ</button><button data-supermarket-action="editItem" data-id="${x.id}">⋯</button><button data-supermarket-delete-item="${x.id}" title="حذف المادة">×</button></div></div>`;wrap.appendChild(row);supermarketLoadThumb(row.querySelector('[data-supermarket-thumb]'),x);}
+}
+async function renderSupermarketRequests(){
+  const wrap=document.getElementById('supermarketRequestList');if(!wrap)return;
+  const pending=(family.supermarketRequests||[]).filter(r=>r.status!=='تم الشراء');
+  const total=pending.reduce((a,r)=>a+Number(r.estimatedPrice||0),0);setText('supermarketPendingTotal',`${total.toFixed(3)} د.ب`);setText('supermarketPendingBadge',pending.length.toLocaleString('ar-BH'));
+  document.querySelectorAll('[data-supermarket-request-filter]').forEach(b=>b.classList.toggle('active',b.dataset.supermarketRequestFilter===supermarketRequestFilter));
+  let rows=[...(family.supermarketRequests||[])];if(supermarketRequestFilter==='pending')rows=rows.filter(r=>r.status!=='تم الشراء');if(supermarketRequestFilter==='bought')rows=rows.filter(r=>r.status==='تم الشراء');rows.sort((a,b)=>(b.addedAt||'').localeCompare(a.addedAt||''));wrap.innerHTML='';
+  if(!rows.length){wrap.innerHTML='<div class="supermarket-empty">لا توجد طلبات في هذا القسم.</div>';return;}
+  for(const r of rows){const item=supermarketItemById(r.itemId)||{name:r.itemName||'مادة جديدة',category:'أخرى',unit:r.unit||'وحدة'};const done=r.status==='تم الشراء';const row=document.createElement('article');row.className='supermarket-request';row.innerHTML=`<div class="supermarket-thumb" data-supermarket-request-thumb="${r.id}">${supermarketEmoji(item.category)}</div><div class="supermarket-info"><b>${escapeHTML(item.name||r.itemName)}</b><small>${Number(r.quantity||1).toLocaleString('ar-BH')} × ${escapeHTML(item.unit||r.unit||'وحدة')} • تقديري ${supermarketPriceLabel(r.estimatedPrice)}</small><div class="supermarket-request-actions">${!done?`<button class="bought" data-supermarket-buy="${r.id}">✓ تم الشراء</button>`:''}<button class="delete" data-supermarket-delete-request="${r.id}">حذف</button></div></div><div class="supermarket-price-side"><span class="supermarket-status ${done?'done':''}">${done?'تم الشراء':'قيد الانتظار'}</span>${done&&r.actualPrice!==undefined&&r.actualPrice!==''?`<small>فعلي ${supermarketPriceLabel(r.actualPrice)}</small>`:''}<small>${r.addedAt?new Date(r.addedAt).toLocaleDateString('ar-BH'):'—'}</small></div>`;wrap.appendChild(row);supermarketLoadThumb(row.querySelector('[data-supermarket-request-thumb]'),item);}
+}
+async function renderSupermarket(){await renderSupermarketPrices();await renderSupermarketRequests();}
+function supermarketItemFormHTML(item=null){const x=item||{};return field('اسم المادة','name','text',`placeholder="مثال: حليب نادك" value="${escapeHTML(x.name||'')}"`)+selectField('الفئة','category',SUPERMARKET_CATEGORIES,x.category||'أخرى')+field('الوحدة','unit','text',`placeholder="كيلو، علبة، حبة، لتر..." value="${escapeHTML(x.unit||'')}"`)+optionalField('السعر الحالي (د.ب)','price','number',`step="0.001" min="0" value="${x.price===''?'':Number(x.price||0)}"`)+`<div class="form-field supermarket-image-field"><label>صورة المادة ${x.imageId?'(اختياري — اتركها كما هي للحفاظ على الحالية)':'(اختياري)'}</label><input type="file" name="itemImage" accept="image/*"><small>تظهر الصورة داخل قائمة الأسعار والطلبات. إذا لم ترفع صورة سنستخدم أيقونة مناسبة للفئة.</small></div>`;}
+function openSupermarketForm(action,id=''){
+  if(action==='addItem')return openDomainForm('عائلتي','إضافة مادة للسوبر ماركت',supermarketItemFormHTML(), 'family:supermarketItem');
+  if(action==='editItem'){const x=supermarketItemById(id);if(!x)return;return openDomainForm('عائلتي','تعديل مادة',supermarketItemFormHTML(x),`family:supermarketItemEdit:${id}`);}
+  if(action==='addRequest'){
+    const opts=(family.supermarketItems||[]).map(x=>`<option value="${x.id}">${escapeHTML(x.name)} — ${escapeHTML(x.unit||'وحدة')} ${x.price!==''?`(${supermarketPriceLabel(x.price)})`:''}</option>`).join('');
+    const html=`<div class="form-field"><label>اختر مادة موجودة</label><select name="itemId"><option value="">— مادة جديدة —</option>${opts}</select></div>`+optionalField('أو اكتب اسم مادة جديدة','itemName','text','placeholder="مثال: موز"')+optionalField('فئة المادة الجديدة','category','text','placeholder="مثال: فواكه"')+optionalField('وحدة المادة الجديدة','unit','text','placeholder="كيلو، علبة، حبة..."')+field('الكمية','quantity','number','min="0.001" step="0.001" value="1"')+textareaField('ملاحظة','note','rows="2" placeholder="اختياري"');
+    return openDomainForm('عائلتي','إضافة طلب للسوبر ماركت',html,'family:supermarketRequest');
+  }
+}
+function openSupermarketPurchase(id){const r=(family.supermarketRequests||[]).find(x=>x.id===id);if(!r)return;const item=supermarketItemById(r.itemId)||{name:r.itemName||'المادة',unit:r.unit||'وحدة',category:'أخرى'};openDomainForm('عائلتي','تم الشراء',`<div class="supermarket-purchase-summary"><div class="supermarket-thumb">${supermarketEmoji(item.category)}</div><div><b>${escapeHTML(item.name)}</b><small>${Number(r.quantity||1).toLocaleString('ar-BH')} × ${escapeHTML(item.unit||'وحدة')} • التقديري ${supermarketPriceLabel(r.estimatedPrice)}</small></div></div>`+optionalField('السعر الفعلي للوحدة (اختياري)','actualUnitPrice','number',`step="0.001" min="0" placeholder="آخر سعر ${item.price!==''?Number(item.price||0).toFixed(3):'غير مسجل'}"`)+`<div class="form-field"><label class="check-row"><input type="checkbox" name="updateCatalog" checked><span>تحديث السعر في قائمة الأسعار إذا أدخلت سعرًا جديدًا</span></label></div>`,'family:supermarketPurchase:'+id);}
+async function saveSupermarketItemImage(item,file){if(!file||!file.type?.startsWith('image/'))return;if(item.imageId)try{await deletePhotoRecord(item.imageId)}catch{};const id=makeId();await putPhotoRecord({id,kind:'supermarket-item',name:file.name||`item-${id}`,type:file.type,createdAt:new Date().toISOString(),blob:file});item.imageId=id;}
+async function deleteSupermarketItem(id){const x=supermarketItemById(id);if(!x)return;if(x.imageId)try{await deletePhotoRecord(x.imageId)}catch{};family.supermarketItems=family.supermarketItems.filter(v=>v.id!==id);family.supermarketRequests.forEach(r=>{if(r.itemId===id){r.itemName=r.itemName||x.name;r.unit=r.unit||x.unit;r.itemId='';}});saveFamily();}
 async function renderFamily(){
   const upcoming=family.members.filter(m=>nextBirthdayDays(m.birthDate)<=30);
   setText('familyMembersCount',family.members.length.toLocaleString('ar-BH')); setText('familyUpcomingCount',upcoming.length.toLocaleString('ar-BH')); setText('familyAlbumsCount',family.albums.length.toLocaleString('ar-BH')); setText('familyPhotosCount',family.photos.length.toLocaleString('ar-BH'));
@@ -1422,6 +1486,7 @@ async function renderFamily(){
   renderList('familyTaskList',family.tasks,t=>`<div class="domain-row ${t.done?'done-row':''}"><div><b>✅ ${escapeHTML(t.title)}</b><small>${t.dueDate?arabicDate(t.dueDate):'بدون موعد'}${t.assignee?` • ${escapeHTML(t.assignee)}`:''}${t.note?` • ${escapeHTML(t.note)}`:''}</small></div><button class="row-toggle" data-family-toggle-task="${t.id}">${t.done?'↺':'✓'}</button><button class="row-delete" data-family-delete="task" data-id="${t.id}">حذف</button></div>`,'لا توجد مسؤوليات عائلية مسجلة.');
   renderFamilyEducation();
   await renderFamilyAlbums();
+  await renderSupermarket();
 }
 function educationFormHTML(item=null){
   const current=item||{title:'',childName:'',month:currentMonthKey(),days:[]};
@@ -1441,6 +1506,7 @@ function printFamilyEducationPDF(id){
 }
 async function renderFamilyAlbums(){ const wrap=document.getElementById('familyAlbumList'); if(!wrap)return; wrap.innerHTML=''; if(!family.albums.length){wrap.innerHTML=emptyRow('لم تنشئ ألبومات بعد.');return;} for(const a of [...family.albums].sort((x,y)=>(y.date||'').localeCompare(x.date||''))){const photos=family.photos.filter(p=>p.albumId===a.id); const coverId=a.coverPhotoId||photos[0]?.id; const card=document.createElement('article'); card.className='album-card'; card.innerHTML=`<div class="album-cover" data-cover-for="${a.id}"><span>🖼️</span></div><div class="album-body"><b>${escapeHTML(a.title)}</b><small>${a.date?arabicDate(a.date):'بدون تاريخ'} • ${photos.length.toLocaleString('ar-BH')} صورة</small>${a.description?`<p>${escapeHTML(a.description)}</p>`:''}<div class="album-actions"><button data-family-add-photo="${a.id}">+ صور</button><button data-family-delete="album" data-id="${a.id}">حذف</button></div></div>`; wrap.appendChild(card); if(coverId){try{const rec=await getPhotoRecord(coverId); if(rec?.blob){const url=URL.createObjectURL(rec.blob); const el=card.querySelector('.album-cover'); el.innerHTML=`<img alt="غلاف ${escapeHTML(a.title)}" src="${url}">`;}}catch{}} } }
 function openFamilyForm(action){
+  if(action==='supermarket') { supermarketSetTab('prices'); return; }
   if(action==='member'){const members=family.members; return openDomainForm('عائلتي','إضافة فرد',field('الاسم','name','text','placeholder="الاسم"')+optionalField('صلة القرابة','relationship','text','placeholder="مثال: أب، أم، أخ، ابنة..."')+optionalField('تاريخ الميلاد / المناسبة','birthDate','date')+entitySelectField('الأب / الوالد 1','parent1Id',members,'اختياري',false)+entitySelectField('الأم / الوالد 2','parent2Id',members,'اختياري',false)+textareaField('ملاحظات','notes'),'family:member');}
   if(action==='album') return openDomainForm('عائلتي','إنشاء ألبوم عائلي',field('اسم الألبوم','title','text','placeholder="مثال: رحلة عمان 2026"')+optionalField('التاريخ','date','date')+textareaField('الوصف','description','placeholder="اختياري"'),'family:album');
   if(action==='task') return openDomainForm('عائلتي','مسؤولية عائلية',field('المهمة','title','text','placeholder="مثال: شراء احتياجات المنزل"')+optionalField('المسؤول','assignee','text','placeholder="اختياري"')+optionalField('موعدها','dueDate','date')+textareaField('ملاحظة','note'),'family:task');
@@ -8019,6 +8085,14 @@ document.addEventListener('click', (event) => {
 
   const familyAction=event.target.closest('[data-family-action]'); if(familyAction){openFamilyForm(familyAction.dataset.familyAction);return;}
   const familyTab=event.target.closest('[data-family-tab]'); if(familyTab){document.querySelectorAll('[data-family-tab]').forEach(x=>x.classList.toggle('active',x===familyTab));document.querySelectorAll('[data-family-panel]').forEach(x=>x.classList.toggle('active',x.dataset.familyPanel===familyTab.dataset.familyTab));return;}
+  const familyTabJump=event.target.closest('[data-family-tab-jump]'); if(familyTabJump){const name=familyTabJump.dataset.familyTabJump;const tab=document.querySelector(`[data-family-tab="${name}"]`);if(tab){document.querySelectorAll('[data-family-tab]').forEach(x=>x.classList.toggle('active',x===tab));document.querySelectorAll('[data-family-panel]').forEach(x=>x.classList.toggle('active',x.dataset.familyPanel===name));if(name==='supermarket')supermarketSetTab('prices');tab.scrollIntoView({behavior:'smooth',block:'center'});}return;}
+  const smTab=event.target.closest('[data-supermarket-tab]'); if(smTab){supermarketSetTab(smTab.dataset.supermarketTab);return;}
+  const smAction=event.target.closest('[data-supermarket-action]'); if(smAction){openSupermarketForm(smAction.dataset.supermarketAction,smAction.dataset.id||'');return;}
+  const smSave=event.target.closest('[data-supermarket-save-price]'); if(smSave){const id=smSave.dataset.supermarketSavePrice,item=supermarketItemById(id),input=document.querySelector(`[data-supermarket-price-input="${id}"]`);if(item&&input){item.price=input.value===''?'':Number(input.value);item.lastUpdated=item.price===''?'':todayKey();saveFamily();renderSupermarketPrices();}return;}
+  const smBuy=event.target.closest('[data-supermarket-buy]'); if(smBuy){openSupermarketPurchase(smBuy.dataset.supermarketBuy);return;}
+  const smDeleteReq=event.target.closest('[data-supermarket-delete-request]'); if(smDeleteReq){if(confirm('حذف هذا الطلب؟')){family.supermarketRequests=family.supermarketRequests.filter(x=>x.id!==smDeleteReq.dataset.supermarketDeleteRequest);saveFamily();renderSupermarketRequests();}return;}
+  const smDeleteItem=event.target.closest('[data-supermarket-delete-item]'); if(smDeleteItem){if(confirm('حذف هذه المادة من قائمة الأسعار؟ ستبقى الطلبات السابقة محفوظة باسم المادة.')){deleteSupermarketItem(smDeleteItem.dataset.supermarketDeleteItem);}return;}
+  const smReqFilter=event.target.closest('[data-supermarket-request-filter]'); if(smReqFilter){supermarketRequestFilter=smReqFilter.dataset.supermarketRequestFilter;renderSupermarketRequests();return;}
   const familyPhoto=event.target.closest('[data-family-add-photo]'); if(familyPhoto){pendingFamilyAlbumId=familyPhoto.dataset.familyAddPhoto;document.getElementById('familyPhotoInput')?.click();return;}
   const familyDel=event.target.closest('[data-family-delete]'); if(familyDel){if(confirm('حذف هذا العنصر؟'))deleteFamily(familyDel.dataset.familyDelete,familyDel.dataset.id);return;}
   const familyTask=event.target.closest('[data-family-toggle-task]'); if(familyTask){toggleFamilyTask(familyTask.dataset.familyToggleTask);return;}
@@ -8177,3 +8251,7 @@ document.addEventListener('click',e=>{
   function shut(){backdrop.hidden=true;document.body.style.overflow=''}
   btn.addEventListener('click',open);close.addEventListener('click',shut);backdrop.addEventListener('click',e=>{if(e.target===backdrop)shut()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!backdrop.hidden)shut()});doneBtn.addEventListener('click',()=>{localStorage.setItem('hayati-nails-last',new Date().toISOString());lastEl.textContent=`تم التسجيل اليوم ✓`;doneBtn.textContent='✓ تم التسجيل اليوم'});refreshButton();
 })();
+
+// Supermarket live search/filter.
+document.getElementById('supermarketSearch')?.addEventListener('input',()=>renderSupermarketPrices());
+document.getElementById('supermarketCategoryFilter')?.addEventListener('change',()=>renderSupermarketPrices());
