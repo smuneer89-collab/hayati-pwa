@@ -858,14 +858,13 @@
         <div class="domain-quick family-quick">
           <button data-family-action="member"><span>👨‍👩‍👧</span><b>فرد</b></button>
           <button data-family-action="education"><span>🎓</span><b>تعليم ولدي</b></button>
-          <button data-family-tab-jump="supermarket"><span>🛒</span><b>سوبر ماركت</b></button>
+          <button data-nav="supermarket"><span>🛒</span><b>سوبر ماركت</b></button>
           <button data-family-action="album"><span>🖼️</span><b>ألبوم</b></button>
           <button data-family-action="task"><span>✅</span><b>مسؤولية</b></button>
         </div>
         <div class="domain-tabs" data-tab-group="family">
           <button class="active" data-family-tab="tree">شجرة العائلة</button>
           <button data-family-tab="education">تعليم ولدي</button>
-          <button data-family-tab="supermarket">سوبر ماركت</button>
           <button data-family-tab="albums">الألبومات</button>
           <button data-family-tab="tasks">المسؤوليات</button>
         </div>
@@ -881,36 +880,6 @@
             <div id="familyEducationList" class="family-education-list"></div>
           </div>
         </section>
-        <section class="domain-panel" data-family-panel="supermarket">
-          <div class="domain-card-wide supermarket-shell">
-            <div class="card-row-head supermarket-head">
-              <div><span class="section-kicker">احتياجات البيت</span><h2>سوبر ماركت</h2><p>تابع أسعار المواد وجهّز قائمة الطلبات في مكان واحد.</p></div>
-              <button class="text-btn" data-supermarket-action="addItem">+ مادة جديدة</button>
-            </div>
-            <div class="supermarket-tabs">
-              <button class="active" data-supermarket-tab="prices">الأسعار</button>
-              <button data-supermarket-tab="requests">الطلبات <span id="supermarketPendingBadge">٠</span></button>
-            </div>
-            <section class="supermarket-panel active" data-supermarket-panel="prices">
-              <div class="supermarket-tools">
-                <label class="supermarket-search"><span>⌕</span><input id="supermarketSearch" type="search" placeholder="ابحث عن مادة..."></label>
-                <select id="supermarketCategoryFilter"><option value="">كل الفئات</option></select>
-              </div>
-              <div id="supermarketPriceList" class="supermarket-price-list"></div>
-              <button class="supermarket-primary" data-supermarket-action="addItem">＋ إضافة مادة جديدة</button>
-            </section>
-            <section class="supermarket-panel" data-supermarket-panel="requests">
-              <div class="supermarket-total-card"><span>الإجمالي التقديري للطلبات المعلقة</span><b id="supermarketPendingTotal">٠٫٠٠٠ د.ب</b></div>
-              <div class="supermarket-request-filters">
-                <button class="active" data-supermarket-request-filter="pending">قيد الانتظار</button>
-                <button data-supermarket-request-filter="bought">تم الشراء</button>
-                <button data-supermarket-request-filter="all">الكل</button>
-              </div>
-              <div id="supermarketRequestList" class="supermarket-request-list"></div>
-              <button class="supermarket-primary" data-supermarket-action="addRequest">＋ إضافة طلب جديد</button>
-            </section>
-          </div>
-        </section>
         <section class="domain-panel" data-family-panel="albums">
           <div class="domain-card-wide"><div class="card-row-head"><div><span class="section-kicker">الذكريات</span><h2>ألبومات الصور</h2></div><button class="text-btn" data-family-action="album">+ ألبوم</button></div><div id="familyAlbumList" class="album-grid"></div></div>
           <div class="phase-note"><b>حفظ الصور قبل Firebase</b><span>الصور تُحفظ داخل IndexedDB على هذا الجهاز، وتدخل ضمن النسخة الاحتياطية ZIP الكاملة.</span></div>
@@ -919,6 +888,26 @@
           <div class="domain-card-wide"><div class="card-row-head"><div><span class="section-kicker">المسؤوليات</span><h2>مهام عائلية</h2></div><button class="text-btn" data-family-action="task">+ مهمة</button></div><div class="domain-list" id="familyTaskList"></div></div>
         </section>
         <input type="file" id="familyPhotoInput" accept="image/*" multiple hidden />
+      </section>
+
+      <section class="view supermarket-view" data-view="supermarket" id="view-supermarket">
+        <div class="supermarket-view-nav"><button class="back-btn" data-nav="family">→ عائلتي</button><button class="back-btn" data-nav="today">⌂ الرئيسية</button></div>
+        <div class="domain-head supermarket-page-head"><div><span class="section-kicker">عائلتي</span><h1>سوبر ماركت</h1><p>أسعار البيت وطلبات التسوق، مرتبة حسب الأقسام.</p></div><span class="local-badge">قائمة العائلة</span></div>
+        <div class="domain-card-wide supermarket-shell">
+          <div class="supermarket-tabs"><button class="active" data-supermarket-tab="prices">الأسعار</button><button data-supermarket-tab="requests">الطلبات <span id="supermarketPendingBadge">٠</span></button></div>
+          <section class="supermarket-panel active" data-supermarket-panel="prices">
+            <div class="supermarket-tools"><label class="supermarket-search"><span>⌕</span><input id="supermarketSearch" type="search" placeholder="ابحث عن مادة..."></label><button class="supermarket-category-manage" data-supermarket-action="categories">إدارة التصنيفات</button></div>
+            <div id="supermarketCategoryChips" class="supermarket-category-chips"></div>
+            <div id="supermarketPriceList" class="supermarket-price-list"></div>
+            <button class="supermarket-primary" data-supermarket-action="addItem">＋ إضافة مادة جديدة</button>
+          </section>
+          <section class="supermarket-panel" data-supermarket-panel="requests">
+            <div class="supermarket-total-card"><span>الإجمالي التقديري للطلبات المعلقة</span><b id="supermarketPendingTotal">٠٫٠٠٠ د.ب</b></div>
+            <div class="supermarket-request-filters"><button class="active" data-supermarket-request-filter="pending">قيد الانتظار</button><button data-supermarket-request-filter="bought">تم الشراء</button><button data-supermarket-request-filter="all">الكل</button></div>
+            <div id="supermarketRequestList" class="supermarket-request-list"></div>
+            <button class="supermarket-primary" data-supermarket-action="addRequest">＋ إضافة طلب جديد</button>
+          </section>
+        </div>
       </section>
 
       <section class="view" data-view="section" id="view-section">
