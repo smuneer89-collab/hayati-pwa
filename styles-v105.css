@@ -832,3 +832,10 @@ body.garage-mode .main-content{padding:0!important;max-width:none!important}
 .obligation-paid-check.is-paid{background:#16836b;border-color:#16836b}
 .obligation-reserved-row.paid .row-title{text-decoration:line-through;opacity:.65}.obligation-reserved-row.paid .row-meta{color:#16836b}
 .supermarket-variable-flow{margin:2px 0 12px}.supermarket-variable-card{padding:14px;border:1px solid color-mix(in srgb,var(--accent) 24%,var(--border));border-radius:16px;background:color-mix(in srgb,var(--accent) 7%,var(--surface))}.supermarket-variable-card>p{margin:5px 0 10px;color:var(--muted)}.supermarket-variable-choice{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.supermarket-variable-choice label{display:flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid var(--border);border-radius:12px;background:var(--surface);font-size:.84rem}.supermarket-variable-result{margin-top:9px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--accent) 11%,var(--surface));font-weight:800;color:var(--text)}
+
+/* Keep the return control visible at the top centre of the reading screen. */
+.mushaf-top-controls{opacity:1;pointer-events:auto;transform:none;grid-template-columns:1fr auto 1fr;direction:ltr}
+.mushaf-top-meta{grid-column:1;grid-row:1;max-width:115px;justify-self:start;direction:rtl}
+#mushafExitBtn{grid-column:2;grid-row:1;width:auto;min-width:72px;padding:0 12px;border-radius:14px;font-size:14px;font-weight:800}
+#mushafThemeBtn{grid-column:3;grid-row:1;justify-self:end}
+.education-day:not(:disabled){cursor:pointer}.education-day.selected{outline:2px solid var(--blue);outline-offset:2px}.education-day:disabled{opacity:.45;cursor:not-allowed}.education-attendance-actions{flex-wrap:wrap}.education-attendance-actions span{flex-basis:100%;font-weight:700;font-size:.83rem}
