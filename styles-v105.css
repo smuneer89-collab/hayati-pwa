@@ -1,0 +1,856 @@
+:root {
+  --bg: #07111f;
+  --bg-2: #0a1627;
+  --surface: #0f1d31;
+  --surface-2: #14243b;
+  --surface-3: #1b2e49;
+  --text: #f5f7fb;
+  --muted: #93a4bb;
+  --line: rgba(255,255,255,.08);
+  --blue: #3b82f6;
+  --cyan: #38bdf8;
+  --teal: #2dd4bf;
+  --green: #34d399;
+  --gold: #fbbf24;
+  --rose: #fb7185;
+  --violet: #a78bfa;
+  --shadow: 0 16px 46px rgba(0,0,0,.28);
+  --radius-xl: 28px;
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --nav-h: 78px;
+}
+
+html[data-theme="light"] {
+  --bg: #f4f7fb;
+  --bg-2: #edf3f9;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-3: #edf3f9;
+  --text: #0f172a;
+  --muted: #64748b;
+  --line: rgba(15,23,42,.09);
+  --shadow: 0 16px 40px rgba(30,41,59,.10);
+}
+
+* { box-sizing: border-box; }
+html { background: var(--bg); color-scheme: dark; -webkit-text-size-adjust:100%; text-size-adjust:100%; overflow-x:hidden; }
+html[data-theme="light"] { color-scheme: light; }
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 70% -10%, rgba(37,99,235,.22), transparent 38%),
+    radial-gradient(circle at 5% 15%, rgba(56,189,248,.08), transparent 28%),
+    var(--bg);
+  color: var(--text);
+  font-family: "IBM Plex Sans Arabic", "Tajawal", -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x:hidden;
+  width:100%;
+}
+button, input, textarea, select { font: inherit; }
+input, textarea, select { font-size:16px; }
+button { cursor: pointer; }
+.safe-top { padding-top: env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+.app-shell { width: 100%; max-width: 480px; min-height: 100dvh; margin: 0 auto; overflow-x:hidden; }
+
+.topbar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 30;
+  height: calc(64px + env(safe-area-inset-top));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: max(18px, calc((100vw - 480px)/2 + 18px));
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--line);
+}
+.brand-wrap { display: flex; gap: 10px; align-items: center; }
+.brand-mark {
+  width: 38px; height: 38px; border-radius: 14px;
+  display: grid; place-items: center;
+  background: linear-gradient(145deg, #2563eb, #38bdf8);
+  color: white; font-weight: 900; box-shadow: 0 8px 20px rgba(37,99,235,.28);
+}
+.brand-title { font-size: 16px; font-weight: 800; line-height: 1.1; }
+.brand-subtitle { margin-top: 3px; color: var(--muted); font-size: 11px; }
+.top-actions { display: flex; gap: 8px; }
+.icon-btn {
+  width: 38px; height: 38px; border: 1px solid var(--line); border-radius: 13px;
+  color: var(--text); background: color-mix(in srgb, var(--surface) 70%, transparent);
+}
+
+.main-content { padding: calc(84px + env(safe-area-inset-top)) 16px calc(var(--nav-h) + 28px + env(safe-area-inset-bottom)); }
+.view { display: none; animation: fade .18s ease-out; }
+.view.active { display: block; }
+@keyframes fade { from { opacity: .2; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+.hero-card {
+  position: relative; overflow: hidden;
+  border-radius: var(--radius-xl); padding: 24px 20px;
+  background: linear-gradient(135deg, #17396a 0%, #112844 55%, #0b1b30 100%);
+  border: 1px solid rgba(125,211,252,.18); box-shadow: var(--shadow);
+}
+.hero-card::before {
+  content: ""; position: absolute; width: 180px; height: 180px; border-radius: 50%;
+  background: rgba(56,189,248,.16); filter: blur(38px); top: -80px; left: -40px;
+}
+.eyebrow, .section-kicker { color: #7dd3fc; font-size: 11px; font-weight: 800; letter-spacing: .02em; }
+.hero-card h1 { margin: 8px 0 6px; font-size: 27px; line-height: 1.2; }
+.hero-card p { margin: 0; color: #cbd5e1; font-size: 13px; line-height: 1.8; }
+.demo-badge {
+  margin-top: 18px; width: fit-content; padding: 8px 10px; border-radius: 999px;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.10);
+  color: #dbeafe; font-size: 10px;
+}
+
+.home-hadith-card {
+  position: relative; overflow: hidden; margin-top: 14px; padding: 20px; border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, #163852 0%, #102a3e 52%, #0b2033 100%);
+  border: 1px solid rgba(45,212,191,.20); box-shadow: var(--shadow);
+}
+.home-hadith-card::before {
+  content: ""; position: absolute; width: 150px; height: 150px; border-radius: 50%;
+  background: rgba(45,212,191,.10); filter: blur(34px); bottom: -78px; left: -30px; pointer-events: none;
+}
+.home-hadith-head { position: relative; display: flex; align-items: start; justify-content: space-between; gap: 12px; }
+.home-hadith-head h2 { margin: 4px 0 0; font-size: 17px; }
+.home-hadith-card blockquote { position: relative; margin: 16px 0 10px; padding: 0; font-size: 16px; font-weight: 750; line-height: 2.05; color: var(--text); }
+.home-hadith-meta { position: relative; color: var(--muted); font-size: 10px; line-height: 1.7; }
+
+.day-cycle-card {
+  margin-top: 14px; padding: 16px; border-radius: var(--radius-xl); background: var(--surface);
+  border: 1px solid var(--line); box-shadow: 0 10px 30px rgba(0,0,0,.12);
+}
+.day-cycle-head { display: flex; align-items: start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.day-cycle-head h2 { margin: 4px 0 0; font-size: 17px; }
+.day-status-pill { padding: 6px 9px; border-radius: 999px; background: rgba(56,189,248,.10); border: 1px solid rgba(56,189,248,.18); color: #7dd3fc; font-size: 9px; font-weight: 800; white-space: nowrap; }
+.day-cycle-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.day-cycle-btn {
+  min-height: 76px; display: flex; align-items: center; gap: 10px; text-align: right; padding: 12px; border-radius: 17px;
+  color: var(--text); background: var(--surface-2); border: 1px solid var(--line);
+}
+.day-cycle-btn.start { background: linear-gradient(145deg, rgba(245,158,11,.12), var(--surface-2)); border-color: rgba(245,158,11,.18); }
+.day-cycle-btn.end { background: linear-gradient(145deg, rgba(99,102,241,.14), var(--surface-2)); border-color: rgba(129,140,248,.18); }
+.day-cycle-btn:active { transform: scale(.985); }
+.day-cycle-btn.is-recorded { box-shadow: inset 0 0 0 1px rgba(45,212,191,.22); }
+.day-cycle-icon { font-size: 24px; }
+.day-cycle-btn b { display: block; font-size: 12px; }
+.day-cycle-btn small { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; line-height: 1.5; }
+.sleep-summary { display: grid; grid-template-columns: 38px 1fr; gap: 10px; align-items: center; margin-top: 10px; padding: 11px; border-radius: 15px; background: color-mix(in srgb, var(--surface-2) 90%, transparent); border: 1px solid var(--line); }
+.sleep-summary-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 13px; background: rgba(99,102,241,.12); font-size: 20px; }
+.sleep-summary span, .sleep-summary small { display: block; color: var(--muted); font-size: 9px; }
+.sleep-summary b { display: block; margin: 3px 0; font-size: 12px; }
+
+.section-block { margin-top: 24px; }
+.section-heading { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.section-heading.compact { align-items: center; }
+.section-heading h2, .page-title h1 { margin: 4px 0 0; font-size: 20px; }
+.text-btn { border: 0; background: transparent; color: var(--cyan); font-size: 12px; font-weight: 700; padding: 8px; }
+
+.priority-list { display: grid; gap: 10px; }
+.priority-card {
+  display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 12px;
+  padding: 14px; border-radius: var(--radius-lg); background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 93%, transparent), color-mix(in srgb, var(--surface) 78%, transparent));
+  border: 1px solid var(--line); box-shadow: 0 9px 28px rgba(0,0,0,.10);
+}
+.priority-icon { width: 44px; height: 44px; border-radius: 15px; display: grid; place-items: center; background: var(--surface-2); font-size: 22px; }
+.priority-label { color: var(--muted); font-size: 10px; font-weight: 800; }
+.priority-body h3 { margin: 2px 0; font-size: 14px; }
+.priority-body p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+.mini-action { border: 1px solid rgba(56,189,248,.22); color: #bae6fd; background: rgba(14,165,233,.10); border-radius: 12px; padding: 8px 10px; font-size: 10px; font-weight: 800; }
+html[data-theme="light"] .mini-action { color: #0369a1; }
+
+.quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.quick-grid button {
+  min-height: 74px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  border: 1px solid var(--line); border-radius: 18px; color: var(--text); background: var(--surface); font-size: 11px; font-weight: 700;
+}
+.quick-grid button span { font-size: 23px; }
+
+.timeline-preview { padding: 4px 2px; }
+.timeline-item { position: relative; display: grid; grid-template-columns: 18px 1fr; gap: 10px; padding: 9px 0; }
+.timeline-item:not(:last-child)::after { content: ""; position: absolute; right: 8px; top: 28px; bottom: -4px; width: 1px; background: var(--line); }
+.timeline-item .dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; box-shadow: 0 0 0 4px color-mix(in srgb, var(--surface) 80%, transparent); }
+.dot.blue { background: var(--blue); } .dot.teal { background: var(--teal); } .dot.gold { background: var(--gold); }
+.timeline-item b { display: block; font-size: 12px; }
+.timeline-item small { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; line-height: 1.6; }
+
+.page-title { margin-bottom: 18px; }
+.page-title h1 { font-size: 28px; }
+.page-title p { color: var(--muted); font-size: 12px; line-height: 1.8; max-width: 48ch; }
+.domain-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 11px; }
+.domain-card {
+  min-height: 210px; padding: 16px; border-radius: 22px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 10px 30px rgba(0,0,0,.10);
+  display: flex; flex-direction: column; transition: transform .16s ease, border-color .16s ease;
+}
+.domain-card:active { transform: scale(.985); }
+.domain-card:hover { border-color: rgba(56,189,248,.22); }
+.domain-top { display: flex; justify-content: space-between; align-items: center; }
+.domain-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 15px; background: var(--surface-2); font-size: 21px; }
+.status-pill { padding: 4px 7px; border-radius: 999px; background: rgba(56,189,248,.08); border: 1px solid rgba(56,189,248,.12); color: #7dd3fc; font-size: 9px; font-weight: 800; }
+html[data-theme="light"] .status-pill { color: #0369a1; }
+.domain-card h2 { margin: 15px 0 5px; font-size: 17px; }
+.domain-card p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.75; flex: 1; }
+.domain-link { margin-top: 14px; color: var(--cyan); font-size: 10px; font-weight: 800; }
+.finance { --accent: var(--green); } .health { --accent: var(--cyan); } .religion { --accent: var(--violet); } .relationships { --accent: var(--gold); } .family { --accent: var(--rose); } .knowledge { --accent: var(--teal); }
+.domain-card { box-shadow: inset 0 1px 0 rgba(255,255,255,.02), 0 12px 34px rgba(0,0,0,.12); }
+.domain-card::before { content: ""; display: block; height: 2px; margin: -16px -16px 14px; background: linear-gradient(90deg, var(--blue), transparent); opacity: .8; }
+
+.empty-state, .section-shell-card {
+  text-align: center; padding: 34px 20px; border-radius: var(--radius-xl); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow);
+}
+.empty-icon, .section-shell-icon { font-size: 50px; margin-bottom: 12px; }
+.empty-state h2, .section-shell-card h1 { margin: 8px 0; }
+.empty-state p, .section-shell-card p { color: var(--muted); line-height: 1.8; font-size: 12px; }
+.primary-btn {
+  border: 0; border-radius: 14px; padding: 12px 16px; background: linear-gradient(135deg, #2563eb, #0ea5e9); color: white; font-size: 12px; font-weight: 800; box-shadow: 0 10px 24px rgba(37,99,235,.22);
+}
+.back-btn { border: 0; background: transparent; color: var(--cyan); font-size: 12px; font-weight: 800; padding: 8px 0 14px; }
+.phase-note { margin: 18px 0; padding: 14px; border-radius: 16px; background: var(--surface-2); border: 1px solid var(--line); text-align: right; }
+.phase-note b { display: block; font-size: 12px; margin-bottom: 5px; }
+.phase-note span { color: var(--muted); font-size: 10px; line-height: 1.75; }
+
+.settings-list { display: grid; gap: 9px; }
+.setting-row {
+  width: 100%; display: grid; grid-template-columns: 38px 1fr auto; gap: 10px; align-items: center; text-align: right; border: 1px solid var(--line); border-radius: 18px; padding: 13px; background: var(--surface); color: var(--text);
+}
+.setting-row > span { width: 38px; height: 38px; display: grid; place-items: center; background: var(--surface-2); border-radius: 13px; }
+.setting-row b { display: block; font-size: 12px; }
+.setting-row small { display: block; color: var(--muted); margin-top: 3px; font-size: 9px; }
+.setting-row em { color: var(--muted); font-size: 10px; font-style: normal; }
+
+.bottom-nav {
+  position: fixed; z-index: 40; bottom: 0; left: 50%; transform: translateX(-50%); width: min(100%, 480px);
+  min-height: var(--nav-h); display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding-inline: 10px; padding-top: 8px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(20px); border-top: 1px solid var(--line);
+}
+.nav-item { border: 0; border-radius: 16px; background: transparent; color: var(--muted); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 54px; }
+.nav-item span { font-size: 20px; line-height: 1; }
+.nav-item b { font-size: 9px; }
+.nav-item.active { color: #7dd3fc; background: rgba(14,165,233,.08); }
+html[data-theme="light"] .nav-item.active { color: #0369a1; }
+
+.modal-backdrop { position: fixed; inset: 0; z-index: 80; background: rgba(0,0,0,.58); backdrop-filter: blur(7px); display: grid; place-items: end center; padding: 16px; }
+.modal-backdrop[hidden] { display: none; }
+.modal { position: relative; width: min(100%, 520px); border-radius: 28px; padding: 28px 20px 20px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 28px 80px rgba(0,0,0,.5); text-align: center; margin-bottom: max(4px, env(safe-area-inset-bottom)); }
+.modal-close { position: absolute; left: 14px; top: 10px; border: 0; background: transparent; color: var(--muted); font-size: 26px; }
+.modal-icon { width: 54px; height: 54px; border-radius: 18px; display: grid; place-items: center; margin: 0 auto 12px; background: rgba(14,165,233,.10); color: var(--cyan); font-size: 25px; }
+.modal h2 { font-size: 18px; margin: 0 0 8px; }
+.modal p { color: var(--muted); font-size: 11px; line-height: 1.8; margin: 0 0 16px; }
+
+@media (min-width: 520px) {
+  .main-content { padding-inline: 22px; }
+  .domain-grid { gap: 14px; }
+}
+@media (max-width: 360px) {
+  .domain-grid { grid-template-columns: 1fr; }
+  .priority-card { grid-template-columns: 40px 1fr; }
+  .priority-card .mini-action { grid-column: 2; justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; animation: none !important; transition: none !important; } }
+
+/* Finance V1 */
+.finance-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:16px; }
+.finance-head h1 { margin:4px 0 4px; font-size:28px; }
+.finance-head p { margin:0; color:var(--muted); font-size:11px; line-height:1.7; }
+.local-badge { white-space:nowrap; padding:7px 9px; border-radius:999px; font-size:9px; font-weight:800; color:#86efac; background:rgba(34,197,94,.09); border:1px solid rgba(34,197,94,.18); }
+.finance-stats { display:grid; grid-template-columns:repeat(2,1fr); gap:9px; }
+.finance-stats article { padding:14px; min-height:82px; border-radius:18px; background:var(--surface); border:1px solid var(--line); display:flex; flex-direction:column; justify-content:space-between; }
+.finance-stats article.accent { background:linear-gradient(145deg,rgba(37,99,235,.24),rgba(14,165,233,.08)); border-color:rgba(56,189,248,.20); }
+.finance-stats span { color:var(--muted); font-size:9px; }
+.finance-stats b { font-size:16px; direction:rtl; }
+.finance-setup-card { margin-top:12px; padding:16px; border-radius:20px; background:linear-gradient(135deg,#17396a,#10253f); border:1px solid rgba(125,211,252,.17); display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.finance-setup-card h2 { margin:3px 0 2px; font-size:14px; color:#fff; }
+.finance-setup-card p { margin:0; color:#cbd5e1; font-size:9px; }
+.secondary-btn { border:1px solid rgba(255,255,255,.18); border-radius:13px; padding:9px 11px; background:rgba(255,255,255,.10); color:#fff; font-size:10px; font-weight:800; white-space:nowrap; }
+.finance-quick { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; margin:12px 0 16px; overflow-x:auto; }
+.finance-quick button { min-width:62px; min-height:66px; border:1px solid var(--line); border-radius:16px; background:var(--surface); color:var(--text); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; }
+.finance-quick button span { font-size:20px; }
+.finance-quick button b { font-size:8px; }
+.finance-tabs { display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin-bottom:8px; }
+.finance-tabs button { flex:1; min-width:78px; border:1px solid var(--line); border-radius:999px; padding:8px 10px; color:var(--muted); background:var(--surface); font-size:9px; font-weight:800; }
+.finance-tabs button.active { color:#fff; border-color:rgba(56,189,248,.25); background:linear-gradient(135deg,#2563eb,#0ea5e9); }
+.fin-panel { display:none; }
+.fin-panel.active { display:block; animation:fade .15s ease-out; }
+.finance-card { margin-top:10px; padding:16px; border-radius:20px; background:var(--surface); border:1px solid var(--line); box-shadow:0 10px 30px rgba(0,0,0,.08); }
+.card-row-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.card-row-head h2 { margin:3px 0 0; font-size:14px; }
+.big-money { color:#86efac; font-size:18px; }
+.money-progress { height:8px; background:var(--surface-2); border-radius:999px; overflow:hidden; margin:14px 0 8px; }
+.money-progress span { display:block; height:100%; width:0; border-radius:inherit; background:linear-gradient(90deg,#22c55e,#38bdf8); transition:width .2s ease; }
+.muted-row { display:flex; justify-content:space-between; color:var(--muted); font-size:9px; }
+.finance-note { margin:10px 0 0; padding:11px; border-radius:14px; background:var(--surface-2); color:var(--muted); font-size:10px; line-height:1.7; }
+.finance-list { display:grid; gap:8px; margin-top:12px; }
+.finance-empty { padding:18px 10px; text-align:center; border:1px dashed var(--line); border-radius:16px; color:var(--muted); font-size:10px; line-height:1.8; }
+.finance-row { padding:11px; border-radius:15px; background:var(--surface-2); border:1px solid var(--line); display:grid; grid-template-columns:1fr auto; gap:8px 10px; align-items:center; }
+.finance-row .row-title { font-size:11px; font-weight:800; }
+.finance-row .row-meta { margin-top:3px; color:var(--muted); font-size:8px; }
+.finance-row .row-amount { font-size:11px; font-weight:900; direction:rtl; }
+.finance-row .row-amount.expense { color:#fda4af; }
+.finance-row .row-amount.income { color:#86efac; }
+.finance-row .row-actions { grid-column:1 / -1; display:flex; justify-content:flex-end; gap:6px; }
+.finance-row .row-actions button { border:0; border-radius:9px; padding:5px 8px; font-size:8px; color:var(--muted); background:rgba(255,255,255,.04); }
+.goal-progress { grid-column:1 / -1; height:6px; border-radius:999px; background:var(--surface); overflow:hidden; }
+.goal-progress span { display:block; height:100%; background:linear-gradient(90deg,#2563eb,#2dd4bf); }
+.goal-detail { grid-column:1 / -1; display:flex; justify-content:space-between; color:var(--muted); font-size:8px; }
+.sheet-backdrop { position:fixed; inset:0; z-index:90; background:rgba(0,0,0,.58); backdrop-filter:blur(6px); display:grid; align-items:end; }
+.sheet-backdrop[hidden] { display:none; }
+.bottom-sheet { position:relative; width:min(100%,480px); margin:0 auto; padding:14px 16px calc(18px + env(safe-area-inset-bottom)); border-radius:28px 28px 0 0; background:var(--surface); border:1px solid var(--line); box-shadow:0 -20px 60px rgba(0,0,0,.35); }
+.sheet-handle { width:44px; height:4px; border-radius:999px; background:var(--line); margin:0 auto 16px; }
+.sheet-title h2 { margin:3px 0 14px; font-size:20px; }
+.form-grid { display:grid; gap:10px; }
+.form-field { display:grid; gap:5px; }
+.form-field label { color:var(--muted); font-size:9px; font-weight:700; }
+.form-field input,.form-field select { width:100%; min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:13px; background:var(--surface-2); color:var(--text); font-family:inherit; font-size:12px; outline:none; }
+.form-field input:focus,.form-field select:focus { border-color:rgba(56,189,248,.45); }
+.primary-btn.full { width:100%; margin-top:14px; min-height:44px; }
+@media (max-width:380px){ .finance-quick{grid-template-columns:repeat(5,70px);} }
+
+/* Core sections V1: Health, Religion, Knowledge */
+.domain-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:16px; }
+.domain-head h1 { margin:4px 0 4px; font-size:28px; }
+.domain-head p { margin:0; color:var(--muted); font-size:11px; line-height:1.7; }
+.domain-stats { display:grid; grid-template-columns:repeat(2,1fr); gap:9px; }
+.domain-stats article { padding:14px; min-height:82px; border-radius:18px; background:var(--surface); border:1px solid var(--line); display:flex; flex-direction:column; justify-content:space-between; }
+.domain-stats article.accent { background:linear-gradient(145deg,rgba(37,99,235,.22),rgba(14,165,233,.07)); border-color:rgba(56,189,248,.20); }
+.domain-stats span { color:var(--muted); font-size:9px; }
+.domain-stats b { font-size:15px; }
+.feature-card { margin-top:12px; padding:16px; border-radius:20px; border:1px solid rgba(125,211,252,.16); display:flex; align-items:center; justify-content:space-between; gap:12px; background:linear-gradient(135deg,#17396a,#10253f); }
+.feature-card h2 { margin:3px 0 3px; font-size:14px; color:white; }
+.feature-card p { margin:0; color:#cbd5e1; font-size:9px; line-height:1.6; }
+.health-feature { background:linear-gradient(135deg,#0f4462,#11324c); }
+.religion-feature { background:linear-gradient(135deg,#302b63,#182442); }
+.knowledge-feature { background:linear-gradient(135deg,#0f4c4c,#123148); }
+.domain-quick { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:12px 0 16px; }
+.domain-quick button { min-height:68px; border:1px solid var(--line); border-radius:16px; background:var(--surface); color:var(--text); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; }
+.domain-quick button span { font-size:20px; }
+.domain-quick button b { font-size:9px; }
+.domain-tabs { display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin-bottom:8px; }
+.domain-tabs button { flex:1; min-width:74px; border:1px solid var(--line); border-radius:999px; padding:8px 10px; color:var(--muted); background:var(--surface); font-size:9px; font-weight:800; white-space:nowrap; }
+.domain-tabs button.active { color:white; border-color:rgba(56,189,248,.25); background:linear-gradient(135deg,#2563eb,#0ea5e9); }
+.domain-panel { display:none; }
+.domain-panel.active { display:block; animation:fade .15s ease-out; }
+.domain-card-wide { margin-top:10px; padding:16px; border-radius:20px; background:var(--surface); border:1px solid var(--line); box-shadow:0 10px 30px rgba(0,0,0,.08); }
+.domain-card-wide h2 { margin:3px 0 0; font-size:14px; }
+.big-value { color:#7dd3fc; font-size:17px; }
+.health-progress span { background:linear-gradient(90deg,#38bdf8,#2dd4bf); }
+.water-progress span { background:linear-gradient(90deg,#0ea5e9,#67e8f9); }
+.domain-inline-actions { display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
+.chip-btn,.icon-chip { border:1px solid var(--line); color:var(--text); background:var(--surface-2); border-radius:999px; padding:7px 10px; font-size:9px; font-weight:800; }
+.icon-chip { min-width:34px; padding:7px; }
+.domain-list { display:grid; gap:8px; margin-top:12px; }
+.domain-row { padding:11px; border-radius:15px; background:var(--surface-2); border:1px solid var(--line); display:flex; align-items:center; gap:8px; }
+.domain-row > div:first-child { min-width:0; flex:1; }
+.domain-row b { display:block; font-size:11px; line-height:1.6; overflow-wrap:anywhere; }
+.domain-row small { display:block; margin-top:3px; color:var(--muted); font-size:8px; line-height:1.65; }
+.domain-row strong { color:#7dd3fc; font-size:10px; white-space:nowrap; }
+.row-delete,.row-toggle { border:0; border-radius:9px; padding:6px 8px; font-size:8px; color:var(--muted); background:rgba(255,255,255,.04); }
+.row-toggle { color:#86efac; background:rgba(34,197,94,.08); }
+.done-row { opacity:.72; }
+.done-row b { text-decoration:line-through; }
+.weight-overview { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
+.weight-overview div,.profile-grid div { padding:11px; border-radius:14px; background:var(--surface-2); border:1px solid var(--line); }
+.weight-overview span,.profile-grid span { display:block; color:var(--muted); font-size:8px; }
+.weight-overview b,.profile-grid b { display:block; margin-top:4px; font-size:11px; }
+.profile-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:12px; }
+.hadith-feature { margin-top:12px; padding:20px 16px; border-radius:22px; background:linear-gradient(145deg,rgba(13,148,136,.18),rgba(37,99,235,.12)); border:1px solid rgba(45,212,191,.18); }
+.hadith-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.hadith-actions { display:flex; gap:6px; }
+.hadith-feature blockquote { margin:16px 0 10px; padding:0; font-size:16px; font-weight:700; line-height:2; }
+.hadith-source { color:var(--muted); font-size:9px; }
+.hadith-row b { font-weight:700; line-height:1.8; }
+.book-row { align-items:flex-start; }
+.mini-progress { height:5px; background:var(--surface); border-radius:999px; overflow:hidden; margin-top:7px; }
+.mini-progress span { display:block; height:100%; background:linear-gradient(90deg,#2dd4bf,#38bdf8); }
+.form-field textarea { width:100%; min-height:90px; padding:10px 12px; border:1px solid var(--line); border-radius:13px; background:var(--surface-2); color:var(--text); font-family:inherit; font-size:12px; outline:none; resize:vertical; }
+.form-field textarea:focus { border-color:rgba(56,189,248,.45); }
+.check-field { display:flex; gap:8px; align-items:center; color:var(--text); font-size:10px; }
+.check-field input { width:18px; height:18px; }
+.row-delete:disabled { opacity:.25; cursor:not-allowed; }
+@media (max-width:380px){ .domain-quick{grid-template-columns:repeat(4,72px);overflow-x:auto}.weight-overview{grid-template-columns:1fr}.profile-grid{grid-template-columns:1fr 1fr}.domain-row{flex-wrap:wrap} }
+
+/* Relationships + Family + Backup */
+.relationships-head h1{color:var(--gold)}
+.family-head h1{color:var(--rose)}
+.relationships-feature{background:linear-gradient(145deg,rgba(245,158,11,.16),rgba(255,255,255,.02));border-color:rgba(245,158,11,.18)}
+.family-feature{background:linear-gradient(145deg,rgba(244,63,94,.14),rgba(255,255,255,.02));border-color:rgba(244,63,94,.18)}
+.family-tree{display:grid;gap:9px;margin-top:10px}
+.tree-person{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;padding:11px;border:1px solid var(--line);background:var(--surface-2);border-radius:15px}
+.tree-avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,rgba(244,63,94,.28),rgba(37,99,235,.18));font-weight:900;font-size:16px;border:1px solid var(--line)}
+.tree-person b{display:block;font-size:11px}.tree-person small{display:block;color:var(--muted);font-size:8px;margin-top:3px;line-height:1.6}
+.album-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+.album-card{overflow:hidden;border-radius:17px;border:1px solid var(--line);background:var(--surface-2)}
+.album-cover{aspect-ratio:4/3;display:grid;place-items:center;background:linear-gradient(145deg,rgba(244,63,94,.16),rgba(14,165,233,.10));font-size:28px;overflow:hidden}
+.album-cover img{width:100%;height:100%;object-fit:cover;display:block}
+.album-body{padding:10px}.album-body b{font-size:11px;display:block}.album-body small{display:block;color:var(--muted);font-size:8px;margin-top:3px}.album-body p{font-size:9px;color:var(--muted);line-height:1.6;margin:7px 0 0}
+.album-actions{display:flex;gap:6px;margin-top:9px}.album-actions button{flex:1;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:10px;padding:7px;font-size:8px;font-weight:800}
+.backup-snapshots-row{align-items:flex-start}
+.snapshot-list{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.snapshot-list button{border:1px solid var(--line);background:var(--surface-2);color:var(--text);border-radius:999px;padding:7px 9px;font-size:10px;line-height:1.2}.snapshot-list span{font-size:10px;color:var(--muted)}
+@media(max-width:390px){.album-grid{grid-template-columns:1fr}.tree-person{grid-template-columns:38px 1fr auto}.tree-avatar{width:38px;height:38px}}
+
+/* Finance two-cycle monthly planner */
+.finance-stats article small { color:var(--muted); font-size:7.5px; line-height:1.45; margin-top:4px; }
+.stat-title-row { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.stat-edit { border:0; border-radius:999px; padding:4px 7px; background:rgba(255,255,255,.10); color:#bae6fd; font-family:inherit; font-size:7px; font-weight:700; }
+.balance-stat b { color:#86efac; }
+.reserve-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-top:13px; }
+.reserve-grid>div { padding:10px; border-radius:13px; background:var(--surface-2); border:1px solid var(--line); display:grid; gap:4px; }
+.reserve-grid span { color:var(--muted); font-size:7.5px; }
+.reserve-grid b { font-size:10px; }
+.month-chip { padding:6px 8px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); color:var(--muted); font-size:8px; white-space:nowrap; }
+.cashflow-period { margin-top:14px; }
+.cashflow-period-head { display:flex; justify-content:space-between; align-items:flex-end; gap:10px; padding:0 2px 8px; border-bottom:1px solid var(--line); }
+.cashflow-period-head>div { display:grid; gap:2px; }
+.cashflow-period-head b { font-size:11px; }
+.cashflow-period-head span { color:var(--muted); font-size:8px; }
+.cashflow-period-head strong { color:#fda4af; font-size:10px; }
+.cashflow-list { margin-top:8px; }
+.cashflow-row { position:relative; grid-template-columns:1fr auto; }
+.flow-status { grid-column:1/-1; justify-self:start; padding:3px 7px; border-radius:999px; background:rgba(251,191,36,.10); border:1px solid rgba(251,191,36,.18); color:#fde68a; font-size:7px; }
+.flow-status.paid { background:rgba(34,197,94,.10); border-color:rgba(34,197,94,.18); color:#86efac; }
+.salary-marker { margin:14px 0 2px; padding:11px; border-radius:16px; background:linear-gradient(135deg,rgba(37,99,235,.22),rgba(14,165,233,.08)); border:1px solid rgba(56,189,248,.20); display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px; }
+.salary-date { width:42px; height:42px; border-radius:14px; background:rgba(255,255,255,.08); display:grid; place-content:center; text-align:center; }
+.salary-date b { font-size:13px; line-height:1; color:#fff; }
+.salary-date span { margin-top:3px; font-size:6.5px; color:#bae6fd; }
+.salary-marker-main { min-width:0; display:grid; gap:2px; }
+.salary-marker-main span { color:#bae6fd; font-size:8px; }
+.salary-marker-main b { color:#fff; font-size:12px; }
+.salary-marker-main small { color:var(--muted); font-size:7px; }
+.salary-marker button { border:1px solid rgba(125,211,252,.25); background:#2563eb; color:#fff; border-radius:11px; padding:7px 9px; font-family:inherit; font-size:8px; font-weight:800; }
+.salary-marker button:disabled { opacity:.45; background:var(--surface-2); }
+.end-marker { background:linear-gradient(135deg,rgba(13,148,136,.18),rgba(37,99,235,.08)); }
+.form-hint { padding:9px 10px; border-radius:12px; background:var(--surface-2); border:1px solid var(--line); color:var(--muted); font-size:8px; line-height:1.6; }
+@media (max-width:380px){ .reserve-grid{grid-template-columns:1fr;} .salary-marker{grid-template-columns:auto 1fr;} .salary-marker button{grid-column:1/-1;width:100%;} }
+
+
+/* Hadith database manager */
+.hadith-manager-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 14px}
+.hadith-manager-summary>div,.hadith-preview-stats>div{padding:12px 10px;border-radius:16px;background:var(--surface);border:1px solid var(--line);text-align:center}
+.hadith-manager-summary span,.hadith-preview-stats span{display:block;color:var(--muted);font-size:8px;margin-bottom:5px}
+.hadith-manager-summary b,.hadith-preview-stats b{display:block;font-size:15px}
+.hadith-import-card,.hadith-preview-card{padding:16px;border-radius:22px;background:var(--surface);border:1px solid var(--line);margin-bottom:14px}
+.hadith-import-card .form-field{margin-top:13px}
+.hadith-topic-field input{font-weight:700}
+.compact-note{margin:13px 0}
+.hadith-import-actions{display:grid;grid-template-columns:1fr 1.35fr;gap:8px;margin-top:12px}
+.secondary-btn{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--surface-2);color:var(--text);font-family:inherit;font-size:11px;font-weight:800}
+.hadith-preview-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0}
+.hadith-preview-list{display:grid;gap:8px}
+.hadith-preview-item{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:11px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line)}
+.hadith-preview-item>span{padding:4px 7px;border-radius:999px;background:rgba(45,212,191,.12);color:#5eead4;font-size:8px;font-weight:800;white-space:nowrap}
+.hadith-preview-item.duplicate>span{background:rgba(245,158,11,.12);color:#fbbf24}
+.hadith-preview-item b{font-size:10px}
+.hadith-preview-item p{margin:4px 0 0;color:var(--muted);font-size:9px;line-height:1.75;white-space:pre-line}
+.hadith-preview-more{text-align:center;color:var(--muted);font-size:9px;padding:7px}
+#hadithBatchText{min-height:260px;line-height:1.9}
+@media(max-width:390px){.hadith-import-actions{grid-template-columns:1fr}.hadith-manager-summary{gap:6px}.hadith-manager-summary>div{padding-inline:6px}}
+
+@media (max-width:380px){ .day-cycle-actions{grid-template-columns:1fr}.home-hadith-card blockquote{font-size:15px} }
+
+
+/* ---------------- Quran Reader V7 ---------------- */
+.quran-entry-card {
+  position: relative; overflow: hidden; display: grid; gap: 16px; padding: 22px;
+  border-radius: 26px; border: 1px solid rgba(45,212,191,.18);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(45,212,191,.16), transparent 36%),
+    linear-gradient(145deg, #103147 0%, #0c2438 52%, #091a2d 100%);
+  box-shadow: var(--shadow); margin-bottom: 14px;
+}
+.quran-entry-card::after { content:"۞"; position:absolute; left:18px; bottom:-8px; color:rgba(167,243,208,.08); font-size:110px; line-height:1; }
+.quran-entry-copy { position:relative; z-index:1; }
+.quran-entry-copy h2 { margin:5px 0 7px; font-size:24px; }
+.quran-entry-copy p { margin:0; color:#b9c9d8; line-height:1.8; font-size:14px; }
+.quran-entry-meta { margin-top:12px; display:inline-flex; padding:7px 11px; border-radius:999px; background:rgba(45,212,191,.10); color:#9ff3dd; font-size:12px; }
+.quran-entry-actions { position:relative; z-index:1; display:flex; flex-wrap:wrap; gap:8px; }
+.quran-entry-actions .primary-btn,.quran-entry-actions .secondary-btn { flex:1; min-width:130px; }
+
+.quran-view { --quran-font-size: 28px; }
+.quran-app-head { display:grid; grid-template-columns:auto 1fr auto; gap:12px; align-items:start; margin-bottom:16px; }
+.quran-app-title h1 { margin:2px 0 4px; font-size:28px; }
+.quran-app-title p { margin:0; color:var(--muted); line-height:1.7; font-size:12px; }
+.quran-theme-toggle { width:42px; height:42px; border-radius:14px; border:1px solid var(--line); background:var(--surface); color:var(--text); font-size:19px; }
+
+.quran-continue-card { display:flex; justify-content:space-between; gap:14px; align-items:center; padding:20px; border-radius:24px; margin-bottom:12px; border:1px solid rgba(251,191,36,.17); background:linear-gradient(140deg, rgba(251,191,36,.10), rgba(20,36,59,.92)); }
+.quran-continue-card h2 { margin:4px 0 6px; font-size:21px; }
+.quran-continue-card p { margin:0; color:var(--muted); font-size:13px; line-height:1.6; }
+.quran-continue-card .primary-btn { flex:0 0 auto; }
+
+.quran-tools-card { padding:12px; border:1px solid var(--line); border-radius:22px; background:var(--surface); display:grid; gap:10px; margin-bottom:14px; }
+.quran-search-wrap { display:grid; grid-template-columns:auto 1fr auto; gap:8px; align-items:center; padding:10px 12px; border-radius:16px; background:var(--surface-2); border:1px solid var(--line); }
+.quran-search-wrap span { color:var(--cyan); font-size:20px; }
+.quran-search-wrap input { width:100%; border:0; outline:0; background:transparent; color:var(--text); font-size:14px; }
+.quran-search-wrap input::placeholder { color:var(--muted); }
+.quran-search-wrap button { width:30px; height:30px; border:0; border-radius:10px; background:transparent; color:var(--muted); font-size:20px; }
+.quran-font-tools { display:flex; gap:8px; align-items:center; justify-content:flex-end; color:var(--muted); font-size:12px; }
+.quran-font-tools button { width:34px; height:34px; border:1px solid var(--line); border-radius:11px; background:var(--surface-2); color:var(--text); font-size:18px; }
+.quran-font-tools b { color:var(--text); min-width:48px; text-align:center; }
+
+.quran-surah-section,.quran-search-results { padding:18px; border-radius:24px; border:1px solid var(--line); background:var(--surface); margin-bottom:14px; }
+.quran-count-pill { padding:6px 10px; border-radius:999px; background:var(--surface-2); color:var(--muted); font-size:11px; }
+.quran-surah-list { display:grid; gap:8px; margin-top:14px; }
+.quran-surah-row { width:100%; border:1px solid var(--line); border-radius:17px; background:var(--surface-2); color:var(--text); padding:12px; display:grid; grid-template-columns:44px 1fr auto; gap:12px; align-items:center; text-align:right; }
+.quran-surah-row:active { transform:scale(.995); }
+.quran-surah-number { width:40px; height:40px; display:grid; place-items:center; border-radius:14px; background:linear-gradient(145deg, rgba(45,212,191,.18), rgba(56,189,248,.10)); color:#a7f3d0; font-weight:800; }
+.quran-surah-name { display:grid; gap:3px; }
+.quran-surah-name b { font-family:"Noto Naskh Arabic","Geeza Pro",serif; font-size:18px; }
+.quran-surah-name small,.quran-surah-count { color:var(--muted); font-size:11px; }
+.quran-surah-arrow { color:var(--cyan); font-size:18px; }
+
+.quran-result-list { display:grid; gap:8px; margin-top:12px; }
+.quran-result { width:100%; border:1px solid var(--line); border-radius:16px; padding:13px; background:var(--surface-2); color:var(--text); text-align:right; }
+.quran-result b { display:block; margin-bottom:5px; color:#8cebd4; }
+.quran-result p { margin:0; font-family:"Amiri Quran","Geeza Pro",serif; font-size:18px; line-height:1.9; color:var(--text); }
+.quran-result small { display:block; margin-top:7px; color:var(--muted); }
+.quran-source-note { display:grid; gap:5px; padding:14px 16px; border-radius:18px; background:rgba(45,212,191,.06); border:1px solid rgba(45,212,191,.12); color:var(--muted); font-size:11px; line-height:1.6; }
+.quran-source-note b { color:var(--text); }
+.quran-source-note a { color:var(--cyan); text-decoration:none; }
+
+.quran-reading-pane { margin-inline:-16px; margin-top:calc(-84px - env(safe-area-inset-top)); padding-top:calc(74px + env(safe-area-inset-top)); min-height:100dvh; background:#071725; }
+.quran-reading-pane[hidden] { display:none !important; }
+.quran-view[data-quran-theme="paper"] .quran-reading-pane { background:#f5eedf; color:#1d2a2a; }
+.quran-reader-sticky { position:sticky; top:calc(64px + env(safe-area-inset-top)); z-index:8; min-height:58px; display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px; padding:9px 16px; background:color-mix(in srgb, #071725 88%, transparent); backdrop-filter:blur(16px); border-bottom:1px solid rgba(255,255,255,.07); }
+.quran-view[data-quran-theme="paper"] .quran-reader-sticky { background:rgba(245,238,223,.93); border-color:rgba(28,46,41,.10); }
+.quran-reader-sticky > div { text-align:center; }
+.quran-reader-sticky span { display:block; color:#82e7d1; font-size:10px; }
+.quran-reader-sticky h2 { margin:1px 0 0; font-family:"Noto Naskh Arabic","Geeza Pro",serif; font-size:19px; }
+.quran-view[data-quran-theme="paper"] .quran-reader-sticky h2 { color:#20312e; }
+.quran-reader-back,.quran-reader-more { border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.05); color:#eef8f5; border-radius:12px; min-height:38px; padding:0 11px; }
+.quran-view[data-quran-theme="paper"] .quran-reader-back,.quran-view[data-quran-theme="paper"] .quran-reader-more { color:#20312e; background:rgba(28,46,41,.05); border-color:rgba(28,46,41,.10); }
+.quran-reader-more { width:40px; padding:0; }
+.quran-surah-banner { display:flex; justify-content:center; gap:16px; align-items:center; text-align:center; padding:30px 18px 18px; }
+.quran-surah-banner h1 { margin:0; font-family:"Amiri Quran","Geeza Pro",serif; font-size:29px; color:#d4f8e8; font-weight:400; }
+.quran-surah-banner p { margin:5px 0 0; color:#8ea9a1; font-size:12px; }
+.quran-view[data-quran-theme="paper"] .quran-surah-banner h1 { color:#1f5145; }
+.quran-view[data-quran-theme="paper"] .quran-surah-banner p { color:#66756f; }
+.quran-ornament { color:#d5af63; font-size:22px; }
+.quran-text-sheet { margin:0 14px; padding:22px 18px 30px; border-radius:28px; background:linear-gradient(180deg,#0c2432,#091d2b); border:1px solid rgba(128,214,190,.12); box-shadow:0 18px 55px rgba(0,0,0,.26); }
+.quran-view[data-quran-theme="paper"] .quran-text-sheet { background:#fffaf0; border-color:#ded2b8; box-shadow:0 16px 35px rgba(66,50,26,.10); }
+.quran-ayah { margin:0; display:inline; font-family:"Amiri Quran","KFGQPC Uthmanic Script HAFS","Geeza Pro","Arabic Typesetting",serif; font-size:var(--quran-font-size); line-height:2.15; color:#f6fbf8; font-weight:400; }
+.quran-view[data-quran-theme="paper"] .quran-ayah { color:#172a25; }
+.quran-ayah[data-selected="1"] { background:rgba(45,212,191,.09); border-radius:8px; }
+.quran-ayah-number { white-space:nowrap; display:inline-grid; place-items:center; min-width:32px; height:32px; margin-inline:4px 8px; padding:0 7px; border-radius:50%; border:1px solid rgba(214,177,99,.46); color:#e8c779; font-family:"Noto Naskh Arabic","Geeza Pro",serif; font-size:12px; vertical-align:middle; transform:translateY(-1px); }
+.quran-view[data-quran-theme="paper"] .quran-ayah-number { color:#8a6524; border-color:rgba(138,101,36,.38); }
+.quran-ayah-actions { display:flex; gap:7px; align-items:center; margin:12px 0 18px; padding:8px; border-radius:14px; background:rgba(45,212,191,.07); }
+.quran-ayah-actions button { border:1px solid rgba(45,212,191,.14); background:rgba(255,255,255,.04); color:inherit; border-radius:11px; padding:8px 10px; font-size:11px; }
+.quran-view[data-quran-theme="paper"] .quran-ayah-actions { background:rgba(31,81,69,.05); }
+.quran-reader-footer { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; padding:18px 14px calc(24px + env(safe-area-inset-bottom)); }
+.quran-reader-footer button { min-height:46px; border-radius:14px; border:1px solid rgba(255,255,255,.08); background:#0d2737; color:#e9f5f2; font-size:12px; }
+.quran-view[data-quran-theme="paper"] .quran-reader-footer button { background:#fffaf0; color:#28433b; border-color:#ded2b8; }
+
+@media (max-width:420px){
+  .quran-continue-card{align-items:stretch;flex-direction:column}.quran-continue-card .primary-btn{width:100%}
+  .quran-text-sheet{margin-inline:8px;padding-inline:14px}.quran-reading-pane{margin-inline:-16px}
+  .quran-app-head{grid-template-columns:auto 1fr auto}.quran-app-title h1{font-size:24px}
+}
+
+.quran-view.is-reading .quran-app-head{display:none;}
+
+
+/* ===== V8 — Fullscreen digital Mushaf ===== */
+@font-face{font-family:"Hayati Uthmanic Hafs";src:url("https://static-cdn.tarteel.ai/qul/fonts/UthmanicHafs_V22.ttf") format("truetype");font-display:swap;}
+body.quran-fullscreen-mode{overflow:hidden;background:#efe8d7;}
+body.quran-fullscreen-mode .topbar,body.quran-fullscreen-mode .bottom-nav{display:none!important;}
+body.quran-fullscreen-mode .main-content{padding:0!important;}
+body.quran-fullscreen-mode .app-shell{max-width:none!important;}
+.quran-view.is-reading{padding:0!important;margin:0!important;max-width:none!important;}
+.quran-view.is-reading .quran-app-head{display:none!important;}
+.mushaf-page-jump{display:grid;grid-template-columns:auto minmax(80px,1fr) auto;gap:8px;align-items:center;color:var(--muted);font-size:12px;}
+.mushaf-page-jump input{min-width:0;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--text);padding:0 10px;text-align:center;}
+.mushaf-page-jump button{height:42px;border:0;border-radius:12px;background:rgba(45,212,191,.13);color:#8cebd4;padding:0 14px;font-weight:800;}
+.quran-reading-pane.mushaf-reader{position:fixed!important;inset:0!important;z-index:1000!important;margin:0!important;padding:0!important;min-height:100dvh!important;background:#efe8d7!important;color:#17211d;overflow:hidden;}
+.quran-reading-pane.mushaf-reader[data-mushaf-theme="night"]{background:#06141b!important;color:#eaf3ed;}
+.mushaf-stage{position:relative;width:100%;height:100dvh;display:grid;place-items:center;overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none;}
+.mushaf-paper{position:absolute;inset:max(4px,env(safe-area-inset-top)) 5px max(4px,env(safe-area-inset-bottom));margin:auto;width:min(calc(100vw - 10px),620px);height:calc(100dvh - max(8px,env(safe-area-inset-top)) - max(8px,env(safe-area-inset-bottom)));background:#fffdf5;color:#101915;border:2px solid #4d8f91;border-radius:4px;box-shadow:inset 0 0 0 3px #d9b66e,inset 0 0 0 6px #e7f2e9,0 12px 38px rgba(43,31,15,.16);padding:clamp(29px,5.2vh,48px) clamp(15px,4vw,28px) clamp(27px,4.5vh,42px);display:grid;grid-template-rows:1fr auto;overflow:hidden;user-select:text;-webkit-user-select:text;}
+[data-mushaf-theme="night"] .mushaf-paper{background:#071b21;color:#f4efe2;border-color:#4f8a83;box-shadow:inset 0 0 0 3px #806b3d,inset 0 0 0 6px #102e30,0 12px 40px rgba(0,0,0,.45);}
+.mushaf-paper:before,.mushaf-paper:after{content:"";position:absolute;pointer-events:none;inset:9px;border:1px solid rgba(55,116,112,.55);}
+.mushaf-paper:after{inset:13px;border-color:rgba(185,145,72,.42);}
+.mushaf-frame-corner{position:absolute;width:23px;height:23px;border-color:#397d7a;z-index:1;pointer-events:none}.c1{top:7px;right:7px;border-top:3px solid;border-right:3px solid}.c2{top:7px;left:7px;border-top:3px solid;border-left:3px solid}.c3{bottom:7px;right:7px;border-bottom:3px solid;border-right:3px solid}.c4{bottom:7px;left:7px;border-bottom:3px solid;border-left:3px solid}
+.mushaf-lines{position:relative;z-index:2;min-height:0;display:flex;flex-direction:column;justify-content:space-between;gap:0;direction:rtl;padding:2px 0 5px;}
+.mushaf-lines.short-page{justify-content:center;gap:clamp(5px,1.25vh,13px);}
+.mushaf-line{position:relative;width:100%;min-height:0;display:flex;align-items:center;justify-content:center;text-align:center;white-space:nowrap;direction:rtl;}
+.mushaf-line.text-line{font-family:"Hayati Uthmanic Hafs","Amiri Quran","Noto Naskh Arabic","Geeza Pro",serif;line-height:1.28;font-weight:400;letter-spacing:0;cursor:pointer;border-radius:7px;padding:1px 2px;transition:background .15s,outline .15s;}
+.mushaf-line-text{display:inline-block;white-space:nowrap;unicode-bidi:plaintext;}
+.mushaf-line-text[data-qcf="1"]{font-weight:400!important;letter-spacing:0!important;word-spacing:.07em;line-height:1!important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+.mushaf-line.text-line.selected-line{background:rgba(205,168,81,.18);outline:1px solid rgba(162,118,37,.45);}
+[data-mushaf-theme="night"] .mushaf-line.text-line.selected-line{background:rgba(211,174,92,.13);outline-color:rgba(232,198,119,.40);}
+.mushaf-line.text-line.saved-line:before{content:"";position:absolute;right:-8px;width:4px;height:70%;border-radius:4px;background:#b98a32;}
+.mushaf-saved-mark{position:absolute;left:2px;top:50%;transform:translateY(-50%);font-family:system-ui,sans-serif;font-style:normal;font-size:8px;color:#8a6727;background:#fff8e7;border:1px solid rgba(155,116,42,.25);border-radius:999px;padding:2px 5px;}
+[data-mushaf-theme="night"] .mushaf-saved-mark{background:#10292c;color:#ebcb87;}
+.surah-header-line{font-family:"Noto Naskh Arabic","Geeza Pro",serif;font-size:clamp(16px,4.8vw,22px);font-weight:700;color:#236a68;border:1px solid rgba(48,120,117,.45);background:linear-gradient(90deg,rgba(72,144,137,.04),rgba(72,144,137,.16),rgba(72,144,137,.04));border-radius:999px;min-height:34px;gap:12px;margin:1px 0 3px;}
+.surah-header-line span{color:#b88b37;font-size:13px}.basmala-line{font-family:"Hayati Uthmanic Hafs","Amiri Quran",serif;font-size:clamp(19px,5.3vw,25px);min-height:30px;color:inherit;}
+[data-mushaf-theme="night"] .surah-header-line{color:#b9e7dc;border-color:rgba(111,185,173,.36);background:rgba(72,144,137,.08)}
+.mushaf-page-number{position:relative;z-index:2;text-align:center;font-family:"Noto Naskh Arabic",serif;color:#55736c;font-size:12px;height:18px;line-height:18px;}
+[data-mushaf-theme="night"] .mushaf-page-number{color:#92aaa2;}
+.mushaf-loading{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;font-family:"Noto Naskh Arabic",serif;color:#54746c;padding:25px;white-space:normal}.mushaf-loading span{font-size:28px;color:#b58a3a}.mushaf-loading.error span{font-size:12px;line-height:1.7}.mushaf-loading button{border:0;border-radius:12px;background:#2d7d77;color:white;padding:10px 16px}
+.mushaf-top-controls,.mushaf-bottom-controls,.mushaf-edge-nav{position:absolute;z-index:1010;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;}
+.controls-visible .mushaf-top-controls,.controls-visible .mushaf-bottom-controls,.controls-visible .mushaf-edge-nav{opacity:1;pointer-events:auto;}
+.mushaf-top-controls{top:calc(10px + env(safe-area-inset-top));left:12px;right:12px;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;transform:translateY(-8px)}.controls-visible .mushaf-top-controls{transform:none}
+.mushaf-round-btn{width:42px;height:42px;border:1px solid rgba(20,45,40,.14);border-radius:50%;background:rgba(255,253,245,.94);color:#24443e;box-shadow:0 8px 24px rgba(42,30,14,.12);font-size:18px}.mushaf-top-meta{justify-self:center;text-align:center;background:rgba(255,253,245,.94);border:1px solid rgba(20,45,40,.10);border-radius:15px;padding:5px 13px;box-shadow:0 8px 22px rgba(42,30,14,.08)}.mushaf-top-meta b,.mushaf-top-meta span{display:block}.mushaf-top-meta b{font-family:"Noto Naskh Arabic",serif;font-size:13px;color:#234b44}.mushaf-top-meta span{font-size:9px;color:#6f7d78;margin-top:1px}
+[data-mushaf-theme="night"] .mushaf-round-btn,[data-mushaf-theme="night"] .mushaf-top-meta{background:rgba(5,24,29,.94);border-color:rgba(255,255,255,.10);color:#eaf3ed}[data-mushaf-theme="night"] .mushaf-top-meta b{color:#c7ebe3}[data-mushaf-theme="night"] .mushaf-top-meta span{color:#8fa8a1}
+.mushaf-bottom-controls{bottom:calc(10px + env(safe-area-inset-bottom));left:12px;right:12px;margin:auto;max-width:560px;background:rgba(255,253,245,.96);border:1px solid rgba(39,74,67,.12);border-radius:20px;padding:9px;box-shadow:0 12px 35px rgba(41,29,14,.18);transform:translateY(8px)}.controls-visible .mushaf-bottom-controls{transform:none}.mushaf-selection{text-align:center;font-size:10px;color:#68766f;margin-bottom:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mushaf-actions{display:grid;grid-template-columns:1fr 1.4fr;gap:7px}.mushaf-actions button{height:42px;border-radius:13px;border:1px solid rgba(48,83,76,.12);background:#f5efe1;color:#34534c;font-size:12px;font-weight:700}.mushaf-actions button.primary{background:#286f69;color:white;border-color:#286f69}
+[data-mushaf-theme="night"] .mushaf-bottom-controls{background:rgba(5,24,29,.96);border-color:rgba(255,255,255,.10)}[data-mushaf-theme="night"] .mushaf-selection{color:#9bb0aa}[data-mushaf-theme="night"] .mushaf-actions button{background:#10292e;color:#d8e8e3;border-color:rgba(255,255,255,.08)}[data-mushaf-theme="night"] .mushaf-actions button.primary{background:#2c7b73;color:white}
+.mushaf-edge-nav{top:50%;transform:translateY(-50%);width:38px;height:64px;border:0;background:rgba(255,253,245,.83);color:#315e57;font-size:28px;box-shadow:0 8px 20px rgba(0,0,0,.08)}.mushaf-edge-nav:disabled{display:none}.mushaf-edge-nav.prev{right:2px;border-radius:18px 0 0 18px}.mushaf-edge-nav.next{left:2px;border-radius:0 18px 18px 0}[data-mushaf-theme="night"] .mushaf-edge-nav{background:rgba(9,35,40,.86);color:#c5e1da}
+@media (max-width:390px){.mushaf-paper{padding-inline:13px}.mushaf-saved-mark{display:none}.surah-header-line{min-height:31px}.mushaf-bottom-controls{left:8px;right:8px}.mushaf-top-controls{left:8px;right:8px}}
+@media (min-width:700px){.mushaf-paper{width:min(74vw,620px)}}
+
+
+/* ===== V10.2 mobile-only stability ===== */
+@media (hover:none) and (pointer:coarse){input,textarea,select{font-size:16px!important}}
+@media (min-width:481px){body{background-color:var(--bg)}.app-shell{box-shadow:0 0 0 1px var(--line),0 24px 80px rgba(0,0,0,.25)}}
+
+/* ===== V10.3 Hadith / Quran semantic styling ===== */
+.home-hadith-card,
+.hadith-feature{
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 12% 24%,rgba(56,189,248,.10),transparent 31%),
+    radial-gradient(circle at 88% 78%,rgba(45,212,191,.08),transparent 30%),
+    linear-gradient(145deg,#073348 0%,#082d40 52%,#06283a 100%);
+  border:1px solid rgba(91,211,224,.24);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.025),0 18px 50px rgba(0,0,0,.16);
+}
+.home-hadith-card::after,.hadith-feature::after{
+  content:"";position:absolute;inset:auto -35px -50px auto;width:155px;height:155px;border:1px solid rgba(117,226,210,.07);border-radius:52% 48% 42% 58%;transform:rotate(18deg);pointer-events:none;
+}
+.home-hadith-card .section-kicker,.hadith-feature .section-kicker{color:#68d7ff;font-size:11px;font-weight:800;letter-spacing:.01em}
+.home-hadith-card .text-btn{color:#71d9ff;border-color:rgba(105,216,255,.22);background:rgba(3,30,44,.3)}
+.home-hadith-card blockquote,.hadith-feature blockquote{
+  position:relative;z-index:1;color:#f8fbff;font-family:"Noto Naskh Arabic",serif;font-size:17px;font-weight:500;line-height:2.15;text-align:right;
+}
+.hadith-quran{
+  color:#c7f59b;
+  font-family:"Amiri Quran","Noto Naskh Arabic",serif;
+  font-weight:400;
+  font-size:1.08em;
+  text-shadow:0 0 18px rgba(174,246,141,.08);
+  white-space:normal;
+}
+.home-hadith-meta,.hadith-source{position:relative;z-index:1;color:rgba(222,239,245,.72);font-size:10px;line-height:1.8}
+.hadith-card-actions{position:relative;z-index:2;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:15px;padding-top:12px;border-top:1px solid rgba(124,208,222,.14)}
+.hadith-card-actions.compact{margin-top:12px}
+.hadith-action-btn{min-width:0;border:0;background:transparent;color:#d9eaf0;border-radius:14px;padding:7px 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer}
+.hadith-action-btn span{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;border:1px solid rgba(160,218,230,.18);background:rgba(4,36,51,.48);font-size:19px;line-height:1}
+.hadith-action-btn small{font-size:8px;line-height:1.25;color:rgba(225,239,244,.72);font-weight:700;text-align:center}
+.hadith-action-btn.ai span{color:#c9f6a5;border-color:rgba(201,246,165,.2)}
+.hadith-action-btn.ai small{color:#c9f6a5;font-size:7px}
+.hadith-action-btn.active span{color:#dfffb6;background:rgba(126,211,87,.12);border-color:rgba(190,244,151,.3)}
+
+.hadith-quran-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin:7px 0 9px}
+.hadith-quran-toolbar button{border:1px solid rgba(80,200,180,.28);background:rgba(45,212,191,.09);color:#bff3a0;border-radius:12px;padding:8px 10px;font-family:inherit;font-size:10px;font-weight:800;cursor:pointer}
+.hadith-quran-toolbar span{flex:1 1 100%;color:var(--muted);font-size:8px;line-height:1.55}
+.hadith-editor-field textarea{line-height:1.85}
+.hadith-quran-check{margin:0 0 10px;padding:9px 11px;border-radius:13px;font-size:9px;line-height:1.65;border:1px solid var(--line)}
+.hadith-quran-check.ok{background:rgba(34,197,94,.08);color:#bdf5a0;border-color:rgba(132,234,105,.18)}
+.hadith-quran-check.warning{background:rgba(245,158,11,.09);color:#f7c76b;border-color:rgba(245,158,11,.2)}
+.hadith-preview-item p .hadith-quran,.hadith-list-text .hadith-quran{color:#91d874}
+.hadith-preview-item.quran-error{border-color:rgba(245,158,11,.3)}
+.hadith-preview-item.quran-error>span{background:rgba(245,158,11,.12);color:#fbbf24}
+.hadith-quran-error{display:block;margin-top:6px;color:#f4b85b;font-size:8px;line-height:1.55}
+.hadith-list-text{font-weight:600;line-height:1.9}
+
+@media(max-width:390px){
+  .home-hadith-card blockquote,.hadith-feature blockquote{font-size:16px;line-height:2.08}
+  .hadith-card-actions{gap:3px}
+  .hadith-action-btn span{width:32px;height:32px;font-size:17px}
+  .hadith-action-btn small{font-size:7px}
+  .hadith-action-btn.ai small{font-size:6.5px}
+}
+
+
+/* ===== V10.4 Hadith database management ===== */
+.hadith-manager-summary>button,.hadith-preview-stats>button{appearance:none;-webkit-appearance:none;width:100%;font:inherit;color:inherit;cursor:pointer;padding:12px 10px;border-radius:16px;background:var(--surface);border:1px solid var(--line);text-align:center;transition:.18s ease}
+.hadith-manager-summary>button:active,.hadith-preview-stats>button:active{transform:scale(.98)}
+.hadith-manager-summary>button small,.hadith-preview-stats>button small{display:block;margin-top:5px;color:var(--muted);font-size:7px}
+.hadith-manager-summary>button:hover,.hadith-manager-summary>button:focus-visible{border-color:rgba(45,212,191,.35);background:rgba(45,212,191,.06)}
+.hadith-preview-stats>button.active{border-color:rgba(45,212,191,.4);background:rgba(45,212,191,.09);box-shadow:inset 0 0 0 1px rgba(45,212,191,.08)}
+.hadith-manager-quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:-4px 0 14px}
+.hadith-manager-browser{padding:16px;border-radius:22px;background:var(--surface);border:1px solid var(--line);margin:0 0 14px;scroll-margin-top:18px}
+.hadith-browser-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.hadith-browser-head h2{margin:2px 0 4px;font-size:17px}.hadith-browser-head p{margin:0;color:var(--muted);font-size:9px;line-height:1.7}
+.hadith-browser-actions{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 12px}.hadith-browser-actions button{flex:1 1 130px}
+.danger-outline-btn{border:1px solid rgba(239,68,68,.28);background:rgba(239,68,68,.07);color:#fca5a5;border-radius:13px;padding:10px 12px;font-family:inherit;font-weight:800;font-size:9px;cursor:pointer}
+.hadith-browser-list{display:grid;gap:9px}
+.hadith-topic-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:stretch;padding:0;border-radius:15px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+.hadith-topic-open{border:0;background:transparent;color:var(--text);padding:12px;text-align:right;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hadith-topic-open span{font-size:10px;font-weight:800;line-height:1.6}.hadith-topic-open b{font-size:8px;color:var(--muted);white-space:nowrap}
+.hadith-topic-delete{border:0;border-right:1px solid var(--line);background:rgba(239,68,68,.06);color:#fca5a5;padding:0 12px;font-family:inherit;font-size:8px;font-weight:800;cursor:pointer}
+.hadith-manager-row{padding:12px;border-radius:16px;background:var(--surface-2);border:1px solid var(--line)}
+.hadith-manager-row-text{font-size:10px;line-height:1.95;font-weight:650}.hadith-manager-row>small{display:block;color:var(--muted);font-size:8px;margin-top:7px;line-height:1.6}
+.hadith-manager-row-actions{display:flex;gap:7px;margin-top:10px}.hadith-manager-row-actions button{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:11px;padding:8px 10px;font-family:inherit;font-size:8px;font-weight:800;cursor:pointer}.hadith-manager-row-actions button.danger{color:#fca5a5;border-color:rgba(239,68,68,.2);background:rgba(239,68,68,.05)}
+.hadith-preview-delete{margin-top:8px;border:1px solid rgba(239,68,68,.22);background:rgba(239,68,68,.05);color:#fca5a5;border-radius:10px;padding:7px 9px;font-family:inherit;font-size:8px;font-weight:800;cursor:pointer}
+@media(max-width:390px){.hadith-manager-quick-actions{grid-template-columns:1fr}.hadith-browser-actions{display:grid;grid-template-columns:1fr}.hadith-browser-actions button{width:100%}}
+
+/* ===== V10.5 Hadith Quran correction flow ===== */
+.hadith-correction-backdrop{position:fixed;inset:0;z-index:1800;background:rgba(2,10,18,.74);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);display:flex;align-items:flex-end;justify-content:center;padding:14px}
+.hadith-correction-backdrop[hidden]{display:none!important}
+.hadith-correction-modal{position:relative;width:min(100%,520px);max-height:min(82dvh,760px);overflow:auto;background:var(--surface);border:1px solid rgba(45,212,191,.18);border-radius:26px 26px 20px 20px;padding:20px 16px 18px;box-shadow:0 -16px 60px rgba(0,0,0,.35)}
+.hadith-correction-icon{width:44px;height:44px;border-radius:15px;display:grid;place-items:center;background:rgba(245,158,11,.12);font-size:20px;margin-bottom:10px}
+.hadith-correction-modal h2{margin:4px 0 7px;font-size:19px}.hadith-correction-modal>p{margin:0;color:var(--muted);font-size:10px;line-height:1.8}
+.hadith-correction-choice{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}.hadith-correction-choice button{width:100%}
+.hadith-correction-editor{margin-top:15px}.hadith-correction-query{padding:12px;border-radius:16px;background:var(--surface-2);border:1px solid var(--line)}
+.hadith-correction-query span,.hadith-correction-query small{display:block;color:var(--muted);font-size:8px}.hadith-correction-query b{display:block;margin:5px 0 4px;font-size:12px;line-height:1.9;color:#f8fafc}
+.hadith-correction-help{margin:10px 2px!important;font-size:9px!important}
+.hadith-correction-suggestions{display:grid;gap:8px;max-height:52dvh;overflow:auto;padding-inline-end:2px}
+.hadith-ayah-suggestion{appearance:none;-webkit-appearance:none;width:100%;text-align:right;border:1px solid var(--line);background:var(--surface-2);color:var(--text);border-radius:15px;padding:11px 12px;font-family:inherit;cursor:pointer}
+.hadith-ayah-suggestion:active{transform:scale(.99);border-color:rgba(45,212,191,.42)}
+.hadith-ayah-ref{display:block;color:#70d8c8;font-size:8px;font-weight:800;margin-bottom:5px}
+.hadith-ayah-suggestion b{display:block;color:#b8ed8e;font-size:11px;line-height:2;font-weight:700}
+.hadith-ayah-suggestion small{display:block;color:var(--muted);font-size:8px;line-height:1.65;margin-top:6px}
+.hadith-correction-empty{padding:14px;border-radius:14px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.18);color:#f5c46e;font-size:9px;line-height:1.8}
+.hadith-correction-editor>.text-btn{margin-top:11px;width:100%}
+@media(max-width:390px){.hadith-correction-choice{grid-template-columns:1fr}.hadith-correction-modal{padding:18px 13px 15px}}
+
+/* Finance v2 — salary-period budgeting */
+.daily-budget-card{border:1px solid rgba(32,132,194,.18);background:linear-gradient(180deg,rgba(237,249,255,.95),rgba(255,255,255,.98))}.daily-pill{padding:.38rem .7rem;border-radius:999px;background:#e7f7ef;color:#16764b;font-weight:800;font-size:.8rem}.daily-allowed{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:1rem 0;padding:1rem;border-radius:18px;background:#fff;box-shadow:0 8px 24px rgba(26,80,108,.08)}.daily-allowed span{font-weight:700;color:#5b6d78}.daily-allowed b{font-size:1.55rem;color:#0f766e}.overspend-alert{margin-top:1rem;padding:1rem;border-radius:16px;background:#fff0f0;border:1px solid #ffc6c6;color:#9f1d1d;display:grid;gap:.35rem}.overspend-alert[hidden]{display:none}.overspend-alert span{line-height:1.7}.period-list{display:grid;gap:1rem}.period-card{padding:1rem;border:1px solid #e5edf2;border-radius:18px;background:#fff}.period-card.active-period{border-color:#71c9aa;box-shadow:0 0 0 3px rgba(113,201,170,.12)}.period-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}.period-head>div{display:grid;gap:.2rem}.period-head span,.period-head small{color:#6b7d88;font-size:.82rem}.period-head strong{color:#0f766e;font-size:1.1rem}.period-mini-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.55rem;margin:.9rem 0}.period-mini-grid>div{padding:.65rem;border-radius:12px;background:#f7fafb;display:grid;gap:.2rem}.period-mini-grid span{font-size:.72rem;color:#71808a}.period-mini-grid b{font-size:.82rem}.period-card>button{width:100%;border:0;border-radius:12px;padding:.7rem;background:#e8f4ff;color:#1769aa;font-weight:800}.period-card>button.received-btn{background:#edf7f1;color:#2e7d52}.allocation-box{margin-top:.5rem;padding:1rem;border:1px solid #dce8ee;border-radius:16px;background:#f9fcfd;display:grid;gap:.7rem}.allocation-box>b{font-size:.95rem}.allocation-box>small{color:#6f7f87;line-height:1.6}.allocation-row{display:grid;grid-template-columns:1fr 140px;gap:.75rem;align-items:center}.allocation-row input{width:100%}.warning-hint{background:#fff7e7!important;color:#8a5a00!important}.goal-row>div:first-child{min-width:0;flex:1}.split-summary-card .reserve-grid{margin-top:1rem}
+@media(max-width:720px){.period-mini-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.allocation-row{grid-template-columns:1fr 110px}.finance-quick{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* ===== Garage • Futuristic mobile configurator ===== */
+.domain-card.garage::before{background:linear-gradient(90deg,#19d8ff,#0b6cff,transparent)}
+.garage-view{background:#06111d;color:#f7fbff;margin:-12px -12px 0;min-height:100vh;padding:0 12px 110px;overflow:hidden}
+.garage-shell{max-width:520px;margin:auto;padding-top:14px}.garage-topline{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 4px 12px}.garage-topline h1{margin:2px 0 0;font-size:25px}.garage-topline p{margin:2px 0;color:#7f9db3;font-size:11px}.garage-live{font-size:10px;color:#78f5b2;border:1px solid #1e5d54;background:#0a2529;padding:7px 9px;border-radius:999px}.garage-live i{display:inline-block;width:6px;height:6px;border-radius:50%;background:#55f4a1;box-shadow:0 0 10px #55f4a1;margin-left:5px}
+.garage-stage{height:330px;position:relative;border:1px solid #153f58;border-radius:28px;overflow:hidden;background:radial-gradient(circle at 50% 50%,#153c55 0,#071827 48%,#030b13 100%);box-shadow:inset 0 0 50px #04101a,0 18px 45px #0008}.garage-gridfx{position:absolute;inset:45% -30% -20%;background-image:linear-gradient(#1ad7ff1b 1px,transparent 1px),linear-gradient(90deg,#1ad7ff1b 1px,transparent 1px);background-size:25px 25px;transform:perspective(230px) rotateX(58deg)}.garage-beam{position:absolute;width:2px;height:200px;background:linear-gradient(transparent,#26d8ff,transparent);filter:blur(.2px);opacity:.55;transform:rotate(28deg)}.beam-a{left:18%;top:-30px}.beam-b{right:16%;top:-20px;transform:rotate(-28deg)}.garage-model{position:absolute;top:18px;right:18px;z-index:3;display:flex;align-items:center;gap:9px}.garage-model b{font:900 25px/1 Arial;color:#e43131;text-shadow:0 0 12px #e4313166}.garage-model span{font:800 12px/1 Arial;letter-spacing:1px;color:#cbd8e1}.garage-car-wrap{position:absolute;z-index:3;left:4%;right:4%;top:63px;height:205px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:20px}.garage-car-wrap:after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,#07152200 58%,#071522 98%);pointer-events:none}.garage-car-wrap img{width:132%;height:118%;object-fit:cover;object-position:50% 61%;mix-blend-mode:screen;filter:none;transition:filter .35s ease,transform .35s ease;transform:scale(1.04);border-radius:18px}.garage-platform{position:absolute;z-index:2;left:8%;right:8%;bottom:44px;height:55px;border-radius:50%;background:#07131d;border:2px solid #28d8ff;box-shadow:0 0 16px #24d9ff,0 0 35px #1687ff99,inset 0 0 18px #2bdcff55}.garage-platform span{display:block;position:absolute;inset:9px;border-radius:50%;border:1px solid #f6b24b;box-shadow:0 0 12px #f6b24b77}.garage-colors{position:absolute;z-index:5;bottom:13px;left:50%;transform:translateX(-50%);display:flex;gap:8px;padding:5px 8px;background:#03101bc9;border:1px solid #18455d;border-radius:999px}.garage-swatch{width:24px;height:24px;border-radius:50%;border:2px solid #ffffff55;background:var(--sw);padding:0;box-shadow:inset 0 1px 3px #fff5}.garage-swatch.active{border-color:#5fe9ff;box-shadow:0 0 0 2px #0a2635,0 0 12px #36dfff}.garage-color-note{position:absolute;z-index:5;bottom:17px;right:13px;color:#7293aa;font-size:8px;display:none}
+.garage-health-card,.garage-alerts,.garage-info-card,.garage-maintenance-card{margin-top:12px;border:1px solid #153d53;background:linear-gradient(145deg,#0b2030,#071621);border-radius:22px;box-shadow:inset 0 1px 0 #ffffff0d,0 10px 25px #0005}.garage-health-card{display:flex;align-items:center;gap:15px;padding:14px}.health-ring{width:92px;height:92px;border-radius:50%;display:grid;place-content:center;text-align:center;background:radial-gradient(circle,#0a1d29 57%,transparent 59%),conic-gradient(#65ef9d calc(var(--score)*1%),#153746 0);box-shadow:0 0 22px #55ef9b20}.health-ring strong{font-size:21px}.health-ring small{font-size:8px;color:#8fb0c3}.health-copy span{font:700 9px Arial;letter-spacing:1.5px;color:#33d7ff}.health-copy h2{font-size:17px;margin:4px 0;color:#7af0ad}.health-copy p{font-size:10px;color:#819bad;margin:0;line-height:1.7}
+.garage-alerts,.garage-info-card,.garage-maintenance-card{padding:14px}.garage-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.garage-section-head h2{font-size:15px;margin:2px 0}.garage-section-head button{border:0;background:transparent;color:#3bdcff;font-size:10px}.garage-alerts article{display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #123347}.garage-alerts article:last-child{border:0}.ga-icon{width:34px;height:34px;border:1px solid #1e6582;background:#0a2b3b;color:#46ddff;border-radius:11px;display:grid;place-content:center;font-size:17px}.garage-alerts b{display:block;font-size:12px}.garage-alerts small{font-size:9px;color:#6f8fa3}.garage-alerts em{font-style:normal;font-size:10px;color:#71f1a5}
+.garage-action-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.garage-action-grid button{min-height:82px;border-radius:18px;border:1px solid #15455f;background:linear-gradient(145deg,#0b2638,#071925);color:#eaf8ff;text-align:right;padding:11px}.garage-action-grid span{font-size:18px;display:block;margin-bottom:5px}.garage-action-grid b{font-size:11px;display:block}.garage-action-grid small{font-size:8px;color:#7295aa}.garage-action-grid button:active{border-color:#31dfff;box-shadow:0 0 16px #22d9ff33}
+.bahrain-plate{width:158px;height:58px;margin:2px auto 13px;border-radius:7px;border:3px solid #e8edf0;background:#fff;color:#111;display:flex;overflow:hidden;box-shadow:0 4px 12px #0006;font-family:Arial}.plate-side{width:42px;background:#b91e2d;color:#fff;display:grid;place-content:center;text-align:center}.plate-side span{font-size:7px}.plate-side b{font-size:11px}.plate-number{flex:1;text-align:center;display:grid;place-content:center}.plate-number small{font-size:8px}.plate-number strong{font-size:24px;letter-spacing:1px}.garage-info-card dl{margin:0}.garage-info-card dl div{display:flex;justify-content:space-between;padding:8px 2px;border-top:1px solid #123448;font-size:10px}.garage-info-card dt{color:#7292a6}.garage-info-card dd{margin:0;font-weight:700}.next-service{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:8px;padding:10px;border:1px solid #1c4a60;background:#091c29;border-radius:15px}.next-service span{font-size:20px}.next-service b{display:block;font-size:11px}.next-service small{font-size:9px;color:#7998aa}.next-service em{font-size:9px;color:#ffbd62;font-style:normal}.garage-mini-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.garage-mini-stats div{padding:10px;border-radius:13px;background:#081925;border:1px solid #12384d}.garage-mini-stats span{display:block;color:#6e91a6;font-size:8px}.garage-mini-stats b{font-size:11px}.garage-footer-note{text-align:center;color:#58788d;font-size:9px;margin:18px 0 0}
+@media(min-width:600px){.garage-view{margin-left:auto;margin-right:auto;max-width:560px}.garage-stage{height:350px}}
+
+/* ===== Garage V10.8 futuristic mobile configurator ===== */
+body.garage-mode{background:#020b13!important;overflow-x:hidden}
+body.garage-mode .topbar,body.garage-mode>.app-shell>.bottom-nav{display:none!important}
+body.garage-mode .main-content{padding:0!important;max-width:none!important}
+.garage-view{background:#020b13!important;color:#f7fbff!important;margin:0!important;min-height:100dvh!important;padding:0 0 96px!important;overflow:hidden!important;font-family:"Noto Naskh Arabic",Arial,sans-serif}
+.garage-shell{width:100%;max-width:430px;margin:0 auto;min-height:100dvh;background:linear-gradient(#03111c,#020a12);position:relative;padding:0 10px 92px}
+.garage-mobile-head{height:76px;padding:calc(8px + env(safe-area-inset-top)) 12px 7px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:20;background:linear-gradient(180deg,#061725 0,#03121d 78%,transparent)}
+.garage-back,.garage-bell{width:38px;height:38px;border-radius:50%;border:1px solid #17455f;background:#082032;color:#dff8ff;font-size:25px;display:grid;place-items:center;box-shadow:0 0 18px #0baee322}.garage-bell{font-size:20px;position:relative}.garage-bell i{position:absolute;width:8px;height:8px;border-radius:50%;background:#ff3547;top:4px;right:5px;box-shadow:0 0 9px #ff3547}.garage-brand{text-align:center;display:flex;flex-direction:column;line-height:1}.garage-brand b{font-size:26px}.garage-brand small{font-size:9px;color:#98adbb;margin-top:5px}
+.garage-hero{position:relative;height:620px;margin:0 -10px;background:radial-gradient(ellipse at 50% 28%,#0c3550 0,#061a2a 34%,#020a12 74%);overflow:hidden;border-bottom:1px solid #0c3c56;box-shadow:inset 0 -80px 70px #020911}.garage-hero:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#00c8ff16 1px,transparent 1px),linear-gradient(#00c8ff0d 1px,transparent 1px);background-size:44px 44px;transform:perspective(460px) rotateX(64deg) scale(1.7);transform-origin:50% 75%;opacity:.42}.garage-hero:after{content:"";position:absolute;left:50%;top:0;width:230px;height:185px;transform:translateX(-50%);background:linear-gradient(110deg,transparent 35%,#11cfff 36% 38%,transparent 39% 61%,#11cfff 62% 64%,transparent 65%);filter:drop-shadow(0 0 8px #00c8ff);opacity:.8}
+.garage-ceiling{position:absolute;top:18px;left:20%;right:20%;height:75px;border:1px solid #0d4361;background:#06182488;box-shadow:0 0 28px #00bff255,inset 0 0 25px #00bfff33;clip-path:polygon(11% 0,89% 0,100% 100%,0 100%)}.garage-ceiling span{position:absolute;bottom:12px;height:3px;background:#40e1ff;box-shadow:0 0 16px #2ee5ff}.garage-ceiling span:nth-child(1){left:14%;right:14%}.garage-ceiling span:nth-child(2){left:5%;width:3px;height:35px;bottom:-18px;transform:rotate(18deg)}.garage-ceiling span:nth-child(3){right:5%;width:3px;height:35px;bottom:-18px;transform:rotate(-18deg)}
+.garage-side-menu{position:absolute;z-index:8;left:9px;top:90px;width:116px;display:grid;gap:6px;direction:rtl}.garage-side-menu button{height:48px;border:0;background:transparent;color:#d6e8f2;border-radius:12px;display:grid;grid-template-columns:26px 1fr;align-items:center;gap:5px;padding:0 8px;text-align:right;font-size:11px}.garage-side-menu button span{font-size:20px;color:#dcebf3}.garage-side-menu button b{font-size:11px;white-space:nowrap}.garage-side-menu button.active{background:linear-gradient(90deg,#0b466b99,#0b7cad33);border:1px solid #21d6ff;box-shadow:0 0 16px #00bfff66,inset 0 0 12px #00bfff22}.garage-side-menu button.active span{color:#5ae7ff;text-shadow:0 0 10px #28e3ff}
+.garage-model{position:absolute;z-index:7;top:90px;left:132px;right:74px;text-align:center;display:flex;flex-direction:column;gap:1px;align-items:center}.garage-model b{font:900 31px/1 Arial;color:#e72b2b;letter-spacing:1px;text-shadow:0 0 1px #fff,0 0 8px #ff2c2c55}.garage-model span{font:700 17px/1.4 Arial;color:#d7f7ff}.garage-model small{font-size:9px;color:#6fe6ff;letter-spacing:.3px}
+.bahrain-plate.garage-plate{position:absolute;z-index:9;top:91px;right:9px;width:96px;height:54px;margin:0;border-radius:8px;border:2px solid #ced7df;box-shadow:0 0 0 2px #132b3b,0 5px 14px #0009;display:flex;direction:ltr;background:#fff;overflow:hidden}.garage-plate .plate-number{flex:1;display:grid;place-content:center;text-align:center;color:#10243e;line-height:1}.garage-plate .plate-number small{font:bold 9px Arial;color:#173054;margin-bottom:2px}.garage-plate .plate-number strong{font:bold 20px Arial;color:#173054;letter-spacing:.5px}.plate-flag{width:29px;background:#cf1835;position:relative}.plate-flag:before{content:"";position:absolute;left:0;top:0;bottom:0;width:11px;background:#fff;clip-path:polygon(0 0,100% 0,45% 10%,100% 20%,45% 30%,100% 40%,45% 50%,100% 60%,45% 70%,100% 80%,45% 90%,100% 100%,0 100%)}
+.garage-car-wrap{position:absolute!important;z-index:5!important;left:12px!important;right:12px!important;top:185px!important;height:305px!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:visible!important;border-radius:0!important}.garage-car-wrap:after{display:none!important}.garage-car-wrap img{width:104%!important;height:auto!important;max-height:300px!important;object-fit:contain!important;object-position:center!important;mix-blend-mode:normal!important;filter:none;transition:filter .28s ease,transform .28s ease;transform:translateX(7px) scale(1.02)!important;border-radius:0!important;filter:drop-shadow(0 18px 18px #000a)}
+.garage-platform{position:absolute!important;z-index:3!important;left:28px!important;right:28px!important;bottom:97px!important;height:112px!important;border-radius:50%!important;background:radial-gradient(ellipse,#0a1d2a 0,#06121b 55%,#02080c 75%)!important;border:3px solid #23d8ff!important;box-shadow:0 0 8px #77ecff,0 0 25px #00bfff,0 0 55px #007cffaa,inset 0 0 28px #1cd8ff88!important;transform:perspective(280px) rotateX(63deg)}.garage-platform span{position:absolute;inset:10px;border-radius:50%;border:2px solid #1187ff!important;box-shadow:0 0 14px #17cfff!important}
+.garage-color-row{position:absolute;z-index:10;left:18px;right:18px;bottom:48px;display:flex;align-items:center;justify-content:center;gap:7px;direction:ltr}.garage-colors{position:static!important;transform:none!important;display:flex!important;gap:8px!important;padding:4px 6px!important;background:transparent!important;border:0!important;border-radius:0!important}.garage-swatch{width:32px!important;height:32px!important;border-radius:50%!important;border:1px solid #ffffffaa!important;background:var(--sw)!important;padding:0!important;box-shadow:inset 0 2px 4px #fff6,0 2px 8px #0009!important}.garage-swatch.active{border:2px solid #67ebff!important;box-shadow:0 0 0 3px #073550,0 0 20px #00c8ff!important}.garage-arrow{width:35px;height:35px;border-radius:50%;border:1px solid #1b7098;background:#061a29;color:white;font-size:26px;line-height:1;box-shadow:0 0 12px #00bfff33}.garage-color-note{display:block!important;position:absolute!important;z-index:10!important;bottom:25px!important;left:0!important;right:0!important;text-align:center!important;color:#d8f7ff!important;font-size:11px!important}
+.garage-xenon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0 9px;direction:rtl}.garage-xenon{min-width:0;height:150px;border-radius:15px;border:1px solid #1ad4ff;background:linear-gradient(155deg,#08273a,#04141f 76%);box-shadow:0 0 8px #0bc6ff88,inset 0 0 18px #00c8ff12;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8px 3px}.garage-xenon:before,.garage-neon-panel:before{content:"";position:absolute;inset:3px;border-radius:12px;border:1px solid #0d6f9133;pointer-events:none}.garage-xenon .x-icon{font-size:26px;color:#5ce8ff;text-shadow:0 0 14px #00c8ff;margin-bottom:5px}.garage-xenon>b{font-size:11px}.garage-xenon>strong{font-size:21px;color:#69efff;line-height:1.1;margin-top:4px}.garage-xenon>small{font-size:9px;color:#22dfff}.garage-xenon>em{font-style:normal;font-size:7px;color:#a6b8c4;margin-top:4px}.garage-xenon.health-x{padding:7px 2px}.garage-xenon .health-ring{width:68px;height:68px;margin:0 0 5px;background:radial-gradient(circle,#061824 57%,transparent 59%),conic-gradient(#58f3a2 calc(var(--score)*1%),#123a48 0);box-shadow:0 0 18px #29f39933}.garage-xenon .health-ring strong{font-size:18px}.garage-xenon .ok{color:#46f19b;font-size:9px;margin-top:3px}
+.garage-maintenance-duo{display:grid;grid-template-columns:1.38fr .98fr;gap:7px;margin-top:8px;direction:ltr}.garage-neon-panel{position:relative;border:1px solid #1ad4ff;border-radius:17px;background:linear-gradient(160deg,#082335,#04131f 76%);box-shadow:0 0 8px #00bfff77,inset 0 0 20px #00c8ff10;color:#f4fbff;direction:rtl;overflow:hidden}.latest-maint-card{padding:12px 10px}.garage-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}.garage-section-head h2{font-size:14px;margin:0}.garage-section-head button{border:0;background:transparent;color:#18d8ff;font-size:9px}.maint-row{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:7px;padding:8px 0;border-bottom:1px solid #0c3348}.maint-row:last-child{border-bottom:0}.maint-thumb{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#0a1a26;color:#bfcbd3;font-size:22px;box-shadow:inset 0 0 7px #fff1}.maint-thumb svg{width:26px;height:26px;fill:none;stroke:#c9d2d8;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.maint-row>div:nth-child(2) b{display:block;font-size:10px}.maint-row>div:nth-child(2) small{font-size:8px;color:#8ca2b1}.maint-row>strong{font-size:11px;color:#65edff;white-space:nowrap}.maint-row>strong small{font-size:7px;color:#b7c9d4}.next-maint-card{padding:12px 9px;text-align:center;display:flex;flex-direction:column;align-items:center}.next-maint-card h2{font-size:14px;margin:0 0 9px;align-self:stretch;text-align:right}.engine-line-icon{width:68px;height:58px;color:#ffad37}.engine-line-icon svg{width:100%;height:100%;fill:none;stroke:#ffad37;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px #ff9c2f66)}.next-maint-card>strong{font-size:17px;color:#ffad37;margin-top:2px}.next-maint-card>small{font-size:9px;color:#d9e5ec}.next-maint-card>b{font-size:9px;margin-top:5px}.service-timeline{height:9px;width:100%;background:#0d4a70;border-radius:99px;margin:10px 0;overflow:hidden;box-shadow:inset 0 1px 3px #000}.service-timeline i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#00d981,#6ff3b5);box-shadow:0 0 10px #34efa2}.next-maint-card button{width:100%;height:38px;border-radius:10px;border:1px solid #53e6ff;background:linear-gradient(#08a9f0,#0770d8);color:#fff;font-size:11px;font-weight:800;box-shadow:0 0 14px #00bfff66}.next-maint-card button span{float:left;font-size:18px}
+.garage-bottom-nav{position:fixed;z-index:100;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,430px);height:78px;padding:7px 11px calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(5,1fr);align-items:center;background:#03121dea;border-top:1px solid #154865;backdrop-filter:blur(18px);box-shadow:0 -10px 25px #0008;direction:rtl}.garage-bottom-nav button{height:56px;border:0;background:transparent;color:#a9bbc7;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:13px}.garage-bottom-nav button span{font-size:21px}.garage-bottom-nav button b{font-size:9px}.garage-bottom-nav button.active{color:#19dfff;text-shadow:0 0 8px #00c8ff}.garage-bottom-nav .garage-add{width:56px;height:56px;border-radius:50%;border:2px solid #1ad8ff;background:#06273b;color:#2ce3ff;margin:auto;box-shadow:0 0 16px #00bfff55}.garage-bottom-nav .garage-add span{font-size:30px;font-weight:300}
+@media(max-width:360px){.garage-shell{padding-inline:7px}.garage-hero{margin-inline:-7px;height:600px}.garage-side-menu{width:106px;left:5px}.garage-side-menu button{height:45px;padding-inline:5px}.garage-model{left:114px;right:70px}.bahrain-plate.garage-plate{right:5px;width:88px}.garage-car-wrap{top:190px!important;height:282px!important}.garage-swatch{width:28px!important;height:28px!important}.garage-xenon{height:142px}.garage-xenon>b{font-size:10px}.garage-xenon>strong{font-size:19px}.garage-maintenance-duo{grid-template-columns:1.3fr .95fr}}
+
+/* ===== Garage V3 — rebuilt mobile-first, approved futuristic concept ===== */
+body.garage-mode{background:#020b13!important;overflow-x:hidden!important}
+body.garage-mode .topbar,body.garage-mode>.app-shell>.bottom-nav{display:none!important}
+body.garage-mode .main-content{padding:0!important;max-width:none!important}
+.garage-view{background:#020b13!important;color:#f8fcff!important;margin:0!important;padding:0 0 96px!important;min-height:100dvh!important;overflow-x:hidden!important;direction:rtl!important}
+.garage-shell-v3{width:100%;max-width:430px;margin:0 auto;min-height:100dvh;background:linear-gradient(180deg,#03111c 0,#041827 38%,#02101a 100%);position:relative;overflow:hidden;font-family:inherit}
+.garage-head-v3{height:92px;padding:22px 20px 10px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:30;background:linear-gradient(180deg,rgba(2,11,19,.98),rgba(2,14,24,.72),transparent)}
+.garage-brand-v3{display:flex;flex-direction:column;align-items:flex-start;line-height:1}.garage-brand-v3 b{font-size:31px;font-weight:900;color:white;letter-spacing:-1px}.garage-brand-v3 small{font-size:10px;color:#c8d5de;margin-top:5px}
+.garage-head-actions-v3{display:flex;align-items:center;gap:10px;direction:ltr}.garage-notify-v3,.garage-avatar-v3{border:0;color:#fff;background:#06263e;display:grid;place-items:center}.garage-avatar-v3{width:42px;height:42px;border-radius:50%;font:700 18px Arial;border:1px solid #0f527c}.garage-notify-v3{width:36px;height:36px;border-radius:50%;font-size:23px;position:relative;background:transparent}.garage-notify-v3 i{position:absolute;width:9px;height:9px;border-radius:50%;background:#ff3347;top:2px;right:2px;box-shadow:0 0 7px #ff3347}
+.garage-showroom-v3{height:592px;position:relative;overflow:hidden;background:radial-gradient(circle at 55% 52%,#0c3857 0,#061c2d 30%,#03111c 64%,#020a11 100%)}
+.garage-showroom-v3:before{content:"";position:absolute;left:-20%;right:-20%;bottom:-40px;height:290px;background-image:linear-gradient(rgba(20,190,255,.11) 1px,transparent 1px),linear-gradient(90deg,rgba(20,190,255,.10) 1px,transparent 1px);background-size:32px 32px;transform:perspective(260px) rotateX(62deg);transform-origin:center bottom;opacity:.55}
+.garage-light-v3{position:absolute;background:#1bd8ff;box-shadow:0 0 10px #53ebff,0 0 35px #00aeea;z-index:1}.light-one{height:4px;left:29%;right:28%;top:22px}.light-two{width:4px;height:108px;left:27%;top:25px;transform:skewX(-18deg)}.light-three{width:4px;height:108px;right:27%;top:25px;transform:skewX(18deg)}
+.garage-side-v3{position:absolute;z-index:12;top:66px;left:11px;width:119px;display:grid;gap:4px;direction:rtl}.garage-side-v3 button{height:47px;border:1px solid transparent;border-radius:12px;background:rgba(2,12,20,.18);color:#e3edf3;display:grid;grid-template-columns:28px 1fr;align-items:center;gap:5px;padding:0 9px;text-align:right;font-family:inherit}.garage-side-v3 button span{font-size:21px;color:#eaf4fa}.garage-side-v3 button b{font-size:11px;white-space:nowrap}.garage-side-v3 button.active{border-color:#28d9ff;background:linear-gradient(90deg,rgba(8,86,127,.78),rgba(7,67,99,.45));box-shadow:0 0 9px #22d8ff,0 0 22px #00b9ff66,inset 0 0 12px #1edaff22}.garage-side-v3 button.active span{color:#58e8ff;text-shadow:0 0 9px #3be4ff}
+.garage-model-v3{position:absolute;z-index:11;top:66px;left:134px;right:86px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1px}.garage-model-v3 b{font:900 32px/1 Arial;color:#e32931;letter-spacing:1px;text-shadow:0 0 1px #fff,0 0 9px #ff2b2b55}.garage-model-v3 span{font:700 17px/1.35 Arial;color:#f2f9fd}.garage-model-v3 small{font-size:9px;color:#54def8;margin-top:2px}
+.bahrain-plate-v3{position:absolute;z-index:14;top:65px;right:10px;width:100px;height:58px;border:2px solid #dfe6ec;border-radius:9px;background:#fff;padding:0;overflow:hidden;display:flex;direction:ltr;box-shadow:0 0 0 2px #102b3e,0 5px 15px #0009}.plate-copy-v3{flex:1;display:grid;place-content:center;text-align:center;line-height:1;color:#112c4c}.plate-copy-v3 small{font:bold 9px Arial;color:#18365d;margin-bottom:2px}.plate-copy-v3 strong{font:bold 21px Arial;color:#17345a;letter-spacing:.4px}.plate-flag-v3{width:31px;background:#cf1735;position:relative}.plate-flag-v3:before{content:"";position:absolute;left:0;inset-block:0;width:12px;background:#fff;clip-path:polygon(0 0,100% 0,44% 10%,100% 20%,44% 30%,100% 40%,44% 50%,100% 60%,44% 70%,100% 80%,44% 90%,100% 100%,0 100%)}
+.garage-car-stage-v3{position:absolute;z-index:8;left:0;right:0;top:170px;height:408px}.garage-car-stage-v3 img{position:absolute;z-index:5;left:50%;top:66px;transform:translateX(-50%);width:78%;max-width:335px;height:auto;object-fit:contain;filter:drop-shadow(0 18px 13px rgba(0,0,0,.78));user-select:none;-webkit-user-drag:none}.garage-platform-v3{position:absolute;z-index:2;left:7%;right:7%;bottom:32px;height:135px;border-radius:50%;background:radial-gradient(ellipse,#0b2638 0,#061724 52%,#02080e 74%);border:3px solid #2bdcff;box-shadow:0 0 8px #78efff,0 0 26px #00bfff,0 0 58px #006cff99,inset 0 0 30px #17d9ff66;transform:perspective(310px) rotateX(64deg)}.garage-platform-v3 i{position:absolute;inset:11px;border-radius:50%;border:2px solid #0d88ff;box-shadow:0 0 17px #10cfff,0 0 35px #087cff66}.garage-platform-v3:after{content:"";position:absolute;left:6%;right:6%;bottom:-24px;height:24px;border-radius:0 0 50% 50%;background:#04111b;box-shadow:0 8px 20px #000}
+.garage-status-v3{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:10px 10px 7px;background:#020b13;direction:rtl}.garage-status-card-v3{min-width:0;height:148px;border:1px solid #26dcff;border-radius:15px;background:linear-gradient(160deg,#08283c 0,#041521 74%);box-shadow:0 0 8px #00caff88,inset 0 0 20px #00c8ff10;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:7px 3px}.garage-status-card-v3:before,.garage-panel-v3:before{content:"";position:absolute;inset:3px;border:1px solid rgba(31,205,255,.24);border-radius:12px;pointer-events:none}.status-icon-v3{font-size:27px;color:#55e9ff;text-shadow:0 0 13px #00cfff;margin-bottom:5px}.garage-status-card-v3>b{font-size:11px}.garage-status-card-v3>strong{font-size:22px;color:#65eeff;line-height:1.05;margin-top:4px}.garage-status-card-v3>small{font-size:9px;color:#22dfff}.garage-status-card-v3>em{font-style:normal;font-size:7px;color:#b5c4cf;margin-top:4px}.health-ring-v3{width:68px;height:68px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#071924 56%,transparent 58%),conic-gradient(#4ff0a0 0 87%,#123849 87% 100%);box-shadow:0 0 17px #29f39938;margin-bottom:5px}.health-ring-v3 strong{font-size:18px;color:#fff}.health-v3>small{color:#42ef98;font-size:9px}
+.garage-maint-v3{display:grid;grid-template-columns:1.35fr .96fr;gap:7px;padding:0 10px 95px;background:#020b13;direction:ltr}.garage-panel-v3{position:relative;border:1px solid #25dafe;border-radius:17px;background:linear-gradient(160deg,#08273a,#04131e 76%);box-shadow:0 0 8px #00bfff77,inset 0 0 20px #00c8ff12;color:#f6fbff;direction:rtl;overflow:hidden}.latest-v3{padding:12px 10px}.latest-v3 header{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}.latest-v3 h2,.next-v3 h2{font-size:14px;margin:0}.latest-v3 header button{border:0;background:transparent;color:#18d8ff;font-family:inherit;font-size:9px}.service-row-v3{display:grid;grid-template-columns:34px 1fr auto;gap:7px;align-items:center;padding:8px 0;border-bottom:1px solid #0c354b}.service-row-v3:last-child{border-bottom:0}.part-icon-v3{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#071824;color:#cbd5db;font-size:23px;box-shadow:inset 0 0 7px #fff1}.part-icon-v3 svg{width:25px;height:25px;fill:none;stroke:#c9d2d8;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.service-row-v3>div:nth-child(2) b{display:block;font-size:10px}.service-row-v3>div:nth-child(2) small{font-size:8px;color:#8da6b6}.service-row-v3>strong{font-size:11px;color:#66edff;white-space:nowrap}.service-row-v3>strong small{font-size:7px;color:#bccad2}.next-v3{padding:12px 9px;text-align:center;display:flex;flex-direction:column;align-items:center}.next-v3 h2{align-self:stretch;text-align:right;margin-bottom:8px}.engine-v3{width:68px;height:58px}.engine-v3 svg{width:100%;height:100%;fill:none;stroke:#ffac35;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px #ff9d2f66)}.next-v3>strong{font-size:17px;color:#ffac35}.next-v3>small{font-size:9px;color:#d9e5ec}.next-v3>b{font-size:9px;margin-top:5px}.timeline-v3{width:100%;height:9px;border-radius:99px;background:#0d4c73;margin:10px 0;overflow:hidden}.timeline-v3 i{display:block;width:72%;height:100%;border-radius:99px;background:linear-gradient(90deg,#00d986,#6ff3b5);box-shadow:0 0 10px #35eea3}.next-v3>button{width:100%;height:38px;border-radius:10px;border:1px solid #52e6ff;background:linear-gradient(#08adf5,#0870d6);color:#fff;font-family:inherit;font-size:11px;font-weight:800;box-shadow:0 0 14px #00bfff66}.next-v3>button span{float:left;font-size:18px}
+.garage-bottom-v3{position:fixed;z-index:100;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,430px);height:82px;padding:7px 10px calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(5,1fr);align-items:center;background:rgba(3,18,29,.96);border-top:1px solid #154865;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 -10px 25px #0008;direction:rtl}.garage-bottom-v3 button{height:58px;border:0;background:transparent;color:#a9bbc7;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:13px;font-family:inherit}.garage-bottom-v3 button span{font-size:22px}.garage-bottom-v3 button b{font-size:9px}.garage-bottom-v3 button.active{color:#18ddff;text-shadow:0 0 9px #00c8ff}.garage-add-v3{width:58px!important;height:58px!important;border-radius:50%!important;border:2px solid #1ad8ff!important;background:#06273b!important;color:#2ce3ff!important;margin:auto!important;box-shadow:0 0 16px #00bfff55!important}.garage-add-v3 span{font-size:31px!important;font-weight:300}
+@media(max-width:375px){.garage-head-v3{height:86px;padding-inline:16px}.garage-showroom-v3{height:560px}.garage-side-v3{left:7px;top:62px;width:107px}.garage-side-v3 button{height:44px;padding-inline:6px}.garage-side-v3 button b{font-size:10px}.garage-model-v3{top:64px;left:118px;right:82px}.garage-model-v3 b{font-size:28px}.garage-model-v3 span{font-size:15px}.bahrain-plate-v3{top:63px;right:7px;width:91px;height:54px}.garage-car-stage-v3{top:165px;height:382px}.garage-car-stage-v3 img{width:76%;top:72px}.garage-platform-v3{left:6%;right:6%;bottom:24px;height:128px}.garage-status-card-v3{height:140px}.garage-status-card-v3>b{font-size:10px}.garage-status-card-v3>strong{font-size:20px}.garage-maint-v3{grid-template-columns:1.28fr .94fr}}
+
+/* v11.1 daily + Mafatih enhancements */
+.today-summary-list{display:grid;gap:10px}.today-summary-list .priority-card{cursor:pointer}.miftah-tree{display:grid;gap:8px;margin-top:12px}.miftah-node{border:1px solid var(--line,#26444b);border-radius:14px;background:color-mix(in srgb,var(--card,#0b2930) 92%,transparent);overflow:hidden}.miftah-node>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px;cursor:pointer;font-weight:800}.miftah-node-actions{display:flex;gap:6px}.miftah-node-actions button{border:1px solid #315d66;background:#103b43;color:#eaf7f3;border-radius:9px;padding:5px 7px;font-size:11px}.miftah-children{display:grid;gap:7px;padding:0 10px 10px 18px}.miftah-text{padding:12px;line-height:2;border-top:1px solid #274d55;color:#e8f4ef;white-space:normal}.domain-form textarea{min-height:140px;resize:vertical}.priority-card.family,.priority-card.relationships,.priority-card.finance{min-height:92px}
+
+/* Finance reserved breakdown */
+.reserve-grid>.reserve-detail-card{padding:10px;border-radius:13px;background:var(--surface-2);border:1px solid var(--line);display:grid;gap:4px;text-align:right;color:inherit;font:inherit;cursor:pointer;width:100%;}
+.reserve-grid>.reserve-detail-card span{color:var(--muted);font-size:7.5px}.reserve-grid>.reserve-detail-card b{font-size:10px}.reserve-grid>.reserve-detail-card small{font-size:7px;color:#16836b;font-weight:800;margin-top:2px}
+.reserve-detail-card:active{transform:scale(.99)}
+.reserved-breakdown-sheet{max-height:82vh;overflow:auto}
+.reserved-breakdown-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:4px 0 14px}.reserved-breakdown-summary>div{padding:10px;border-radius:13px;background:var(--surface-2);border:1px solid var(--line);display:grid;gap:4px}.reserved-breakdown-summary span{font-size:8px;color:var(--muted)}.reserved-breakdown-summary b{font-size:11px}
+.reserved-breakdown-list{display:grid;gap:12px;padding-bottom:12px}.reserved-breakdown-group{display:grid;gap:7px}.reserved-breakdown-group>h3{font-size:10px;margin:0;color:var(--muted);display:flex;justify-content:space-between;align-items:center}.reserved-breakdown-group>h3 b{color:var(--text);font-size:10px}.reserved-breakdown-list .finance-row{grid-template-columns:1fr auto}.reserved-breakdown-list .row-actions button[data-fin-edit-reserved]{color:#16836b;background:rgba(22,131,107,.08)}
+@media(max-width:380px){.reserved-breakdown-summary{grid-template-columns:1fr 1fr}}
+
+/* v11.3.5 — book reading tracker */
+.enhanced-book-row{cursor:pointer;align-items:flex-start}.book-row-title{display:flex;align-items:center;gap:7px;justify-content:space-between}.book-row-title>b{flex:1}.book-today-badge{font-size:7px;padding:4px 7px;border-radius:999px;background:rgba(251,191,36,.08);color:#fbbf24;border:1px solid rgba(251,191,36,.16);white-space:nowrap}.book-today-badge.done{background:rgba(34,197,94,.09);color:#86efac;border-color:rgba(34,197,94,.18)}.book-quick-read{white-space:nowrap}.book-detail-summary{padding:14px;border:1px solid var(--line);background:var(--surface-2);border-radius:16px}.book-detail-progress{display:flex;align-items:center;justify-content:space-between;gap:12px}.book-detail-progress b{font-size:14px}.book-detail-progress strong{font-size:18px;color:#7dd3fc}.book-detail-summary>small{display:block;margin-top:9px;color:var(--muted)}.book-detail-bar{height:8px;margin-top:10px}.book-detail-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}.book-log-head{display:flex;align-items:center;justify-content:space-between;margin:14px 2px 8px}.book-log-head small{color:var(--muted)}.book-log-list{display:grid;gap:8px}.book-log-item{display:flex;align-items:flex-start;gap:8px;padding:11px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line)}.book-log-item>div:first-child{flex:1;min-width:0}.book-log-item b{display:block;font-size:10px}.book-log-item small{display:block;margin-top:3px;color:var(--muted);font-size:8px;line-height:1.55}.book-log-actions{display:flex;gap:5px}.book-log-actions button{border:0;border-radius:8px;padding:5px 7px;font-size:7px;background:rgba(255,255,255,.05);color:var(--muted)}.empty-inline{padding:14px;text-align:center;color:var(--muted);font-size:9px;border:1px dashed var(--line);border-radius:14px}
+
+
+/* ===== v11.3.6: grouped backup settings + salary review + religion tracker/tasbeeh ===== */
+.settings-card{border:1px solid var(--line);border-radius:22px;background:var(--surface);overflow:hidden;box-shadow:var(--shadow);margin:4px 0 12px}.settings-card-head{display:flex;gap:12px;align-items:center;padding:16px 16px 10px;border-bottom:1px solid var(--line)}.settings-card-head>span{font-size:22px}.settings-card-head div{display:grid;gap:2px}.settings-card-head small{color:var(--muted)}.settings-card .setting-row{border-radius:0;border:0;border-bottom:1px solid var(--line);box-shadow:none;margin:0}.settings-card .setting-row:last-child{border-bottom:0}
+.card-head-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.salary-drop-btn{border-color:color-mix(in srgb,var(--green) 40%,var(--line))!important;background:color-mix(in srgb,var(--green) 10%,var(--surface))!important}.salary-drop-summary{display:grid;gap:4px;padding:16px;border:1px solid var(--line);border-radius:18px;background:var(--surface-2);margin-bottom:12px}.salary-drop-summary span,.salary-drop-summary small{color:var(--muted)}.salary-drop-summary b{font-size:26px}.salary-drop-group{border:1px solid var(--line);border-radius:18px;padding:12px;margin:10px 0;background:var(--surface)}.salary-drop-group h3{display:flex;justify-content:space-between;gap:10px;margin:0 0 8px;font-size:15px}.salary-drop-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line)}.salary-drop-row span{display:grid;gap:2px}.salary-drop-row small{color:var(--muted);font-size:11px}.salary-drop-row strong{white-space:nowrap}
+.tasbeeh-card{border:1px solid color-mix(in srgb,var(--gold) 36%,var(--line));border-radius:28px;padding:18px;background:linear-gradient(180deg,color-mix(in srgb,var(--gold) 7%,var(--surface)),var(--surface));box-shadow:var(--shadow);text-align:center}.tasbeeh-title-row{display:flex;align-items:center;justify-content:space-between;text-align:right}.tasbeeh-title-row h2{margin:3px 0 0}.tasbeeh-title-row>span{font-size:30px}.tasbeeh-mode-switch{display:grid;grid-template-columns:1fr 1fr;border:1px solid color-mix(in srgb,var(--gold) 55%,var(--line));border-radius:999px;overflow:hidden;margin:20px 0 16px}.tasbeeh-mode-switch button{border:0;padding:12px 8px;color:var(--text);background:transparent}.tasbeeh-mode-switch button.active{background:linear-gradient(135deg,#c58a2f,#e1ad52);color:#fff}.tasbeeh-phrase{min-height:118px;border:1px solid color-mix(in srgb,var(--gold) 58%,var(--line));border-radius:22px;display:grid;place-items:center;padding:18px;font-size:31px;font-weight:800;background:color-mix(in srgb,var(--surface-2) 92%,transparent)}.tasbeeh-zahra-targets{display:flex;justify-content:center;gap:12px;margin:16px 0}.tasbeeh-zahra-targets span{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line);color:var(--muted);font-weight:800}.tasbeeh-zahra-targets span.active{border-color:#c58a2f;color:#c58a2f;background:color-mix(in srgb,#c58a2f 8%,var(--surface))}.tasbeeh-counter{--tasbeeh-progress:0%;width:min(270px,74vw);aspect-ratio:1;border-radius:50%;margin:26px auto 18px;border:10px solid transparent;background:linear-gradient(var(--surface),var(--surface)) padding-box,conic-gradient(#c58a2f var(--tasbeeh-progress),color-mix(in srgb,var(--surface-3) 70%,transparent) 0) border-box;color:var(--text);display:grid;place-content:center;gap:3px;box-shadow:0 12px 34px rgba(0,0,0,.18),inset 0 0 0 1px color-mix(in srgb,var(--gold) 35%,var(--line));touch-action:manipulation}.tasbeeh-counter:active{transform:scale(.985)}.tasbeeh-counter strong{font-size:72px;line-height:1;font-weight:500}.tasbeeh-counter small{font-size:18px;color:var(--muted)}.tasbeeh-counter em{font-style:normal;color:#c58a2f;margin-top:7px}.tasbeeh-reset{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:999px;padding:11px 26px}.tasbeeh-zahra-targets[hidden]{display:none}
+@media(max-width:390px){.card-head-actions{gap:4px}.card-head-actions .text-btn{font-size:11px;padding-inline:6px}.tasbeeh-counter{width:min(240px,72vw)}.tasbeeh-counter strong{font-size:62px}}
+
+/* ===== v11.3.7 religion experience ===== */
+.hadith-action-btn.film{background:transparent}.hadith-action-btn.film span{color:#f0c66f;border-color:rgba(240,198,111,.22)}.hadith-action-btn.film small{color:#f0c66f}.film-line-icon svg{width:19px;height:19px;display:block}
+.religion-subpage-active>.back-btn,.religion-subpage-active>.domain-head,.religion-subpage-active>.domain-stats,.religion-subpage-active>.religion-feature,.religion-subpage-active>.religion-quick,.religion-subpage-active>.domain-tabs{display:none!important}.religion-subpage-active .religion-standalone-panel.active{display:block!important;margin-top:0}.religion-subpage-head{min-height:150px;margin:-2px -2px 16px;padding:18px;border-radius:26px;background:radial-gradient(circle at 85% 10%,rgba(213,179,92,.18),transparent 35%),linear-gradient(145deg,#123f39,#082d31);border:1px solid rgba(213,179,92,.34);position:relative;overflow:hidden}.religion-subpage-head:after{content:'۞';position:absolute;left:18px;bottom:-28px;font-size:118px;color:rgba(220,190,112,.08)}.religion-subpage-head .back-btn{margin:0 0 18px}.religion-subpage-head h1{margin:5px 0 0;font-size:28px}.religion-subpage-head span{color:#d9bc70;font-size:13px}.miftah-library-card,.islamic-tasbeeh{background:radial-gradient(circle at 90% 0,rgba(203,169,82,.09),transparent 34%),linear-gradient(180deg,color-mix(in srgb,#0f423a 12%,var(--surface)),var(--surface));border-color:color-mix(in srgb,#c9a557 38%,var(--line))}.miftah-tree{gap:12px}.miftah-node{border-color:color-mix(in srgb,#c9a557 30%,var(--line));border-radius:20px;background:linear-gradient(145deg,color-mix(in srgb,#0f4b40 9%,var(--surface-2)),var(--surface-2));box-shadow:0 7px 18px rgba(0,0,0,.08)}.miftah-node>summary{padding:15px 14px}.miftah-node>summary>span:first-child{font-size:16px}.miftah-children{padding:0 12px 12px 24px;border-right:2px solid color-mix(in srgb,#c9a557 28%,transparent);margin-right:14px}.miftah-text{font-size:16px;line-height:2.15;padding:17px;border-top-color:color-mix(in srgb,#c9a557 24%,var(--line))}.islamic-tasbeeh{position:relative;overflow:hidden}.islamic-tasbeeh:before{content:'۞';position:absolute;right:-22px;top:80px;font-size:150px;color:rgba(201,165,87,.045);pointer-events:none}.islamic-tasbeeh .tasbeeh-phrase{background:linear-gradient(180deg,color-mix(in srgb,#f5e6b8 7%,var(--surface-2)),var(--surface-2));border-color:color-mix(in srgb,#c9a557 55%,var(--line))}
+
+/* v11.3.8 — تعليم ولدي */
+.family-education-help{margin:.3rem 0 0;color:var(--muted);font-size:.9rem}
+.family-education-list{display:grid;gap:14px;margin-top:14px}
+.education-card{border:1px solid color-mix(in srgb,var(--line) 82%,transparent);border-radius:20px;padding:16px;background:color-mix(in srgb,var(--surface) 92%,transparent);box-shadow:0 10px 28px rgba(0,0,0,.07)}
+.education-card-head{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.education-card-head h3{margin:0 0 4px;font-size:1.05rem}.education-card-head p{margin:0;color:var(--muted);font-size:.88rem}
+.education-days{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}.education-day{min-width:34px;height:34px;padding:0 8px;border-radius:12px;border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:.83rem;background:var(--surface)}
+.education-day.present{background:rgba(54,160,100,.14);border-color:rgba(54,160,100,.42);color:#23804b}.education-day.absent{background:rgba(210,72,72,.12);border-color:rgba(210,72,72,.38);color:#b33636}.education-day.pending-today{outline:2px solid var(--blue);outline-offset:2px}
+.education-card-actions{display:flex;flex-wrap:wrap;gap:8px}.education-card-actions button{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:12px;padding:9px 12px;font-weight:700}.education-card-actions .education-pdf{background:var(--blue);color:#fff;border-color:transparent}
+.education-attendance-actions{display:flex;gap:8px;margin-top:10px}.education-attendance-actions button{flex:1;border:0;border-radius:12px;padding:10px;font-weight:800}.education-attendance-actions .present{background:#2f8f5b;color:#fff}.education-attendance-actions .absent{background:#b74b4b;color:#fff}
+.education-day-picker{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:8px}.education-day-picker label{position:relative}.education-day-picker input{position:absolute;opacity:0;pointer-events:none}.education-day-picker span{height:38px;border:1px solid var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--surface);font-weight:700;cursor:pointer}.education-day-picker input:checked+span{background:var(--blue);border-color:var(--blue);color:#fff}.education-picker-note{font-size:.82rem;color:var(--muted);margin-top:6px}
+.today-education-reminder{display:grid;gap:8px;margin-top:8px}.today-education-reminder strong{display:block}.today-education-actions{display:flex;gap:7px}.today-education-actions button{border:0;border-radius:10px;padding:7px 10px;font-size:.8rem;font-weight:800}.today-education-actions .present{background:#2f8f5b;color:#fff}.today-education-actions .absent{background:#b74b4b;color:#fff}
+
+/* v11.4.0 — nail clipping weekday guide */
+.nail-day-btn{color:#ef4444;transition:.2s ease}.nail-day-btn.good{color:#22a06b;background:rgba(34,160,107,.12);border-color:rgba(34,160,107,.28)}.nail-day-btn.bad{color:#e05252;background:rgba(224,82,82,.10);border-color:rgba(224,82,82,.24)}.nail-day-btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nail-modal-backdrop{position:fixed;inset:0;z-index:2500;background:rgba(5,12,18,.52);backdrop-filter:blur(8px);display:grid;align-items:end;justify-items:center;padding:16px}.nail-modal-backdrop[hidden]{display:none}.nail-modal{width:min(560px,100%);max-height:min(82vh,760px);overflow:auto;position:relative;border-radius:28px 28px 22px 22px;padding:22px;background:color-mix(in srgb,var(--surface) 94%,transparent);border:1px solid var(--line);box-shadow:0 25px 70px rgba(0,0,0,.28);animation:nailUp .24s ease both}.nail-modal-close{position:absolute;left:16px;top:14px;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface-2);color:var(--text);font-size:24px;z-index:2}.nail-modal-head{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:4px 0 16px}.nail-modal-head h2{margin:3px 0 0;font-size:25px}.nail-modal-head small{color:var(--muted)}.nail-modal-icon{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;background:rgba(34,160,107,.1);color:#22a06b}.nail-modal-icon svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.nail-badge{align-self:start;margin-top:4px;padding:7px 10px;border-radius:999px;font-size:11px;font-weight:900;white-space:nowrap}.nail-modal.good .nail-badge{background:rgba(34,160,107,.13);color:#168357}.nail-modal.bad .nail-badge{background:rgba(224,82,82,.12);color:#c23c3c}.nail-modal.bad .nail-modal-icon{background:rgba(224,82,82,.10);color:#d64545}.nail-week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:0 0 12px}.nail-week span{padding:7px 2px;border:1px solid var(--line);border-radius:10px;text-align:center;font-size:9px;color:var(--muted);background:var(--surface-2)}.nail-week span.good{color:#168357;background:rgba(34,160,107,.07)}.nail-week span.bad{color:#c23c3c;background:rgba(224,82,82,.06)}.nail-week span.today{outline:2px solid currentColor;outline-offset:1px;font-weight:900}.nail-info-card{padding:15px 16px;border:1px solid var(--line);border-radius:18px;background:var(--surface-2);margin-top:10px}.nail-info-card small{color:var(--muted);font-weight:800}.nail-info-card p{margin:8px 0 0;line-height:1.9;font-size:14px;white-space:pre-line}.nail-text-card p{font-size:13px}.nail-done-btn{width:100%;margin-top:14px}.nail-last{display:block;text-align:center;color:var(--muted);margin-top:9px}.nail-modal.good .nail-done-btn{background:#217a56}.nail-modal.bad .nail-done-btn{background:var(--surface-3);color:var(--text);border:1px solid var(--line)}@keyframes nailUp{from{opacity:0;transform:translateY(25px) scale(.98)}to{opacity:1;transform:none}}@media(min-width:700px){.nail-modal-backdrop{align-items:center}.nail-modal{border-radius:28px}}
+
+/* ===== Family / Supermarket ===== */
+.supermarket-shell{overflow:hidden}.supermarket-head p{margin:.25rem 0 0;color:var(--muted)}
+.supermarket-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;background:color-mix(in srgb,var(--surface) 75%,var(--bg));border:1px solid var(--border);border-radius:18px;margin:18px 0 14px}
+.supermarket-tabs button{border:0;background:transparent;color:var(--muted);border-radius:14px;padding:11px 14px;font:inherit;font-weight:800;cursor:pointer}.supermarket-tabs button.active{background:var(--accent);color:#fff;box-shadow:0 8px 18px rgba(31,89,74,.18)}
+.supermarket-tabs span{display:inline-grid;place-items:center;min-width:22px;height:22px;margin-inline-start:5px;border-radius:999px;background:rgba(255,255,255,.18);font-size:.78rem}.supermarket-panel{display:none}.supermarket-panel.active{display:block}
+.supermarket-tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(125px,.34fr);gap:10px;margin-bottom:12px}.supermarket-search{display:flex;align-items:center;gap:8px;padding:0 12px;border:1px solid var(--border);background:var(--surface);border-radius:14px}.supermarket-search input,.supermarket-tools select{width:100%;border:0!important;background:transparent!important;box-shadow:none!important;min-height:44px}.supermarket-tools select{border:1px solid var(--border)!important;border-radius:14px!important;padding-inline:10px!important;background:var(--surface)!important}
+.supermarket-price-list,.supermarket-request-list{display:grid;gap:9px}.supermarket-item,.supermarket-request{display:grid;grid-template-columns:58px minmax(0,1fr) auto;align-items:center;gap:11px;padding:10px;border:1px solid var(--border);background:color-mix(in srgb,var(--surface) 92%,transparent);border-radius:18px;box-shadow:0 7px 24px rgba(30,35,33,.055)}
+.supermarket-thumb{width:58px;height:58px;border-radius:15px;display:grid;place-items:center;overflow:hidden;background:linear-gradient(145deg,color-mix(in srgb,var(--accent) 12%,var(--surface)),var(--surface));font-size:28px}.supermarket-thumb img{width:100%;height:100%;object-fit:cover}.supermarket-info{min-width:0}.supermarket-info b{display:block;font-size:.98rem}.supermarket-info small{display:block;color:var(--muted);margin-top:3px;white-space:normal}.supermarket-price-side{text-align:left;min-width:95px}.supermarket-price-side strong{display:block;font-size:1.05rem}.supermarket-price-side small{color:var(--muted)}
+.supermarket-stale{display:inline-flex!important;align-items:center;gap:4px;color:#a76b14!important;background:#fff2cf;border-radius:999px;padding:3px 7px;margin-top:5px!important;font-size:.72rem!important}.supermarket-inline{display:flex;gap:5px;justify-content:flex-start;margin-top:6px}.supermarket-inline input{width:78px!important;min-height:33px!important;padding:5px 7px!important;text-align:center}.supermarket-inline button,.supermarket-mini{border:0;border-radius:10px;padding:7px 9px;background:color-mix(in srgb,var(--accent) 12%,var(--surface));color:var(--text);font:inherit;font-size:.78rem;font-weight:800;cursor:pointer}.supermarket-inline .save{background:var(--accent);color:#fff}.supermarket-primary{width:100%;margin-top:13px;border:0;border-radius:16px;padding:13px 16px;background:var(--accent);color:#fff;font:inherit;font-weight:900;cursor:pointer}.supermarket-empty{padding:24px 12px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:16px}
+.supermarket-total-card{display:flex;align-items:center;justify-content:space-between;gap:14px;border-radius:18px;padding:14px 16px;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,var(--surface)),var(--surface));border:1px solid color-mix(in srgb,var(--accent) 25%,var(--border));margin-bottom:12px}.supermarket-total-card span{color:var(--muted);font-weight:700}.supermarket-total-card b{font-size:1.18rem}.supermarket-request-filters{display:flex;gap:7px;overflow:auto;margin-bottom:11px}.supermarket-request-filters button{white-space:nowrap;border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:999px;padding:7px 11px;font:inherit;font-size:.82rem;font-weight:800}.supermarket-request-filters button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.supermarket-request{grid-template-columns:50px minmax(0,1fr) auto}.supermarket-request .supermarket-thumb{width:50px;height:50px;border-radius:13px;font-size:24px}.supermarket-request-actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-start;margin-top:6px}.supermarket-request-actions button{border:0;border-radius:9px;padding:6px 8px;font:inherit;font-size:.76rem;font-weight:800;background:color-mix(in srgb,var(--accent) 12%,var(--surface));color:var(--text)}.supermarket-request-actions .bought{background:#dff4e7;color:#17643c}.supermarket-request-actions .delete{background:#fde6e3;color:#a63e34}.supermarket-status{font-size:.72rem;font-weight:900;border-radius:999px;padding:4px 7px;background:#fff3d9;color:#936213}.supermarket-status.done{background:#dff4e7;color:#17643c}
+.supermarket-image-field input[type=file]{padding:10px;background:var(--surface);border:1px dashed var(--border);border-radius:13px;width:100%}.supermarket-purchase-summary{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:color-mix(in srgb,var(--accent) 8%,var(--surface));margin-bottom:12px}.supermarket-purchase-summary .supermarket-thumb{flex:0 0 auto}
+@media(max-width:560px){.supermarket-tools{grid-template-columns:1fr}.supermarket-item{grid-template-columns:52px minmax(0,1fr);}.supermarket-item .supermarket-thumb{width:52px;height:52px}.supermarket-price-side{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;text-align:right;padding-top:8px;border-top:1px solid var(--border)}.supermarket-inline{margin-top:0}.supermarket-total-card{align-items:flex-start;flex-direction:column}.supermarket-request{grid-template-columns:46px minmax(0,1fr)}.supermarket-request>.supermarket-price-side{grid-column:1/-1}}
+/* Supermarket v11.4.2 — standalone, categorized shopping hub */
+.supermarket-view-nav{display:flex;gap:8px;justify-content:space-between;margin-bottom:10px}.supermarket-view-nav .back-btn{margin:0}.supermarket-page-head{margin-bottom:14px}.supermarket-category-manage{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:14px;padding:10px 14px;font:inherit;font-weight:800;cursor:pointer}.supermarket-category-chips{display:flex;gap:7px;overflow:auto;padding:2px 0 12px;scrollbar-width:none}.supermarket-category-chips::-webkit-scrollbar{display:none}.supermarket-category-chips button{white-space:nowrap;border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:999px;padding:8px 11px;font:inherit;font-size:.78rem;font-weight:800}.supermarket-category-chips button.active{background:var(--accent);border-color:var(--accent);color:#fff}.supermarket-name-line{display:flex;align-items:center;gap:7px}.supermarket-star{border:0;background:transparent;color:#b28a37;font-size:1.2rem;padding:0;cursor:pointer}.supermarket-star.active{color:#d49a20}.supermarket-trend{color:var(--accent)!important;font-weight:700}.supermarket-request-category{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;margin-top:5px;border-radius:13px;background:color-mix(in srgb,var(--accent) 8%,var(--surface));border:1px solid color-mix(in srgb,var(--accent) 15%,var(--border))}.supermarket-request-category span{color:var(--muted);font-size:.78rem}.supermarket-category-manager{display:grid;gap:7px;margin-bottom:14px}.supermarket-category-manager>div{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:13px;background:var(--surface)}.supermarket-category-manager button{border:0;border-radius:9px;padding:6px 9px;background:#fde6e3;color:#a63e34;font:inherit;font-size:.76rem;font-weight:800}.supermarket-category-manager small{color:var(--muted)}
+@media(max-width:560px){.supermarket-view-nav{position:sticky;top:6px;z-index:8}.supermarket-page-head .local-badge{display:none}.supermarket-tools{grid-template-columns:1fr auto}.supermarket-category-manage{padding-inline:10px;font-size:.8rem}}
+/* v11.4.3 — obligation paid checkbox in reserved breakdown */
+.obligation-reserved-row{grid-template-columns:28px minmax(0,1fr) auto!important;align-items:center}
+.obligation-reserved-row .row-actions{grid-column:2/-1}
+.obligation-paid-check{width:24px;height:24px;border-radius:7px;border:1.5px solid var(--line);background:var(--surface);display:grid;place-items:center;font-size:15px;font-weight:900;color:#fff;padding:0;cursor:pointer}
+.obligation-paid-check.is-paid{background:#16836b;border-color:#16836b}
+.obligation-reserved-row.paid .row-title{text-decoration:line-through;opacity:.65}.obligation-reserved-row.paid .row-meta{color:#16836b}
+.supermarket-variable-flow{margin:2px 0 12px}.supermarket-variable-card{padding:14px;border:1px solid color-mix(in srgb,var(--accent) 24%,var(--border));border-radius:16px;background:color-mix(in srgb,var(--accent) 7%,var(--surface))}.supermarket-variable-card>p{margin:5px 0 10px;color:var(--muted)}.supermarket-variable-choice{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.supermarket-variable-choice label{display:flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid var(--border);border-radius:12px;background:var(--surface);font-size:.84rem}.supermarket-variable-result{margin-top:9px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--accent) 11%,var(--surface));font-weight:800;color:var(--text)}
+
+/* Keep the return control visible at the top centre of the reading screen. */
+.mushaf-top-controls{opacity:1;pointer-events:auto;transform:none;grid-template-columns:1fr auto 1fr;direction:ltr}
+.mushaf-top-meta{grid-column:1;grid-row:1;max-width:115px;justify-self:start;direction:rtl}
+#mushafExitBtn{grid-column:2;grid-row:1;width:auto;min-width:72px;padding:0 12px;border-radius:14px;font-size:14px;font-weight:800}
+#mushafThemeBtn{grid-column:3;grid-row:1;justify-self:end}
+/* The return button floats over the paper without shifting the Quran page. */
+.quran-reading-pane.mushaf-reader .mushaf-top-controls{position:fixed;top:calc(18px + env(safe-area-inset-top));z-index:3000}
+.quran-reading-pane.mushaf-reader #mushafExitBtn{position:relative;z-index:3001;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.education-day:not(:disabled){cursor:pointer}.education-day.selected{outline:2px solid var(--blue);outline-offset:2px}.education-day:disabled{opacity:.45;cursor:not-allowed}.education-attendance-actions{flex-wrap:wrap}.education-attendance-actions span{flex-basis:100%;font-weight:700;font-size:.83rem}
+.finance-period-picker{margin:14px 0}.finance-period-picker select{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--text)}
+.finance-review-tabs{display:flex;gap:7px;overflow-x:auto;padding:8px 0 12px}.finance-review-tabs button{flex:none;padding:9px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--text);font-weight:700}.finance-review-tabs button.active{background:var(--blue);color:#fff;border-color:var(--blue)}.finance-review-list{display:grid;gap:8px}.finance-review-list .finance-row{gap:8px}.finance-review-list .row-amount{white-space:nowrap}
+.allocation-row{grid-template-columns:minmax(0,1fr) 100px 145px}
+@media(max-width:720px){.allocation-row{grid-template-columns:minmax(0,1fr) 95px}.allocation-row input[type=date]{grid-column:1/-1}}
+.allocation-box[hidden]{display:none!important}
+.finance-subpage .finance-overview-only,.finance-subpage .finance-tabs{display:none!important}
+#view-finance:not(.finance-subpage) .finance-period-picker{display:none}
+.finance-subpage-head[hidden]{display:none!important}
+.finance-subpage-head{display:flex;align-items:center;gap:12px;padding:8px 0 16px}
+.finance-subpage-head button{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--text);padding:10px 12px;font-weight:800;white-space:nowrap}
+.finance-subpage-head h2{margin:0;font-size:20px}
+.salary-summary-card .period-head{align-items:center}.salary-summary-card>.period-head>div{display:grid;gap:5px}.salary-summary-card>small{display:block;margin-top:12px;color:var(--muted)}
