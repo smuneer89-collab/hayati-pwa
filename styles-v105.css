@@ -838,4 +838,11 @@ body.garage-mode .main-content{padding:0!important;max-width:none!important}
 .mushaf-top-meta{grid-column:1;grid-row:1;max-width:115px;justify-self:start;direction:rtl}
 #mushafExitBtn{grid-column:2;grid-row:1;width:auto;min-width:72px;padding:0 12px;border-radius:14px;font-size:14px;font-weight:800}
 #mushafThemeBtn{grid-column:3;grid-row:1;justify-self:end}
+/* The return button floats over the paper without shifting the Quran page. */
+.quran-reading-pane.mushaf-reader .mushaf-top-controls{position:fixed;top:calc(18px + env(safe-area-inset-top));z-index:3000}
+.quran-reading-pane.mushaf-reader #mushafExitBtn{position:relative;z-index:3001;box-shadow:0 8px 24px rgba(0,0,0,.35)}
 .education-day:not(:disabled){cursor:pointer}.education-day.selected{outline:2px solid var(--blue);outline-offset:2px}.education-day:disabled{opacity:.45;cursor:not-allowed}.education-attendance-actions{flex-wrap:wrap}.education-attendance-actions span{flex-basis:100%;font-weight:700;font-size:.83rem}
+.finance-period-picker{margin:14px 0}.finance-period-picker select{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--text)}
+.finance-review-tabs{display:flex;gap:7px;overflow-x:auto;padding:8px 0 12px}.finance-review-tabs button{flex:none;padding:9px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--text);font-weight:700}.finance-review-tabs button.active{background:var(--blue);color:#fff;border-color:var(--blue)}.finance-review-list{display:grid;gap:8px}.finance-review-list .finance-row{gap:8px}.finance-review-list .row-amount{white-space:nowrap}
+.allocation-row{grid-template-columns:minmax(0,1fr) 100px 145px}
+@media(max-width:720px){.allocation-row{grid-template-columns:minmax(0,1fr) 95px}.allocation-row input[type=date]{grid-column:1/-1}}
