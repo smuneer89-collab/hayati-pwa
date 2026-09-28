@@ -134,7 +134,7 @@ function normalizeFinanceData(raw) {
     })):[],
     transactions:Array.isArray(f.transactions)?f.transactions:[],
     obligations:Array.isArray(f.obligations)?f.obligations.map(x=>({...x,id:x.id||makeId(),amount:Number(x.amount||0),paid:!!x.paid,paidAt:x.paidAt||''})):[],
-    goals:Array.isArray(f.goals)?f.goals:[],
+    goals:Array.isArray(f.goals)?f.goals.map(x=>({...x,splitMode:x.splitMode||'auto'})):[],
     monthlySavings:(f.monthlySavings&&typeof f.monthlySavings==='object')?f.monthlySavings:{},
     savings:Array.isArray(f.savings)?f.savings.map(x=>({...x,id:x.id||makeId(),amount:Number(x.amount||0),date:x.date||todayKey(),note:x.note||'ادخار عام'})):[]
   };
@@ -422,7 +422,7 @@ function financeScheduledItems(period,ref=todayKey()){
       ||kind==='obligation'&&item.paid&&(!item.recurring||item.dueDate?.slice(0,7)===month);
     items.push({kind,itemId:item.id,key,title:item.title||item.note||'بند مالي',amount,dueDate,startsOn:starts,meta,paid:!!record||!!legacyPaid,paidAt:record?.at||item.paidAt||'',salaryId:salary.id,active:!starts||starts<=ref});
   };
-  finance.fixedExpenses.forEach(x=>{const allocation=financeAllocationDetail(x,salary),amount=financeAllocationFor(x,salary);const due=financeMonthDue(month,Number(allocation?.dueDate?.slice(8))||x.dueDay||Number(x.dueDate?.slice(8))||1);add('fixed',x,amount,due,`fixed:${x.id}:${salary.id}`,'مصروف ثابت');});
+  finance.fixedExpenses.forEach(x=>{const split=(x.allocations||[]).length>0,allocation=financeAllocationDetail(x,salary),dueDay=Number(allocation?.dueDate?.slice(8))||x.dueDay||Number(x.dueDate?.slice(8))||1;const due=split?financeMonthDue(month,dueDay):financeDueWithinPeriod(period,dueDay,financeStartsOn(x));if(!due)return;add('fixed',x,split?financeAllocationFor(x,salary):x.amount,due,`fixed:${x.id}:${split?salary.id:due.slice(0,7)}`,'مصروف ثابت');});
   finance.obligations.forEach(x=>{
     const dueDay=Number(x.dueDate?.slice(8))||1,due=financeMonthDue(month,Number(financeAllocationDetail(x,salary)?.dueDate?.slice(8))||dueDay);
     const split=(x.allocations||[]).length>0,amount=split?financeAllocationFor(x,salary):Number(x.amount||0);
@@ -438,15 +438,18 @@ function financeScheduledItems(period,ref=todayKey()){
   });
   finance.goals.filter(x=>!x.done).forEach(x=>{
     const starts=financeStartsOn(x);if(starts&&starts>=period.end)return;
-    const due=financeMonthDue(month,Number(x.dueDay)||Number(x.deadline?.slice(8))||1);
-    if(x.deadline&&month>x.deadline.slice(0,7))return;
-    const monthPaid=Object.entries(finance.settlementPayments||{}).filter(([k])=>k.startsWith(`goal:${x.id}:`)&&k.endsWith(`:${month}`)).reduce((sum,[,v])=>sum+Number(v.amount||0),0);
-    const months=Math.max(1,((dateObj(x.deadline||due).getFullYear()-dateObj(`${month}-01`).getFullYear())*12)+(dateObj(x.deadline||due).getMonth()-dateObj(`${month}-01`).getMonth())+1);
+    const mode=x.splitMode||'auto',allocation=mode==='manual'?financeAllocationDetail(x,salary):null;
+    const dueDay=Number(allocation?.dueDate?.slice(8))||Number(x.dueDay)||Number(x.deadline?.slice(8))||1;
+    const due=mode==='none'?financeDueWithinPeriod(period,dueDay,starts):financeMonthDue(month,dueDay);
+    if(!due||x.deadline&&due.slice(0,7)>x.deadline.slice(0,7))return;
+    const dueMonth=due.slice(0,7);
+    const monthPaid=Object.entries(finance.settlementPayments||{}).filter(([k])=>k.startsWith(`goal:${x.id}:`)&&k.endsWith(`:${dueMonth}`)).reduce((sum,[,v])=>sum+Number(v.amount||0),0);
+    const months=Math.max(1,((dateObj(x.deadline||due).getFullYear()-dateObj(`${dueMonth}-01`).getFullYear())*12)+(dateObj(x.deadline||due).getMonth()-dateObj(`${dueMonth}-01`).getMonth())+1);
     const monthly=Math.max(0,(Number(x.target||0)-Number(x.saved||0)+monthPaid)/months);
     const monthSalaries=finance.salaryStreams.filter(s=>s.date.slice(0,7)===month);
     const total=monthSalaries.reduce((sum,s)=>sum+Math.max(0,Number(s.amount||0)),0);
-    const share=monthSalaries.length?monthly*(total>0?Math.max(0,Number(salary.amount||0))/total:1/monthSalaries.length):0;
-    add('goal',x,share,due,`goal:${x.id}:${salary.id}:${month}`,'مساهمة الهدف');
+    const share=mode==='none'?monthly:mode==='manual'?monthly*Number(allocation?.amount||0)/100:monthSalaries.length?monthly*(total>0?Math.max(0,Number(salary.amount||0))/total:1/monthSalaries.length):0;
+    add('goal',x,share,due,`goal:${x.id}:${mode==='none'?'once':salary.id}:${dueMonth}`,'مساهمة الهدف');
   });
   return items;
 }
@@ -588,13 +591,15 @@ function renderFinance(){
 }
 function financeRow(title,meta,amount,type,id,kind,extraAction=''){return `<div class="finance-row"><div><div class="row-title">${escapeHTML(title)}</div><div class="row-meta">${escapeHTML(meta)}</div></div><div class="row-amount ${type}">${amount}</div><div class="row-actions">${extraAction}<button type="button" data-fin-delete="${kind}" data-id="${id}">حذف</button></div></div>`;}
 function salaryOptionsHTML(){return sortedSalaries().map(s=>`<option value="${s.id}">${escapeHTML(s.title)} — ${arabicDate(s.date)}</option>`).join('');}
-function fixedAllocationFields(x=null){
-  if(!finance.salaryStreams.length)return `<div class="form-hint warning-hint">أضف راتبًا أولًا قبل إضافة المصروف الثابت.</div>`;
-  return `<div class="allocation-box"><b>توزيع المبلغ على الرواتب</b><small>اكتب حصة كل راتب وتاريخ استحقاقها. يجب أن يساوي مجموع الحصص المبلغ الكلي.</small>${sortedSalaries().map(s=>{const a=(x?.allocations||[]).find(v=>v.salaryId===s.id);return `<div class="allocation-row"><span>${escapeHTML(s.title)}<small>${arabicDate(s.date)}</small></span><input name="alloc_${s.id}" type="number" step="0.001" min="0" value="${a?.amount||''}" placeholder="0.000"><input name="due_${s.id}" type="date" value="${escapeHTML(a?.dueDate||'')}" aria-label="استحقاق حصة ${escapeHTML(s.title)}"></div>`}).join('')}</div>`;
+function fixedAllocationFields(x=null,goal=false){
+  const selected=!!(x?.allocations||[]).length;
+  const rows=finance.salaryStreams.length?sortedSalaries().map(s=>{const a=(x?.allocations||[]).find(v=>v.salaryId===s.id);return `<div class="allocation-row"><span>${escapeHTML(s.title)}<small>${arabicDate(s.date)}</small></span><input name="alloc_${s.id}" type="number" step="0.001" min="0" ${goal?'max="100"':''} value="${a?.amount||''}" placeholder="${goal?'٪':'0.000'}"><input name="due_${s.id}" type="date" value="${escapeHTML(a?.dueDate||'')}" aria-label="استحقاق حصة ${escapeHTML(s.title)}"></div>`}).join(''):'<div class="form-hint warning-hint">أضف الرواتب أولًا حتى تتمكن من تقسيم المبلغ عليها.</div>';
+  return `<div class="form-field"><label for="finSplitChoice">هل تريد تقسيم ${goal?'مساهمة الهدف':'المبلغ'} على الرواتب؟</label><select id="finSplitChoice" name="splitChoice"><option value="no" ${selected?'':'selected'}>لا، دفعة واحدة</option><option value="yes" ${selected?'selected':''}>نعم، تقسيم على الرواتب</option></select></div><div class="allocation-box" data-fin-allocation-panel ${selected?'':'hidden'}><b>توزيع ${goal?'المساهمة الشهرية':'المبلغ'} على الرواتب</b><small>${goal?'حدد نسبة كل راتب بحيث يكون المجموع ١٠٠٪. يتغير مبلغ المساهمة الشهرية تلقائيًا بحسب المتبقي والموعد المستهدف.':'اكتب حصة كل راتب وتاريخ استحقاقها. يجب أن يساوي مجموع الحصص المبلغ الكلي.'}</small>${rows}</div>`;
 }
 function financeStartField(value=todayKey(),required=true){return (required?field:optionalField)('ابتداءً من','startsOn','date',`value="${escapeHTML(value||'')}"`);}
 function financeRecurringField(checked=false){return checkboxField('يتكرر شهريًا','recurring',checked);}
 function financeSelectedAllocations(fd,amount,required=false){const allocations=finance.salaryStreams.map(s=>({salaryId:s.id,amount:Number(fd[`alloc_${s.id}`]||0),dueDate:fd[`due_${s.id}`]||''})).filter(a=>a.amount>0),sum=allocations.reduce((v,a)=>v+a.amount,0);if((required||sum>0)&&Math.abs(sum-amount)>0.001)return null;return allocations;}
+financeForm.addEventListener('change',e=>{if(e.target.name==='splitChoice'){const panel=financeFormFields.querySelector('[data-fin-allocation-panel]');if(panel)panel.hidden=e.target.value!=='yes';}});
 function openFinanceForm(action){
   currentFinanceAction=action;let title='',html='';const today=todayKey();
   if(action==='balance'){title='تعديل المبلغ الحالي';html=field('المبلغ الموجود فعليًا الآن','amount','number',`step="0.001" min="0" value="${finance.currentBalance||''}"`);}
@@ -602,13 +607,13 @@ function openFinanceForm(action){
   if(action.startsWith('editSalary:')){const id=action.split(':')[1],x=finance.salaryStreams.find(v=>v.id===id);if(!x)return;title='تعديل الراتب';html=field('اسم الراتب','title','text',`value="${escapeHTML(x.title)}"`)+field('المبلغ','amount','number',`step="0.001" min="0" value="${x.amount}"`)+field('تاريخ الراتب','date','date',`value="${x.date}"`)+`<div class="form-hint">يمكن تعديل تاريخ الراتب إلى أي يوم. ستُعاد حساب فترات الميزانية تلقائيًا.</div>`;}
   if(action==='expense'){title='إضافة مصروف متغيّر';html=field('المبلغ','amount','number','step="0.001" min="0"')+selectField('التصنيف','category',['طعام','مواصلات','فواتير','تسوق','منزل','ترفيه','صدقة','أخرى'])+optionalField('ملاحظة','note','text','placeholder="اختياري"')+field('التاريخ','date','date',`value="${today}"`)+`<div class="form-hint">عند دخول فترة الراتب التي يقع فيها هذا التاريخ، يحجز النظام المبلغ فورًا ويخفض المسموح اليومي حتى قبل حلول يوم المصروف.</div>`;}
   if(action==='extraIncome'){title='تسجيل دخل إضافي';html=field('المبلغ','amount','number','step="0.001" min="0"')+selectField('التصنيف','category',['دخل إضافي','مكافأة','هدية','استرداد','أخرى'])+optionalField('ملاحظة','note','text','placeholder="اختياري"')+field('التاريخ','date','date',`value="${today}"`);}
-  if(action==='fixed'){title='إضافة مصروف ثابت';html=field('اسم المصروف','title','text','placeholder="مثال: إيجار أو طعام"')+field('المبلغ','amount','number','step="0.001" min="0"')+selectField('التصنيف','category',['سكن','فواتير','قسط','اشتراك','طعام','مواصلات','أخرى'])+field('يوم الاستحقاق','dueDay','number','min="1" max="31" value="1"')+financeStartField()+fixedAllocationFields()+`<div class="form-hint">تتكرر الحصة شهريًا على راتب بالاسم ويوم النزول نفسه عند إضافة الرواتب القادمة.</div>`;}
+  if(action==='fixed'){title='إضافة مصروف ثابت';html=field('اسم المصروف','title','text','placeholder="مثال: إيجار أو طعام"')+field('المبلغ','amount','number','step="0.001" min="0"')+selectField('التصنيف','category',['سكن','فواتير','قسط','اشتراك','طعام','مواصلات','أخرى'])+field('يوم الاستحقاق','dueDay','number','min="1" max="31" value="1"')+financeStartField()+fixedAllocationFields()+`<div class="form-hint">من دون تقسيم، يُحجز المبلغ كاملًا مرة واحدة في فترة تاريخ الاستحقاق. عند التقسيم، تظهر حصة كل راتب وحدها.</div>`;}
   if(action==='obligation'){title='إضافة التزام مالي';html=field('اسم الالتزام','title','text')+field('المبلغ','amount','number','step="0.001" min="0"')+field('تاريخ الاستحقاق','dueDate','date')+financeStartField()+financeRecurringField()+fixedAllocationFields();}
   if(action.startsWith('editFixed:')){const id=action.split(':')[1],x=finance.fixedExpenses.find(v=>String(v.id)===String(id));if(!x)return;title='تعديل المصروف الثابت';html=field('اسم المصروف','title','text',`value="${escapeHTML(x.title||'')}"`)+field('المبلغ','amount','number',`step="0.001" min="0" value="${Number(x.amount||0)}"`)+selectField('التصنيف','category',['سكن','فواتير','قسط','اشتراك','طعام','مواصلات','أخرى'],x.category||'أخرى')+field('يوم الاستحقاق','dueDay','number',`min="1" max="31" value="${x.dueDay||1}"`)+financeStartField(x.startsOn||'',false)+fixedAllocationFields(x);}
   if(action.startsWith('editTransaction:')){const id=action.split(':')[1],x=finance.transactions.find(v=>String(v.id)===String(id));if(!x||isActualFinanceTransaction(x))return;title='تعديل المصروف المحجوز';html=field('المبلغ','amount','number',`step="0.001" min="0" value="${Number(x.amount||0)}"`)+selectField('التصنيف','category',['طعام','مواصلات','فواتير','تسوق','منزل','ترفيه','صدقة','أخرى'],x.category||'أخرى')+optionalField('ملاحظة','note','text',`value="${escapeHTML(x.note||'')}"`)+field('التاريخ','date','date',`value="${x.date||today}"`)+`<div class="form-hint">هذا مصروف محجوز ولم يُخصم من المبلغ الحالي الحقيقي بعد.</div>`;}
   if(action.startsWith('editObligation:')){const id=action.split(':')[1],x=finance.obligations.find(v=>String(v.id)===String(id));if(!x)return;title='تعديل الالتزام';html=field('اسم الالتزام','title','text',`value="${escapeHTML(x.title||'')}"`)+field('المبلغ','amount','number',`step="0.001" min="0" value="${Number(x.amount||0)}"`)+field('تاريخ الاستحقاق','dueDate','date',`value="${x.dueDate||today}"`)+financeStartField(x.startsOn||'',false)+financeRecurringField(!!x.recurring)+fixedAllocationFields(x);}
   if(action.startsWith('editSaving:')){const id=action.split(':')[1],x=(finance.savings||[]).find(v=>String(v.id)===String(id));if(!x)return;title='تعديل الادخار';html=field('مبلغ الادخار','amount','number',`step="0.001" min="0" value="${Number(x.amount||0)}"`)+field('تاريخ الادخار','date','date',`value="${x.date||today}"`)+financeStartField(x.startsOn||'',false)+financeRecurringField(!!x.recurring)+optionalField('ملاحظة','note','text',`value="${escapeHTML(x.note||'')}"`)+fixedAllocationFields(x);}
-  if(action==='goal'){title='إضافة هدف مالي';html=field('اسم الهدف','title','text')+field('تكلفة الهدف الإجمالية','target','number','step="0.001" min="0"')+field('المدخر حاليًا للهدف','saved','number','step="0.001" min="0" value="0"')+field('التاريخ المستهدف','deadline','date')+financeStartField()+field('يوم استحقاق مساهمة الهدف','dueDay','number','min="1" max="31" value="1"')+`<div class="form-hint">المساهمة الشهرية تُوزع على رواتب الشهر بنسبة قيمة كل راتب، وتُخصم فقط عند تأكيد التحويل.</div>`;}
+  if(action==='goal'){title='إضافة هدف مالي';html=field('اسم الهدف','title','text')+field('تكلفة الهدف الإجمالية','target','number','step="0.001" min="0"')+field('المدخر حاليًا للهدف','saved','number','step="0.001" min="0" value="0"')+field('التاريخ المستهدف','deadline','date')+financeStartField()+field('يوم استحقاق مساهمة الهدف','dueDay','number','min="1" max="31" value="1"')+fixedAllocationFields(null,true)+`<div class="form-hint">المساهمة الشهرية تُحسب من المتبقي حتى الموعد المستهدف. يمكنك دفعها مرة واحدة أو تقسيمها بنسب على الرواتب.</div>`;}
   if(action==='saving'){title='إضافة ادخار';html=field('مبلغ الادخار','amount','number','step="0.001" min="0"')+field('تاريخ الادخار','date','date',`value="${today}"`)+financeStartField()+financeRecurringField()+optionalField('ملاحظة','note','text','placeholder="مثال: ادخار عام"')+fixedAllocationFields()+`<div class="form-hint">إن قسمت الادخار على الرواتب، تُعرض حصة كل راتب وحدها.</div>`;}
   financeFormTitle.textContent=title;financeFormFields.innerHTML=html;financeSheet.hidden=false;
 }
@@ -640,7 +645,11 @@ function payPlannedExpense(id){const x=finance.transactions.find(v=>v.id===id);i
 function receiveSalary(id,date,actualAmount){const s=finance.salaryStreams.find(x=>x.id===id);if(!s||s.date>todayKey()||txForSalaryOccurrence(s,date))return false;const amount=Number(actualAmount);if(!Number.isFinite(amount)||amount<=0)return false;finance.transactions.push({id:makeId(),type:'income',amount,category:'راتب',note:s.title,date:todayKey(),source:'salary',salaryId:s.id,salaryDate:s.date,affectsBalance:true});finance.currentBalance=Number(finance.currentBalance||0)+amount;addTimeline(`استلمت ${s.title} بقيمة ${money(amount)}`,'مالي','💵');saveFinance();return true;}
 financeForm.addEventListener('submit',e=>{
  e.preventDefault();const fd=Object.fromEntries(new FormData(financeForm).entries()),action=currentFinanceAction;
- if(['fixed','obligation','saving'].includes(action)||action?.startsWith('editFixed:')||action?.startsWith('editObligation:')||action?.startsWith('editSaving:')){const amount=Number(fd.amount||0),required=action==='fixed'||action?.startsWith('editFixed:'),allocations=financeSelectedAllocations(fd,amount,required);if(!allocations)return openModal('راجع توزيع المبلغ','يجب أن يساوي مجموع الحصص المبلغ الكلي، أو اترك التوزيع فارغًا للبند غير المقسم.','📌');if(['fixed','obligation','saving'].includes(action)&&allocations.some(a=>!a.dueDate))return openModal('حدد تاريخ الاستحقاق','ضع تاريخ استحقاق لكل حصة وزعتها على راتب.','📅');fd._allocations=allocations;}
+ if(['fixed','obligation','saving','goal'].includes(action)||/^edit(Fixed|Obligation|Saving):/.test(action||'')){
+   const split=fd.splitChoice==='yes';let allocations=[];
+   if(split){allocations=financeSelectedAllocations(fd,action==='goal'?100:Number(fd.amount||0),true);if(!allocations)return openModal('راجع توزيع المبلغ',action==='goal'?'اجعل مجموع نسب الرواتب ١٠٠٪.':'يجب أن يساوي مجموع الحصص المبلغ الكلي.','📌');if(allocations.some(a=>!a.dueDate))return openModal('حدد تاريخ الاستحقاق','ضع تاريخ استحقاق لكل حصة وزعتها على راتب.','📅');}
+   fd._allocations=allocations;
+ }
  if(fd.startsOn&&((fd.dueDate&&fd.dueDate<fd.startsOn)||(fd.date&&action==='saving'&&fd.date<fd.startsOn))&&fd.recurring!=='on')return openModal('راجع تاريخ البداية','تاريخ الاستحقاق يسبق تاريخ ابتداء البند.','📅');
  if(action==='balance')finance.currentBalance=Number(fd.amount||0);
  if(action==='salary'){
@@ -656,7 +665,7 @@ financeForm.addEventListener('submit',e=>{
  if(action?.startsWith('editTransaction:')){const id=action.split(':')[1],x=finance.transactions.find(v=>String(v.id)===String(id));if(x&&!isActualFinanceTransaction(x)){Object.assign(x,{amount:Number(fd.amount||0),category:fd.category,note:fd.note,date:fd.date,planned:true,affectsBalance:false});}}
  if(action?.startsWith('editObligation:')){const id=action.split(':')[1],x=finance.obligations.find(v=>String(v.id)===String(id));if(x)Object.assign(x,{title:fd.title,amount:Number(fd.amount||0),dueDate:fd.dueDate,startsOn:fd.startsOn||'',recurring:fd.recurring==='on',allocations:fd._allocations});}
  if(action?.startsWith('editSaving:')){const id=action.split(':')[1],x=(finance.savings||[]).find(v=>String(v.id)===String(id));if(x)Object.assign(x,{amount:Number(fd.amount||0),date:fd.date||todayKey(),note:fd.note||'ادخار عام',startsOn:fd.startsOn||'',recurring:fd.recurring==='on',allocations:fd._allocations});}
- if(action==='goal')finance.goals.push({id:makeId(),title:fd.title,target:Number(fd.target||0),saved:Number(fd.saved||0),deadline:fd.deadline,startsOn:fd.startsOn,dueDay:Number(fd.dueDay||1),done:false});
+ if(action==='goal')finance.goals.push({id:makeId(),title:fd.title,target:Number(fd.target||0),saved:Number(fd.saved||0),deadline:fd.deadline,startsOn:fd.startsOn,dueDay:Number(fd.dueDay||1),recurring:true,splitMode:fd.splitChoice==='yes'?'manual':'none',allocations:fd._allocations,done:false});
  if(action==='saving'){const amount=Number(fd.amount||0);if(amount>0)finance.savings.push({id:makeId(),amount,date:fd.date||todayKey(),note:fd.note||'ادخار عام',startsOn:fd.startsOn,recurring:fd.recurring==='on',allocations:fd._allocations});}
  saveFinance();closeFinanceForm();
  if(action==='expense'&&fd.date===todayKey()&&Number(fd.amount||0)>0)notifyExpense(Number(fd.amount));
