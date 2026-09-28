@@ -847,3 +847,10 @@ body.garage-mode .main-content{padding:0!important;max-width:none!important}
 .allocation-row{grid-template-columns:minmax(0,1fr) 100px 145px}
 @media(max-width:720px){.allocation-row{grid-template-columns:minmax(0,1fr) 95px}.allocation-row input[type=date]{grid-column:1/-1}}
 .allocation-box[hidden]{display:none!important}
+.finance-subpage .finance-overview-only,.finance-subpage .finance-tabs{display:none!important}
+#view-finance:not(.finance-subpage) .finance-period-picker{display:none}
+.finance-subpage-head[hidden]{display:none!important}
+.finance-subpage-head{display:flex;align-items:center;gap:12px;padding:8px 0 16px}
+.finance-subpage-head button{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--text);padding:10px 12px;font-weight:800;white-space:nowrap}
+.finance-subpage-head h2{margin:0;font-size:20px}
+.salary-summary-card .period-head{align-items:center}.salary-summary-card>.period-head>div{display:grid;gap:5px}.salary-summary-card>small{display:block;margin-top:12px;color:var(--muted)}

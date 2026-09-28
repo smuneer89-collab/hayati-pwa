@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://static-cdn.tarteel.ai" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles-v105.css?v=1143" />
+  <link rel="stylesheet" href="styles-v105.css?v=1144" />
   <title>حياتي</title>
   <meta name="hayati-build" content="10.0-qcf604" />
 </head>
@@ -347,8 +347,8 @@
       </section>
 
       <section class="view" data-view="finance" id="view-finance">
-        <button class="back-btn" data-nav="domains">→ الرجوع للأقسام</button>
-        <div class="finance-head">
+        <button class="back-btn finance-overview-only" data-nav="domains">→ الرجوع للأقسام</button>
+        <div class="finance-head finance-overview-only">
           <div>
             <span class="section-kicker">مالي</span>
             <h1>إدارة مالي</h1>
@@ -357,22 +357,22 @@
           <span class="local-badge">محفوظ محليًا</span>
         </div>
 
-        <div class="finance-stats">
-          <article class="accent balance-stat"><div class="stat-title-row"><span>المبلغ الحالي الحقيقي</span><button type="button" class="stat-edit" data-fin-action="balance">تعديل</button></div><b id="finBalance">٠.٠٠٠ د.ب</b><small>الرصيد الفعلي الآن</small></article>
-          <article><span>المصاريف الثابتة</span><b id="finFixed">٠.٠٠٠ د.ب</b><small>إجمالي المسجل</small></article>
-          <article><span>إجمالي الرواتب</span><b id="finSalary">٠.٠٠٠ د.ب</b><small>الرواتب المسجلة في هذا الشهر</small></article>
-          <article><span>مصروف هذا الشهر</span><b id="finSpent">٠.٠٠٠ د.ب</b><small>ما تم صرفه فعليًا حتى اليوم</small></article>
+        <div class="finance-stats finance-overview-only">
+          <article class="accent balance-stat"><div class="stat-title-row"><span>المبلغ الحالي الحقيقي</span><button type="button" class="stat-edit" data-fin-action="balance">تعديل</button></div><b id="finBalance">0.000 د.ب</b><small>الرصيد الفعلي الآن</small></article>
+          <article><span>المصاريف الثابتة</span><b id="finFixed">0.000 د.ب</b><small>إجمالي المسجل</small></article>
+          <article><span>إجمالي الرواتب</span><b id="finSalary">0.000 د.ب</b><small>الرواتب المسجلة في هذا الشهر</small></article>
+          <article><span>مصروف هذا الشهر</span><b id="finSpent">0.000 د.ب</b><small>ما تم صرفه فعليًا حتى اليوم</small></article>
         </div>
 
-        <section class="finance-card daily-budget-card">
+        <section class="finance-card daily-budget-card finance-overview-only">
           <div class="card-row-head"><div><span class="section-kicker">الفترة الحالية</span><h2 id="finPeriodTitle">أضف راتبًا لبدء الميزانية</h2></div><span class="daily-pill">المسموح اليوم</span></div>
-          <div class="daily-allowed"><span>المسموح لك اليوم</span><b id="finDailyAllowed">٠.٠٠٠ د.ب</b></div>
-          <div class="reserve-grid"><div><span>المبلغ المتاح بعد الحجز</span><b id="finPeriodAvailable">٠.٠٠٠ د.ب</b></div><button type="button" class="reserve-detail-card" data-fin-reserved-details><span>إجمالي المصروفات والالتزامات والادخار المحجوز</span><b id="finPeriodReserved">٠.٠٠٠ د.ب</b><small>اضغط لمعرفة مصدر المبلغ والتعديل</small></button><div><span>الأيام المتبقية</span><b id="finDaysLeft">—</b></div></div>
+          <div class="daily-allowed"><span>المسموح لك اليوم</span><b id="finDailyAllowed">0.000 د.ب</b></div>
+          <div class="reserve-grid"><div><span>المبلغ المتاح بعد الحجز</span><b id="finPeriodAvailable">0.000 د.ب</b></div><button type="button" class="reserve-detail-card" data-fin-reserved-details><span>إجمالي المصروفات والالتزامات والادخار المحجوز</span><b id="finPeriodReserved">0.000 د.ب</b><small>اضغط لمعرفة مصدر المبلغ والتعديل</small></button><div><span>الأيام المتبقية</span><b id="finDaysLeft">—</b></div></div>
           <div class="overspend-alert" id="finOverspendAlert" hidden></div>
           <p class="finance-note">عند دخول فترة الراتب، أي مصروف مجدول يقع داخلها يُحجز مباشرة حتى لو لم يأتِ تاريخ دفعه بعد، وبناءً عليه يتغير المسموح اليومي.</p>
         </section>
 
-        <div class="finance-quick">
+        <div class="finance-quick finance-overview-only">
           <button data-fin-action="salary"><span>💵</span><b>راتب</b></button>
           <button type="button" class="salary-drop-btn" data-fin-salary-drop><span>✅</span><b>نزل الراتب</b></button>
           <button data-fin-action="expense"><span>💳</span><b>مصروف</b></button>
@@ -383,6 +383,7 @@
           <button data-fin-action="obligation"><span>🗓️</span><b>التزام</b></button>
         </div>
 
+        <div id="financeSubpageHead" class="finance-subpage-head" hidden><button type="button" data-fin-tab="overview">→ نظرة عامة</button><h2 id="financeSubpageTitle"></h2></div>
 <div class="form-field finance-period-picker"><label for="financePeriodPicker">عرض بنود فترة الراتب</label><select id="financePeriodPicker"></select></div>
         <div class="finance-tabs" role="tablist">
           <button class="active" data-fin-tab="overview">نظرة عامة</button>
@@ -401,13 +402,13 @@
           </div>
 
           <div class="finance-card">
-            <div class="card-row-head"><div><span class="section-kicker">فترات الميزانية</span><h2>من راتب إلى الراتب التالي</h2></div></div>
+            <div class="card-row-head"><div><span class="section-kicker">الرواتب</span><h2>ملخص الرواتب والبنود المسجلة</h2></div></div>
             <div class="period-list" id="periodList"></div>
           </div>
 
           <div class="finance-card split-summary-card">
             <div><span class="section-kicker">الخطة الذكية</span><h2>الأهداف والادخار</h2></div>
-            <div class="reserve-grid"><div><span>احتياج الأهداف هذا الشهر</span><b id="finGoalNeed">٠.٠٠٠ د.ب</b></div><div><span>إجمالي الادخار هذا الشهر</span><b id="finSavingMonth">٠.٠٠٠ د.ب</b></div></div>
+            <div class="reserve-grid"><div><span>احتياج الأهداف هذا الشهر</span><b id="finGoalNeed">0.000 د.ب</b></div><div><span>إجمالي الادخار هذا الشهر</span><b id="finSavingMonth">0.000 د.ب</b></div></div>
             <p class="finance-note">الادخار غير المقسم يُحجز في فترة استحقاقه، أما المقسم فتظهر حصة كل راتب وحدها.</p>
           </div>
 
@@ -415,7 +416,7 @@
 
         <section class="fin-panel" data-fin-panel="fixed"><div class="finance-card"><h2>حصص المصروفات الثابتة لهذه الفترة</h2><div class="finance-list" id="fin-fixed-due"></div></div>          <div class="finance-card">
             <div class="card-row-head"><div><span class="section-kicker">ثابت شهريًا</span><h2>المصاريف الثابتة</h2></div><button class="text-btn" data-fin-action="fixed">+ إضافة</button></div>
-            <p class="finance-note">كل حصة لها مبلغ وتاريخ استحقاق؛ مثال: فاتورة ٣٠ د.ب = دفعتان فعليتان بقيمة ١٥ لكل راتب.</p>
+            <p class="finance-note">كل حصة لها مبلغ وتاريخ استحقاق؛ مثال: فاتورة 30 د.ب = دفعتان فعليتان بقيمة 15 لكل راتب.</p>
             <div class="finance-list" id="fixedList"></div>
           </div>
 
@@ -459,7 +460,7 @@
           <article><span>الوزن الحالي</span><b id="healthCurrentWeight">— كجم</b></article>
           <article><span>الهدف</span><b id="healthTargetWeight">— كجم</b></article>
           <article class="accent"><span>السعرات المتبقية اليوم</span><b id="healthCaloriesLeft">—</b></article>
-          <article><span>الماء اليوم</span><b id="healthWaterToday">٠ مل</b></article>
+          <article><span>الماء اليوم</span><b id="healthWaterToday">0 مل</b></article>
         </div>
 
         <section class="feature-card health-feature">
@@ -488,10 +489,10 @@
           <div class="domain-card-wide">
             <div class="card-row-head">
               <div><span class="section-kicker">اليوم</span><h2>السعرات</h2></div>
-              <b class="big-value" id="healthCaloriesSummary">٠ / ٠</b>
+              <b class="big-value" id="healthCaloriesSummary">0 / 0</b>
             </div>
             <div class="money-progress health-progress"><span id="healthCaloriesBar"></span></div>
-            <div class="muted-row"><span>المستهلك من الميزانية اليومية</span><b id="healthCaloriesPct">٠٪</b></div>
+            <div class="muted-row"><span>المستهلك من الميزانية اليومية</span><b id="healthCaloriesPct">0٪</b></div>
           </div>
 
           <div class="domain-card-wide">
@@ -500,16 +501,16 @@
           </div>
 
           <div class="domain-card-wide">
-            <div class="card-row-head"><div><span class="section-kicker">الماء</span><h2>الهدف اليومي</h2></div><b id="healthWaterGoalText">٠ / ٠ مل</b></div>
+            <div class="card-row-head"><div><span class="section-kicker">الماء</span><h2>الهدف اليومي</h2></div><b id="healthWaterGoalText">0 / 0 مل</b></div>
             <div class="money-progress water-progress"><span id="healthWaterBar"></span></div>
-            <div class="domain-inline-actions"><button class="chip-btn" data-health-water="250">+ ٢٥٠ مل</button><button class="chip-btn" data-health-water="500">+ ٥٠٠ مل</button></div>
+            <div class="domain-inline-actions"><button class="chip-btn" data-health-water="250">+ 250 مل</button><button class="chip-btn" data-health-water="500">+ 500 مل</button></div>
           </div>
         </section>
 
         <section class="domain-panel" data-health-panel="weight">
           <div class="domain-card-wide">
-            <div class="card-row-head"><div><span class="section-kicker">الاتجاه</span><h2>الوزن ومتوسط ٧ أيام</h2></div><button class="text-btn" data-health-action="weight">+ تسجيل</button></div>
-            <div class="weight-overview"><div><span>آخر وزن</span><b id="healthLatestWeight">—</b></div><div><span>متوسط ٧ أيام</span><b id="healthAvg7">—</b></div><div><span>من البداية</span><b id="healthChange">—</b></div></div>
+            <div class="card-row-head"><div><span class="section-kicker">الاتجاه</span><h2>الوزن ومتوسط 7 أيام</h2></div><button class="text-btn" data-health-action="weight">+ تسجيل</button></div>
+            <div class="weight-overview"><div><span>آخر وزن</span><b id="healthLatestWeight">—</b></div><div><span>متوسط 7 أيام</span><b id="healthAvg7">—</b></div><div><span>من البداية</span><b id="healthChange">—</b></div></div>
             <div class="domain-list" id="healthWeightList"></div>
           </div>
         </section>
@@ -538,10 +539,10 @@
         </div>
 
         <div class="domain-stats religion-stats">
-          <article><span>المشاريع النشطة</span><b id="religionProjectsCount">٠</b></article>
+          <article><span>المشاريع النشطة</span><b id="religionProjectsCount">0</b></article>
           <article><span>آخر موضع قرآن</span><b id="religionQuranPos">—</b></article>
-          <article class="accent"><span>مهام دينية مكتملة اليوم</span><b id="religionDhikrDone">٠</b></article>
-          <article><span>عداد المسبحة</span><b id="religionTasbeehCount">٠</b></article>
+          <article class="accent"><span>مهام دينية مكتملة اليوم</span><b id="religionDhikrDone">0</b></article>
+          <article><span>عداد المسبحة</span><b id="religionTasbeehCount">0</b></article>
         </div>
 
         <section class="feature-card religion-feature">
@@ -586,8 +587,8 @@
             <div class="quran-entry-copy">
               <span class="section-kicker">القرآن الكريم</span>
               <h2>مصحفي داخل حياتي</h2>
-              <p>مصحف عثمان طه كامل: ٦٠٤ صفحة، بحث، مفضلة، علامات، نص عثماني قابل للنسخ وحفظ موضع القراءة.</p>
-              <div class="quran-entry-meta" id="religionQuranReaderMeta">١١٤ سورة • ٦٠٤ صفحة</div>
+              <p>مصحف عثمان طه كامل: 604 صفحة، بحث، مفضلة، علامات، نص عثماني قابل للنسخ وحفظ موضع القراءة.</p>
+              <div class="quran-entry-meta" id="religionQuranReaderMeta">114 سورة • 604 صفحة</div>
             </div>
             <div class="quran-entry-actions">
               <button class="primary-btn" type="button" onclick="window.location.href='quran.html?v=104'">فتح المصحف</button>
@@ -626,11 +627,11 @@
             </div>
             <div class="tasbeeh-phrase" id="tasbeehPhrase">الله أكبر</div>
             <div class="tasbeeh-zahra-targets" id="tasbeehZahraTargets">
-              <span data-stage="0">٣٤</span><span data-stage="1">٣٣</span><span data-stage="2">٣٣</span>
+              <span data-stage="0">34</span><span data-stage="1">33</span><span data-stage="2">33</span>
             </div>
             <button class="tasbeeh-counter" type="button" data-tasbeeh-count aria-label="اضغط للتسبيح">
-              <strong id="tasbeehCount">٠</strong>
-              <small id="tasbeehCountMeta">من ٣٤</small>
+              <strong id="tasbeehCount">0</strong>
+              <small id="tasbeehCountMeta">من 34</small>
               <em>اضغط للتسبيح</em>
             </button>
             <button class="tasbeeh-reset" type="button" data-tasbeeh-reset>إعادة التصفير</button>
@@ -696,7 +697,7 @@
   <div class="mushaf-stage" id="mushafStage">
     <div class="mushaf-top-controls">
       <button type="button" id="mushafExitBtn" class="mushaf-round-btn" aria-label="رجوع إلى فهرس المصحف">رجوع</button>
-      <div class="mushaf-top-meta"><b id="mushafSurahName">سورة الفاتحة</b><span id="mushafPageTop">صفحة ١ من ٦٠٤</span></div>
+      <div class="mushaf-top-meta"><b id="mushafSurahName">سورة الفاتحة</b><span id="mushafPageTop">صفحة 1 من 604</span></div>
       <button type="button" id="mushafThemeBtn" class="mushaf-round-btn" aria-label="تبديل مظهر المصحف">☾</button>
     </div>
     <button type="button" id="mushafPrevPage" class="mushaf-edge-nav prev" aria-label="الصفحة السابقة">›</button>
@@ -704,7 +705,7 @@
     <article class="mushaf-paper" id="mushafPaper" aria-label="صفحة المصحف">
       <div class="mushaf-frame-corner c1"></div><div class="mushaf-frame-corner c2"></div><div class="mushaf-frame-corner c3"></div><div class="mushaf-frame-corner c4"></div>
       <div class="mushaf-lines" id="mushafLines"></div>
-      <div class="mushaf-page-number" id="mushafPageNumber">١</div>
+      <div class="mushaf-page-number" id="mushafPageNumber">1</div>
     </article>
     <div class="mushaf-bottom-controls">
       <div class="mushaf-selection" id="mushafSelectionText">اضغط على السطر الذي انتهيت عنده</div>
@@ -730,10 +731,10 @@
         </div>
 
         <div class="domain-stats knowledge-stats">
-          <article><span>الأحاديث</span><b id="knowledgeHadithCount">٠</b></article>
-          <article><span>مهام الإنجليزية اليوم</span><b id="knowledgeEnglishDone">٠ / ٠</b></article>
+          <article><span>الأحاديث</span><b id="knowledgeHadithCount">0</b></article>
+          <article><span>مهام الإنجليزية اليوم</span><b id="knowledgeEnglishDone">0 / 0</b></article>
           <article class="accent"><span>الاختبار الأسبوعي</span><b id="knowledgeNextExam">غير محدد</b></article>
-          <article><span>كتب أقرأها الآن</span><b id="knowledgeReadingBooks">٠</b></article>
+          <article><span>كتب أقرأها الآن</span><b id="knowledgeReadingBooks">0</b></article>
         </div>
 
         <section class="hadith-feature" id="dailyHadithCard">
@@ -803,10 +804,10 @@
           <span class="local-badge">محفوظ محليًا</span>
         </div>
         <div class="domain-stats relationships-stats">
-          <article><span>الأشخاص</span><b id="relPeopleCount">٠</b></article>
-          <article><span>يحتاجون تواصلًا</span><b id="relDueCount">٠</b></article>
-          <article class="accent"><span>مناسبات قادمة</span><b id="relUpcomingCount">٠</b></article>
-          <article><span>وعود مفتوحة</span><b id="relOpenPromises">٠</b></article>
+          <article><span>الأشخاص</span><b id="relPeopleCount">0</b></article>
+          <article><span>يحتاجون تواصلًا</span><b id="relDueCount">0</b></article>
+          <article class="accent"><span>مناسبات قادمة</span><b id="relUpcomingCount">0</b></article>
+          <article><span>وعود مفتوحة</span><b id="relOpenPromises">0</b></article>
         </div>
         <section class="feature-card relationships-feature">
           <div><span class="section-kicker">متابعة ذكية بسيطة</span><h2>من يحتاج تواصلي؟</h2><p id="relFollowupSummary">أضف الأشخاص وحدد وتيرة التواصل التي تناسبك.</p></div>
@@ -851,10 +852,10 @@
           <span class="local-badge">محفوظ محليًا</span>
         </div>
         <div class="domain-stats family-stats">
-          <article><span>أفراد العائلة</span><b id="familyMembersCount">٠</b></article>
-          <article><span>مناسبات قريبة</span><b id="familyUpcomingCount">٠</b></article>
-          <article class="accent"><span>الألبومات</span><b id="familyAlbumsCount">٠</b></article>
-          <article><span>الصور المحفوظة</span><b id="familyPhotosCount">٠</b></article>
+          <article><span>أفراد العائلة</span><b id="familyMembersCount">0</b></article>
+          <article><span>مناسبات قريبة</span><b id="familyUpcomingCount">0</b></article>
+          <article class="accent"><span>الألبومات</span><b id="familyAlbumsCount">0</b></article>
+          <article><span>الصور المحفوظة</span><b id="familyPhotosCount">0</b></article>
         </div>
         <section class="feature-card family-feature">
           <div><span class="section-kicker">الذكرى</span><h2>أرشيف العائلة</h2><p id="familyMemorySummary">أنشئ أول ألبوم عائلي وارفع الصور من الآيفون.</p></div>
@@ -899,7 +900,7 @@
         <div class="supermarket-view-nav"><button class="back-btn" data-nav="family">→ عائلتي</button><button class="back-btn" data-nav="today">⌂ الرئيسية</button></div>
         <div class="domain-head supermarket-page-head"><div><span class="section-kicker">عائلتي</span><h1>سوبر ماركت</h1><p>أسعار البيت وطلبات التسوق، مرتبة حسب الأقسام.</p></div><span class="local-badge">قائمة العائلة</span></div>
         <div class="domain-card-wide supermarket-shell">
-          <div class="supermarket-tabs"><button class="active" data-supermarket-tab="prices">الأسعار</button><button data-supermarket-tab="requests">الطلبات <span id="supermarketPendingBadge">٠</span></button></div>
+          <div class="supermarket-tabs"><button class="active" data-supermarket-tab="prices">الأسعار</button><button data-supermarket-tab="requests">الطلبات <span id="supermarketPendingBadge">0</span></button></div>
           <section class="supermarket-panel active" data-supermarket-panel="prices">
             <div class="supermarket-tools"><label class="supermarket-search"><span>⌕</span><input id="supermarketSearch" type="search" placeholder="ابحث عن مادة..."></label><button class="supermarket-category-manage" data-supermarket-action="categories">إدارة التصنيفات</button></div>
             <div id="supermarketCategoryChips" class="supermarket-category-chips"></div>
@@ -907,7 +908,7 @@
             <button class="supermarket-primary" data-supermarket-action="addItem">＋ إضافة مادة جديدة</button>
           </section>
           <section class="supermarket-panel" data-supermarket-panel="requests">
-            <div class="supermarket-total-card"><span>الإجمالي التقديري للطلبات المعلقة</span><b id="supermarketPendingTotal">٠٫٠٠٠ د.ب</b></div>
+            <div class="supermarket-total-card"><span>الإجمالي التقديري للطلبات المعلقة</span><b id="supermarketPendingTotal">0٫000 د.ب</b></div>
             <div class="supermarket-request-filters"><button class="active" data-supermarket-request-filter="pending">قيد الانتظار</button><button data-supermarket-request-filter="bought">تم الشراء</button><button data-supermarket-request-filter="all">الكل</button></div>
             <div id="supermarketRequestList" class="supermarket-request-list"></div>
             <button class="supermarket-primary" data-supermarket-action="addRequest">＋ إضافة طلب جديد</button>
@@ -1023,6 +1024,6 @@
       <small class="nail-last" id="nailLast"></small>
     </section>
   </div>
-  <script src="app-v105.js?v=1143" defer></script>
+  <script src="app-v105.js?v=1144" defer></script>
 </body>
 </html>
