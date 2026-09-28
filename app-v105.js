@@ -1088,7 +1088,58 @@ function buildHadithFilmPrompt(hadithText){
 ${String(hadithText||'')}`;
 }
 async function copyDailyHadithForFilm(){const h=dailyHadith();if(!h)return openModal('لا يوجد حديث','أضف حديثًا أولًا.','📜');const ok=await writeClipboardText(buildHadithFilmPrompt(h.text));openModal(ok?'جاهز لصناعة الأفلام':'تعذر النسخ',ok?'تم نسخ أمر صناعة أفلام الأنيميشن مع حديث اليوم.':'لم يتمكن المتصفح من نسخ الرسالة.','🎬');}
-async function copyDailyHadith(){const h=dailyHadith();if(!h)return openModal('لا يوجد حديث','أضف حديثًا أولًا.','📜');const ok=await writeClipboardText(h.text);openModal(ok?'تم النسخ':'تعذر النسخ',ok?'نُسخ نص الحديث إلى الحافظة.':'لم يتمكن المتصفح من نسخ النص.','⧉');}
+function hadithShareTheme(h,body){
+  const normalized=normalizeHadithForCompare(`${body} ${h.topic||h.category||''}`);
+  const themes=[
+    [/نورالله|طينتناواحدة|الحزنوالفرحيصل/,['من نورٍ واحد…','اللهم اجعل قلوبنا متصلةً بمحمدٍ وآل محمد.']],
+    [/الصبر|اصبر|ابتلاء|البلاء/,['في رحاب الصبر…','اللهم ارزقنا صبرًا جميلًا وثباتًا عند البلاء.']],
+    [/الرحم|الاقارب|القرابة/,['صلةٌ لا تنقطع…','اللهم أعنّا على صلة أرحامنا والإحسان إليهم.']],
+    [/الوالدين|الابوين|امك|اباك/,['برٌّ وإحسان…','اللهم أعنّا على برّ والدينا والإحسان إليهما.']],
+    [/الصدق|الكذب|صادقا/,['طريق الصدق…','اللهم اجعلنا من الصادقين في القول والعمل.']],
+    [/الصلاة|صلاتك|يصلي/,['نور الصلاة…','اللهم اجعل الصلاة قرة عينٍ لنا وأعنّا على أدائها.']],
+    [/الصدقة|يتصدق|الانفاق/,['أثر العطاء…','اللهم ارزقنا قلبًا كريمًا ووفقنا لبذل الخير.']],
+    [/التوبة|الاستغفار|استغفر/,['باب التوبة…','اللهم تب علينا واغفر لنا وارحمنا.']],
+    [/العلم|تعلم|العلماء/,['نور العلم…','اللهم انفعنا بما علمتنا وزدنا علمًا نافعًا.']],
+    [/الدعاء|ادعوا|سأل الله/,['باب الدعاء…','اللهم ارزقنا الإخلاص في دعائنا وقربك وإجابتك.']],
+    [/الخلق|الاخلاق|تواضع|الحلم|الرفق/,['جمال الخُلُق…','اللهم حسّن أخلاقنا وارزقنا الرفق بمن حولنا.']],
+    [/الامام الحسين|كربلاء|عاشوراء/,['في حب الحسين…','اللهم ثبتنا على محبة الحسين وأهل بيته والسير على نهجهم.']]
+  ];
+  const match=themes.find(([pattern])=>pattern.test(normalized));
+  if(match)return {title:match[1][0],prayer:match[1][1]};
+  const topic=String(h.topic||h.category||'').trim();
+  const first=(body.split(/[:：]/).at(-1)||body).replace(/[«»﴿﴾]/g,'').split(/[،؛.!؟\n]/)[0].trim();
+  const title=topic&&topic!=='بدون موضوع'?`${topic}…`:first.length>=8&&first.length<=42?`${first}…`:'من هدي الحديث…';
+  return {title,prayer:'اللهم ارزقنا فهم هذا الحديث والعمل بما فيه من خير.'};
+}
+function hadithShareSources(h,raw){
+  const marker=raw.search(/(?:المصدر الأصلي|المصدر من بحار الأنوار|المصدر\s*[:：])/);
+  const body=(marker>=0?raw.slice(0,marker):raw).replace(/\n\s*\/\s*\n/g,'\n').trim();
+  const details=marker>=0?raw.slice(marker).replace(/^\s*\/\s*$/gm,''):'';
+  const original=details.match(/المصدر الأصلي\s*[:：]\s*([^\n/]+)/)?.[1]?.trim();
+  const bihar=details.match(/المصدر من بحار الأنوار\s*[:：]\s*([\s\S]*?)(?=\n\s*المصدر|$)/)?.[1]?.replace(/\s+/g,' ').replace(/\s*،\s*/g,'، ').replace(/ج\s*(\d)/g,'ج $1').replace(/ص\s*(\d)/g,'ص $1').trim();
+  const ownSource=String(h.source||'').trim();
+  const sources=[];
+  if(original)sources.push(`📚 المصدر الأصلي: ${original}`);
+  if(bihar)sources.push(`📖 بحار الأنوار: ${bihar}`);
+  if(ownSource&&!sources.some(x=>x.includes(ownSource)))sources.push(`📚 المصدر: ${ownSource}`);
+  return {body,sources};
+}
+function hadithShareBody(body){
+  const clean=cleanHadithChunk(body).replace(/\s*\(عليه السلام\)/g,' (عليه السلام)');
+  // Preserve the report's wording; only separate the narrator and exchanges.
+  if(/^قال أبو بص[يی]ر[:：]/.test(clean)&&/الحزن والفرح يصل إليكم منّا/.test(clean)){
+    const m=clean.match(/^قال أبو بص[يی]ر[:：]\s*([\s\S]*?)\s*فقلت له[:：]\s*([\s\S]*?)\s*فقال الصادق\s*\(عليه السلام\)[:：]\s*([\s\S]*)$/);
+    if(m)return `رُوي عن أبي بصير، قال:\n\n${m[1].trim()} فقلت له:\n\n«${m[2].trim().replace(/[.،؛]+$/,'')}».\n\nفقال الإمام الصادق (عليه السلام):\n\n✨ «${m[3].trim().replace(/[.،؛]+$/,'')}».`;
+  }
+  return clean.replace(/\s*(فقال\s+[^:：\n]{2,65}[:：])/g,'\n\n$1\n\n').replace(/\s*(فقلت(?:\s+له)?[:：])/g,'\n\n$1\n\n').replace(/\n{3,}/g,'\n\n').trim();
+}
+function buildShareableHadith(h){
+  const raw=String(h.text||'').replace(/\r\n?/g,'\n').replace(/[٠-٩]/g,c=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(c)));
+  const {body,sources}=hadithShareSources(h,raw);
+  const theme=hadithShareTheme(h,body);
+  return [`🕊️ ${theme.title}`,hadithShareBody(body),sources.join('\n'),`🤍 ${theme.prayer}`].filter(Boolean).join('\n\n');
+}
+async function copyDailyHadith(){const h=dailyHadith();if(!h)return openModal('لا يوجد حديث','أضف حديثًا أولًا.','📜');const ok=await writeClipboardText(buildShareableHadith(h));openModal(ok?'تم النسخ':'تعذر النسخ',ok?'نُسخت رسالة منسقة وجاهزة للإرسال.':'لم يتمكن المتصفح من نسخ النص.','⧉');}
 async function copyDailyHadithForAI(){const h=dailyHadith();if(!h)return openModal('لا يوجد حديث','أضف حديثًا أولًا.','📜');const ok=await writeClipboardText(buildHadithAiPrompt(h.text));openModal(ok?'جاهز للذكاء الاصطناعي':'تعذر النسخ',ok?'تم نسخ الرسالة كاملة مع الحديث. افتح برنامج الذكاء الاصطناعي والصقها مباشرة.':'لم يتمكن المتصفح من نسخ الرسالة.','✦');}
 async function shareDailyHadith(){const h=dailyHadith();if(!h)return openModal('لا يوجد حديث','أضف حديثًا أولًا.','📜');const text=h.text;try{if(navigator.share){await navigator.share({title:'حديث اليوم',text});return;}await writeClipboardText(text);openModal('تم النسخ','المشاركة المباشرة غير متاحة؛ نُسخ الحديث إلى الحافظة.','⌯');}catch(e){if(e?.name!=='AbortError')openModal('تعذرت المشاركة','يمكنك استخدام زر النسخ بدلًا من ذلك.','⌯');}}
 function updateHadithActionStates(){const h=dailyHadith(),fav=!!h?.favorite;const home=document.getElementById('homeHadithFavoriteBtn');if(home){const span=home.querySelector('span');if(span)span.textContent=fav?'♥':'♡';home.classList.toggle('active',fav);}const icon=document.getElementById('hadithFavoriteIcon');if(icon)icon.textContent=fav?'♥':'♡';const know=document.getElementById('hadithFavoriteBtn');if(know)know.classList.toggle('active',fav);}
