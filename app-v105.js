@@ -99,9 +99,18 @@ let family = loadJSON(FAMILY_KEY, emptyFamily());
 family = { ...emptyFamily(), ...(family&&typeof family==='object'?family:{}), education:Array.isArray(family?.education)?family.education.map(x=>({...x,days:Array.isArray(x.days)?x.days.map(Number).filter(n=>n>=1&&n<=31):[],attendance:(x.attendance&&typeof x.attendance==='object')?x.attendance:{}})):[], supermarketItems:Array.isArray(family?.supermarketItems)?family.supermarketItems.map(x=>{const price=x.pricePerUnit!==undefined?x.pricePerUnit:x.price;const variable=x.variablePrice!==undefined?!!x.variablePrice:String(x.category||'').includes('خضار')||String(x.category||'').includes('فواكه');return {...x,price:price===''?'':Number(price||0),pricePerUnit:price===''?'':Number(price||0),variablePrice:variable,lastPurchase:x.lastPurchase||null};}):[], supermarketRequests:Array.isArray(family?.supermarketRequests)?family.supermarketRequests.map(x=>({...x,quantity:Number(x.quantity||1),estimatedPrice:Number(x.estimatedPrice||0)})):[], supermarketCategories:Array.isArray(family?.supermarketCategories)?family.supermarketCategories:[] };
 let dayRhythm = loadJSON(DAY_RHYTHM_KEY, emptyDayRhythm());
 dayRhythm = { ...emptyDayRhythm(), ...(dayRhythm && typeof dayRhythm === 'object' ? dayRhythm : {}), sleepHistory: Array.isArray(dayRhythm?.sleepHistory) ? dayRhythm.sleepHistory : [] };
-// A task cycle changes only when the user ends the day, not at midnight.
-if(!dayRhythm.taskCycleDate){dayRhythm.taskCycleDate=todayKey();localStorage.setItem(DAY_RHYTHM_KEY,JSON.stringify(dayRhythm));}
-function taskCycleDate(){return dayRhythm.taskCycleDate;}
+// Recover a daily cycle when the calendar day changes, including after a closed app resumes.
+function localDateOf(iso){const d=new Date(iso);return Number.isNaN(d.getTime())?'':`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function refreshDailyCycle(){
+  const today=todayKey();let changed=false;
+  if(!dayRhythm.taskCycleDate||dayRhythm.taskCycleDate<today){dayRhythm.taskCycleDate=today;changed=true;}
+  if(dayRhythm.currentEnd&&localDateOf(dayRhythm.currentEnd)<today){dayRhythm.currentEnd='';dayRhythm.currentStart='';changed=true;}
+  if(dayRhythm.currentStart&&!dayRhythm.currentEnd&&localDateOf(dayRhythm.currentStart)<today){dayRhythm.currentStart='';changed=true;}
+  if(changed)localStorage.setItem(DAY_RHYTHM_KEY,JSON.stringify(dayRhythm));
+  return changed;
+}
+refreshDailyCycle();
+function taskCycleDate(){refreshDailyCycle();return dayRhythm.taskCycleDate;}
 function nextTaskCycleDate(){const d=new Date(`${taskCycleDate()}T12:00:00`);d.setDate(d.getDate()+1);const following=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;return following>todayKey()?following:todayKey();}
 
 function loadJSON(key, fallback) {
@@ -210,7 +219,7 @@ function openModal(title, text, icon='✓') {
   modalIcon.textContent = icon;
   modalBackdrop.hidden = false;
 }
-function closeModal() { modalBackdrop.hidden = true; }
+function closeModal() { modalBackdrop.hidden = true; modalBackdrop.classList.remove('hadith-share-preview'); }
 function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent); }
 function isStandalone() { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
 async function installApp() {
@@ -250,6 +259,7 @@ function renderDayRhythm(){
   }
 }
 function startDay(){
+  refreshDailyCycle();
   if(dayRhythm.currentStart && !dayRhythm.currentEnd) return openModal('اليوم بدأ بالفعل',`سجلت بداية اليوم عند ${formatClock(dayRhythm.currentStart)}.`,'☀️');
   const now=new Date(); const nowIso=now.toISOString();
   if(dayRhythm.lastEnd){
@@ -261,10 +271,14 @@ function startDay(){
   addTimeline(dayRhythm.lastSleepMinutes!=null?`بدأت يومي • النوم ${formatSleepDuration(dayRhythm.lastSleepMinutes)}`:'بدأت يومي','يومي','☀️');
 }
 function endDay(){
-  if(dayRhythm.currentEnd) return openModal('نهاية اليوم مسجلة',`سجلت نهاية اليوم عند ${formatClock(dayRhythm.currentEnd)}. ستُحسب مدة النوم عند تسجيل بداية اليوم التالية.`,'🌙');
+  refreshDailyCycle();
+  if(dayRhythm.currentEnd) return showEndDayVerse();
   const nowIso=new Date().toISOString(); dayRhythm.currentEnd=nowIso; dayRhythm.lastEnd=nowIso; dayRhythm.taskCycleDate=nextTaskCycleDate(); saveDayRhythm();
   renderReligion();renderKnowledge();renderFamily();renderDashboard();
   addTimeline('أنهيت يومي','يومي','🌙');
+  showEndDayVerse();
+}
+function showEndDayVerse(){
   openModal('نهاية اليوم', 'قال تعالى :\n﴿ قُلْ إِنَّمَا أَنَا بَشَرٌ مِّثْلُكُمْ يُوحَىٰ إِلَيَّ أَنَّمَا إِلَٰهُكُمْ إِلَٰهٌ وَاحِدٌ ۖ فَمَن كَانَ يَرْجُو لِقَاءَ رَبِّهِ فَلْيَعْمَلْ عَمَلًا صَالِحًا وَلَا يُشْرِكْ بِعِبَادَةِ رَبِّهِ أَحَدًا ﴾', '🌙');
 }
 function renderHomeHadith(){
@@ -836,7 +850,7 @@ function activateDailyHadith(preferredId=''){
   let had=preferredId&&validIds.has(preferredId)?valid.find(h=>h.id===preferredId):null;
   if(!had){
     let candidates=valid.filter(h=>!state.shownIds.includes(h.id));
-    if(!candidates.length){state.shownIds=[];candidates=[...valid];}
+    if(!candidates.length){state.shownIds=[];candidates=valid.length>1?valid.filter(h=>h.id!==state.currentId):[...valid];}
     const seed=Math.floor(new Date(`${date}T12:00:00`).getTime()/86400000);
     had=candidates[seed%candidates.length];
   }
@@ -1139,9 +1153,9 @@ function buildShareableHadith(h){
   const theme=hadithShareTheme(h,body);
   return [`🕊️ ${theme.title}`,hadithShareBody(body),sources.join('\n'),`🤍 ${theme.prayer}`].filter(Boolean).join('\n\n');
 }
-async function copyDailyHadith(){const h=dailyHadith();if(!h)return openModal('لا يوجد حديث','أضف حديثًا أولًا.','📜');const ok=await writeClipboardText(buildShareableHadith(h));openModal(ok?'تم النسخ':'تعذر النسخ',ok?'نُسخت رسالة منسقة وجاهزة للإرسال.':'لم يتمكن المتصفح من نسخ النص.','⧉');}
+async function copyDailyHadith(){const h=dailyHadith();if(!h)return openModal('لا يوجد حديث','أضف حديثًا أولًا.','📜');const formatted=buildShareableHadith(h);const ok=await writeClipboardText(formatted);openModal(ok?'تم نسخ الحديث المنسق':'تعذر النسخ؛ يمكنك تحديد النص هنا',formatted,'⧉');modalBackdrop.classList.add('hadith-share-preview');}
 async function copyDailyHadithForAI(){const h=dailyHadith();if(!h)return openModal('لا يوجد حديث','أضف حديثًا أولًا.','📜');const ok=await writeClipboardText(buildHadithAiPrompt(h.text));openModal(ok?'جاهز للذكاء الاصطناعي':'تعذر النسخ',ok?'تم نسخ الرسالة كاملة مع الحديث. افتح برنامج الذكاء الاصطناعي والصقها مباشرة.':'لم يتمكن المتصفح من نسخ الرسالة.','✦');}
-async function shareDailyHadith(){const h=dailyHadith();if(!h)return openModal('لا يوجد حديث','أضف حديثًا أولًا.','📜');const text=h.text;try{if(navigator.share){await navigator.share({title:'حديث اليوم',text});return;}await writeClipboardText(text);openModal('تم النسخ','المشاركة المباشرة غير متاحة؛ نُسخ الحديث إلى الحافظة.','⌯');}catch(e){if(e?.name!=='AbortError')openModal('تعذرت المشاركة','يمكنك استخدام زر النسخ بدلًا من ذلك.','⌯');}}
+async function shareDailyHadith(){const h=dailyHadith();if(!h)return openModal('لا يوجد حديث','أضف حديثًا أولًا.','📜');const text=buildShareableHadith(h);try{if(navigator.share){await navigator.share({title:'حديث اليوم',text});return;}const ok=await writeClipboardText(text);openModal(ok?'تم نسخ الحديث المنسق':'تعذر النسخ؛ يمكنك تحديد النص هنا',text,'⌯');modalBackdrop.classList.add('hadith-share-preview');}catch(e){if(e?.name!=='AbortError')openModal('تعذرت المشاركة','يمكنك استخدام زر النسخ بدلًا من ذلك.','⌯');}}
 function updateHadithActionStates(){const h=dailyHadith(),fav=!!h?.favorite;const home=document.getElementById('homeHadithFavoriteBtn');if(home){const span=home.querySelector('span');if(span)span.textContent=fav?'♥':'♡';home.classList.toggle('active',fav);}const icon=document.getElementById('hadithFavoriteIcon');if(icon)icon.textContent=fav?'♥':'♡';const know=document.getElementById('hadithFavoriteBtn');if(know)know.classList.toggle('active',fav);}
 function parseHadithBatch(raw=''){
   const text=String(raw).replace(/\r\n?/g,'\n').trim();
@@ -8377,6 +8391,14 @@ async function importFullBackup(file){try{const payload=JSON.parse(await file.te
 
 document.getElementById('startDayBtn')?.addEventListener('click',startDay);
 document.getElementById('endDayBtn')?.addEventListener('click',endDay);
+function refreshDailyScreens(){
+  if(!refreshDailyCycle())return;
+  document.getElementById('todayDate').textContent=formatArabicDate();
+  renderReligion();renderKnowledge();renderFamily();renderDashboard();
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshDailyScreens();});
+window.addEventListener('focus',refreshDailyScreens);
+setInterval(refreshDailyScreens,60000);
 document.getElementById('hadithManagerOpenBtn')?.addEventListener('click',()=>showView('hadith-manager'));
 document.getElementById('hadithAnalyzeBtn')?.addEventListener('click',handleHadithAnalyzeAndRoute);
 document.getElementById('hadithBatchForm')?.addEventListener('submit',addHadithBatch);

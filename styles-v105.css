@@ -244,6 +244,7 @@ html[data-theme="light"] .nav-item.active { color: #0369a1; }
 .modal-icon { width: 54px; height: 54px; border-radius: 18px; display: grid; place-items: center; margin: 0 auto 12px; background: rgba(14,165,233,.10); color: var(--cyan); font-size: 25px; }
 .modal h2 { font-size: 18px; margin: 0 0 8px; }
 .modal p { color: var(--muted); font-size: 11px; line-height: 1.8; margin: 0 0 16px; }
+.modal-backdrop.hadith-share-preview .modal p { white-space: pre-wrap; text-align: right; max-height: 55dvh; overflow: auto; user-select: text; -webkit-user-select: text; }
 
 @media (min-width: 520px) {
   .main-content { padding-inline: 22px; }
