@@ -354,6 +354,7 @@ html[data-theme="light"] .nav-item.active { color: #0369a1; }
 .domain-row strong { color:#7dd3fc; font-size:10px; white-space:nowrap; }
 .row-delete,.row-toggle { border:0; border-radius:9px; padding:6px 8px; font-size:8px; color:var(--muted); background:rgba(255,255,255,.04); }
 .row-toggle { color:#86efac; background:rgba(34,197,94,.08); }
+.dhikr-date-controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 13px}.dhikr-date-controls label{font-size:12px;font-weight:700}.dhikr-date-controls input,.dhikr-date-controls button{min-height:42px;border:1px solid var(--line);border-radius:11px;background:var(--surface-2);color:var(--text);padding:7px 10px;font:inherit}.dhikr-date-controls input{max-width:180px}.dhikr-date-controls button{cursor:pointer}.domain-row .row-toggle{min-width:76px;min-height:44px;padding:10px 12px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation}
 .done-row { opacity:.72; }
 .done-row b { text-decoration:line-through; }
 .weight-overview { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
